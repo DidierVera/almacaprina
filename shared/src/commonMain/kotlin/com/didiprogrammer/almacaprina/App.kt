@@ -1,5 +1,6 @@
 package com.didiprogrammer.almacaprina
 
+import ConnectionTestScreen
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,12 +19,14 @@ import org.jetbrains.compose.resources.painterResource
 
 import almacaprina.shared.generated.resources.Res
 import almacaprina.shared.generated.resources.compose_multiplatform
+import com.didiprogrammer.almacaprina.di.appModule
+import org.koin.compose.KoinApplication
+import org.koin.dsl.koinConfiguration
 
 @Composable
 @Preview
-fun App() {
+private fun MainApp() {
     MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
         Column(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.primaryContainer)
@@ -31,19 +34,16 @@ fun App() {
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
-                }
-            }
+            ConnectionTestScreen()
         }
     }
 }
+@Composable
+fun App() {
+    KoinApplication(
+        configuration = koinConfiguration(declaration = { modules(appModule) }),
+        content = {
+            MainApp()
+        })
+}
+

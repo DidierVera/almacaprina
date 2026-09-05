@@ -1,0 +1,25 @@
+package com.didiprogrammer.almacaprina.data.remote
+
+object SupabaseTables {
+    const val PROFILES = "profiles"
+    const val GOATS = "goats"
+    const val WEIGHT_RECORDS = "weight_records"
+    const val REPRODUCTIVE_EVENTS = "reproductive_events"
+    const val MILK_PRODUCTION_RECORDS = "milk_production_records"
+    const val HEALTH_RECORDS = "health_records"
+    const val FEEDING_RECORDS = "feeding_records"
+    const val INSUMOS = "insumos"
+    const val PRODUCT_RECIPE_ITEMS = "product_recipe_items"
+    const val PRODUCTS = "products"
+    const val PACKAGINGS = "packagings"
+    const val PRODUCTION_BATCHES = "production_batches"
+    const val PRODUCTION_BATCH_INSUMO_USAGES = "production_batch_insumo_usages"
+    const val PURCHASES = "purchases"
+    const val CUSTOMERS = "customers"
+    const val SALES = "sales"
+    const val PACKAGING_INVENTORIES = "packaging_inventories"
+    const val PACKAGING_DEPOSIT_TRANSACTIONS = "packaging_deposit_transactions"
+    const val BUSINESS_SETTINGS = "business_settings"
+    const val CARE_TASKS = "care_tasks"
+    const val CARE_TASK_LOGS = "care_task_logs"
+}
