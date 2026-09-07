@@ -40,6 +40,18 @@ import com.didiprogrammer.almacaprina.domain.repository.PurchaseRepository
 import com.didiprogrammer.almacaprina.domain.repository.ReproductiveEventRepository
 import com.didiprogrammer.almacaprina.domain.repository.SaleRepository
 import com.didiprogrammer.almacaprina.domain.repository.WeightRecordRepository
+import com.didiprogrammer.almacaprina.ui.admin.hato.AdminGoatDetailViewModel
+import com.didiprogrammer.almacaprina.ui.admin.calendario.AdminCareTaskFormViewModel
+import com.didiprogrammer.almacaprina.ui.admin.calendario.AdminCareTaskListViewModel
+import com.didiprogrammer.almacaprina.ui.admin.catalogo.AdminCatalogoViewModel
+import com.didiprogrammer.almacaprina.ui.admin.compras.AdminNewPurchaseViewModel
+import com.didiprogrammer.almacaprina.ui.admin.compras.AdminPurchaseHistoryViewModel
+import com.didiprogrammer.almacaprina.ui.admin.hato.AdminHatoListViewModel
+import com.didiprogrammer.almacaprina.ui.admin.hato.AdminGoatFormViewModel
+import com.didiprogrammer.almacaprina.ui.admin.home.AdminHomeViewModel
+import com.didiprogrammer.almacaprina.ui.admin.produccion.AdminNewBatchViewModel
+import com.didiprogrammer.almacaprina.ui.admin.produccion.AdminProductionHistoryViewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 /**
@@ -68,4 +80,115 @@ val appModule = module {
     single<BusinessSettingsRepository> { BusinessSettingsRepositoryImpl() }
     single<CareTaskRepository> { CareTaskRepositoryImpl() }
     single<CareTaskLogRepository> { CareTaskLogRepositoryImpl() }
+
+    viewModel {
+        AdminHomeViewModel(
+            businessSettingsRepository = get(),
+            goatRepository = get(),
+            milkProductionRecordRepository = get(),
+            saleRepository = get(),
+            purchaseRepository = get(),
+            healthRecordRepository = get(),
+            feedingRecordRepository = get(),
+            weightRecordRepository = get(),
+            reproductiveEventRepository = get(),
+            insumoRepository = get(),
+            careTaskRepository = get(),
+            productRepository = get(),
+            packagingRepository = get(),
+            productionBatchRepository = get(),
+            productionBatchInsumoUsageRepository = get()
+        )
+    }
+
+    viewModel { params ->
+        AdminHatoListViewModel(
+            initialStatusFilter = params.getOrNull(),
+            goatRepository = get(),
+            milkProductionRecordRepository = get(),
+            reproductiveEventRepository = get(),
+            weightRecordRepository = get()
+        )
+    }
+
+    viewModel { params ->
+        AdminGoatDetailViewModel(
+            goatId = params.get(),
+            goatRepository = get(),
+            weightRecordRepository = get(),
+            reproductiveEventRepository = get(),
+            healthRecordRepository = get(),
+            milkProductionRecordRepository = get(),
+            insumoRepository = get()
+        )
+    }
+
+    viewModel { params -> AdminGoatFormViewModel(goatId = params.getOrNull(), goatRepository = get()) }
+
+    viewModel {
+        AdminCatalogoViewModel(
+            productRepository = get(),
+            packagingRepository = get(),
+            insumoRepository = get(),
+            productRecipeItemRepository = get(),
+            businessSettingsRepository = get()
+        )
+    }
+
+    viewModel {
+        AdminProductionHistoryViewModel(
+            productionBatchRepository = get(),
+            productRepository = get()
+        )
+    }
+
+    viewModel {
+        AdminNewBatchViewModel(
+            productRepository = get(),
+            milkProductionRecordRepository = get(),
+            saleRepository = get(),
+            productionBatchRepository = get(),
+            productionBatchInsumoUsageRepository = get(),
+            productRecipeItemRepository = get(),
+            insumoRepository = get(),
+            purchaseRepository = get(),
+            healthRecordRepository = get(),
+            feedingRecordRepository = get(),
+            businessSettingsRepository = get()
+        )
+    }
+
+    viewModel {
+        AdminPurchaseHistoryViewModel(
+            purchaseRepository = get(),
+            insumoRepository = get(),
+            packagingRepository = get(),
+            businessSettingsRepository = get()
+        )
+    }
+
+    viewModel {
+        AdminNewPurchaseViewModel(
+            purchaseRepository = get(),
+            insumoRepository = get(),
+            packagingRepository = get(),
+            packagingInventoryRepository = get(),
+            businessSettingsRepository = get()
+        )
+    }
+
+    viewModel {
+        AdminCareTaskListViewModel(
+            careTaskRepository = get(),
+            insumoRepository = get()
+        )
+    }
+
+    viewModel { params ->
+        AdminCareTaskFormViewModel(
+            taskId = params.getOrNull(),
+            careTaskRepository = get(),
+            insumoRepository = get()
+        )
+    }
 }

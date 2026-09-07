@@ -38,8 +38,7 @@ Este modelo soporta desde el día 1 no solo venta de leche cruda, sino también 
 | name | text | Nombre del animal |
 | photo_url | text | Foto de referencia |
 | sex | enum (male, female) | |
-| breed | text | Raza principal |
-| breed_cross | text/array | Detalle de cruces si es mestiza |
+| breed_composition | jsonb — array de `{breed_name: text, percentage: decimal}` | Puede ser 100% de una raza o una mezcla. Si `origin = born_on_farm` y se conocen ambos padres, se calcula automáticamente como el promedio de la composición de la madre y el padre (herencia 50/50) al crear la ficha del cabrito junto con el evento de parto; si `origin = purchased`, se captura manualmente. Siempre editable a mano después. Ver `business/averageBreedComposition` |
 | birth_date | date | |
 | mother_id | UUID (FK → Goat) | Nula si es fundadora del hato o de origen externo |
 | father_id | UUID (FK → Goat) | Nula si es semental externo |
@@ -48,6 +47,7 @@ Este modelo soporta desde el día 1 no solo venta de leche cruda, sino también 
 | current_weight_kg | decimal | Último peso registrado (espejo del último WeightRecord) |
 | current_body_condition_score | integer (1-5) | Body Condition Score |
 | herd_entry_date | date | Nacimiento o compra |
+| weaning_date | date | Fecha en que la cría deja de tomar leche de la madre. Opcional — solo aplica a crías |
 | origin | enum (born_on_farm, purchased) | |
 | exit_date | date | Nula si sigue activa |
 | exit_reason | text | Venta, muerte, descarte, etc. |
@@ -160,6 +160,9 @@ Catálogo de todo lo que se compra y se consume en la operación (no incluye env
 | last_unit_cost | decimal | Se actualiza automáticamente con cada `Purchase` de este insumo — sirve para prellenar costos en `FeedingRecord`, `HealthRecord` y `ProductionBatchInsumoUsage` antes de la próxima compra |
 | reorder_lead_time_days | integer | Cuántos días antes de quedarse sin existencias se quiere la alerta (ej. 3). Se compara contra `InsumoDaysRemaining` |
 | active | boolean | Para descontinuar sin borrar historial |
+| purchase_package_label | text | Nombre del empaque en que normalmente se compra (ej. "Botella", "Bulto", "Saco"). Opcional — solo para facilitar el registro de `Purchase` por empaque en vez de calcular manualmente la conversión a `unit_of_measure` |
+| purchase_package_size | decimal | Contenido de un empaque, expresado en `unit_of_measure` (ej. 50 para una botella de 50 ml de cuajo). Junto con `purchase_package_label`, permite que "Nueva compra" calcule `quantity` y `unit_cost` a partir de "N° de empaques" y "costo por empaque" |
+| notes | text | Observaciones libres opcionales |
 
 ---
 

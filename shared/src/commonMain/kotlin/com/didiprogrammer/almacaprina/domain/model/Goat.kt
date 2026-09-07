@@ -28,6 +28,13 @@ enum class GoatOrigin {
     @SerialName("purchased") PURCHASED
 }
 
+/** Un componente de la composición racial de una cabra (ej. {"Alpina", 50.0}). */
+@Serializable
+data class BreedPercentage(
+    @SerialName("breed_name") val breedName: String,
+    val percentage: Double
+)
+
 @Serializable
 data class Goat(
     val id: String,
@@ -35,8 +42,8 @@ data class Goat(
     val name: String,
     @SerialName("photo_url") val photoUrl: String? = null,
     val sex: GoatSex,
-    val breed: String? = null,
-    @SerialName("breed_cross") val breedCross: String? = null,
+    /** Puede ser 100% de una raza o una mezcla — ver [com.didiprogrammer.almacaprina.business.averageBreedComposition]. */
+    @SerialName("breed_composition") val breedComposition: List<BreedPercentage> = emptyList(),
     @SerialName("birth_date") val birthDate: LocalDate,
     @SerialName("mother_id") val motherId: String? = null,
     @SerialName("father_id") val fatherId: String? = null,
@@ -45,6 +52,8 @@ data class Goat(
     @SerialName("current_weight_kg") val currentWeightKg: Double? = null,
     @SerialName("current_body_condition_score") val currentBodyConditionScore: Int? = null,
     @SerialName("herd_entry_date") val herdEntryDate: LocalDate,
+    /** Fecha en que la cría deja de tomar leche de la madre. */
+    @SerialName("weaning_date") val weaningDate: LocalDate? = null,
     val origin: GoatOrigin,
     @SerialName("exit_date") val exitDate: LocalDate? = null,
     @SerialName("exit_reason") val exitReason: String? = null,

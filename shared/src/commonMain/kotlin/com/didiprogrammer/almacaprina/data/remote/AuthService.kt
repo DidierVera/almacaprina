@@ -19,6 +19,16 @@ object AuthService {
         SupabaseClientProvider.client.auth.signOut()
     }
 
+    /**
+     * Espera a que el Auth de supabase-kt termine de restaurar (y refrescar si
+     * hace falta) la sesión persistida del dispositivo, y dice si sigue vigente.
+     * Se usa al abrir la app para decidir entre login completo, PIN o entrar directo.
+     */
+    suspend fun hasValidSession(): Boolean {
+        SupabaseClientProvider.client.auth.awaitInitialization()
+        return SupabaseClientProvider.client.auth.currentSessionOrNull() != null
+    }
+
     fun currentUserId(): String? =
         SupabaseClientProvider.client.auth.currentUserOrNull()?.id
 
