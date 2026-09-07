@@ -19,6 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.savedstate.read
 import com.didiprogrammer.almacaprina.domain.model.GoatStatus
+import com.didiprogrammer.almacaprina.ui.admin.ajustes.AdminSettingsScreen
 import com.didiprogrammer.almacaprina.ui.admin.calendario.AdminCareTaskFormScreen
 import com.didiprogrammer.almacaprina.ui.admin.calendario.AdminCareTaskListScreen
 import com.didiprogrammer.almacaprina.ui.admin.calendario.CareTaskRoutes
@@ -42,8 +43,10 @@ import com.didiprogrammer.almacaprina.ui.admin.produccion.ProductionRoutes
  * (ver ui/App.kt). El bottom bar se oculta en pantallas de "drill-in" (ficha
  * técnica, formularios) para que se sientan como una pila de navegación normal.
  */
+private const val ROUTE_SETTINGS = "admin/ajustes"
+
 @Composable
-fun AdminRootScreen() {
+fun AdminRootScreen(onLogout: () -> Unit) {
     val navController = rememberNavController()
 
     Scaffold(
@@ -152,8 +155,13 @@ fun AdminRootScreen() {
                 AdminMasMenuScreen(
                     onComprasClick = { navController.navigate(PurchaseRoutes.HISTORY) },
                     onCalendarioClick = { navController.navigate(CareTaskRoutes.LIST) },
-                    onAjustesClick = { /* Ajustes no es parte de este encargo — queda pendiente */ }
+                    onAjustesClick = { navController.navigate(ROUTE_SETTINGS) }
                 )
+            }
+
+            // ---------- MÁS · AJUSTES ----------
+            composable(ROUTE_SETTINGS) {
+                AdminSettingsScreen(onLoggedOut = onLogout)
             }
 
             // ---------- MÁS · COMPRAS (Sección 5) ----------

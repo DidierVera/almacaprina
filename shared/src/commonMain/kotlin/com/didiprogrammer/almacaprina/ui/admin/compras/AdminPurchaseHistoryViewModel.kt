@@ -42,29 +42,38 @@ class AdminPurchaseHistoryViewModel(
         load()
     }
 
-    fun load() {
+    fun load() = fetchData(isRefresh = false)
+
+    fun refresh() = fetchData(isRefresh = true)
+
+    private fun fetchData(isRefresh: Boolean) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            // Los 4 repositorios son independientes — se piden todos a la vez.
-            val (purchases, insumosById, packagingsById, currency) = coroutineScope {
-                val purchasesDeferred = async { purchaseRepository.getAll() }
-                val insumosDeferred = async { insumoRepository.getAll() }
-                val packagingsDeferred = async { packagingRepository.getAll() }
-                val currencyDeferred = async { businessSettingsRepository.getAll().firstOrNull()?.currency ?: "COP" }
-                AdminPurchaseHistoryRawData(
-                    purchases = purchasesDeferred.await(),
-                    insumosById = insumosDeferred.await().associateBy { it.id },
-                    packagingsById = packagingsDeferred.await().associateBy { it.id },
-                    currency = currencyDeferred.await()
-                )
+            _uiState.update { it.copy(isLoading = !isRefresh, isRefreshing = isRefresh, errorMessage = null) }
+            try {
+                // Los 4 repositorios son independientes — se piden todos a la vez.
+                val (purchases, insumosById, packagingsById, currency) = coroutineScope {
+                    val purchasesDeferred = async { purchaseRepository.getAll() }
+                    val insumosDeferred = async { insumoRepository.getAll() }
+                    val packagingsDeferred = async { packagingRepository.getAll() }
+                    val currencyDeferred = async { businessSettingsRepository.getAll().firstOrNull()?.currency ?: "COP" }
+                    AdminPurchaseHistoryRawData(
+                        purchases = purchasesDeferred.await(),
+                        insumosById = insumosDeferred.await().associateBy { it.id },
+                        packagingsById = packagingsDeferred.await().associateBy { it.id },
+                        currency = currencyDeferred.await()
+                    )
+                }
+                val items = purchases.map { purchase ->
+                    val name = purchase.insumoId?.let { insumosById[it]?.name }
+                        ?: purchase.packagingId?.let { packagingsById[it]?.name }
+                        ?: "Sin especificar"
+                    PurchaseHistoryItem(purchase = purchase, itemName = name)
+                }
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, allItems = items, currency = currency) }
+            } catch (t: Throwable) {
+                t.printStackTrace()
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: "No se pudo cargar el historial de compras") }
             }
-            val items = purchases.map { purchase ->
-                val name = purchase.insumoId?.let { insumosById[it]?.name }
-                    ?: purchase.packagingId?.let { packagingsById[it]?.name }
-                    ?: "Sin especificar"
-                PurchaseHistoryItem(purchase = purchase, itemName = name)
-            }
-            _uiState.update { it.copy(isLoading = false, allItems = items, currency = currency) }
         }
     }
 

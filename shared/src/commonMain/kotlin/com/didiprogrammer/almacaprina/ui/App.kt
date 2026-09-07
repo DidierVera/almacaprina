@@ -135,7 +135,15 @@ fun App() {
                 composable(ROUTE_VENTAS_HOME) {
                     PlaceholderHome(title = "Ventas", subtitle = "Módulo de ventas — pendiente de construir")
                 }
-                composable(ROUTE_ADMIN_HOME) { AdminRootScreen() }
+                composable(ROUTE_ADMIN_HOME) {
+                    AdminRootScreen(
+                        onLogout = {
+                            navController.navigate(ROUTE_LOGIN) {
+                                popUpTo(navController.graph.id) { inclusive = true }
+                            }
+                        }
+                    )
+                }
             }
         }
     }

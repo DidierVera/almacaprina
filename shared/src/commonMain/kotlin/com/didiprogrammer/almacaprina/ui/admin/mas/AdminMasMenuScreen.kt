@@ -27,7 +27,7 @@ import com.didiprogrammer.almacaprina.ui.components.AlmacaprinaCard
 
 /**
  * Sección "Más" del bottom navigation: despliega Compras, Calendario de tareas y
- * Ajustes. Ajustes queda como "próximamente" — no es parte de este encargo (secciones 5 y 6).
+ * Ajustes.
  */
 @Composable
 fun AdminMasMenuScreen(
@@ -48,7 +48,7 @@ fun AdminMasMenuScreen(
                 MasMenuRow(icon = Icons.AutoMirrored.Outlined.EventNote, label = "Calendario de tareas", onClick = onCalendarioClick)
             }
             item {
-                MasMenuRow(icon = Icons.Outlined.Settings, label = "Ajustes (próximamente)", onClick = onAjustesClick)
+                MasMenuRow(icon = Icons.Outlined.Settings, label = "Ajustes", onClick = onAjustesClick)
             }
         }
     }

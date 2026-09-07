@@ -9,5 +9,7 @@ data class CareTaskListItem(
 
 data class AdminCareTaskListUiState(
     val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
+    val errorMessage: String? = null,
     val items: List<CareTaskListItem> = emptyList()
 )

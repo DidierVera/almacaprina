@@ -2,7 +2,6 @@ package com.didiprogrammer.almacaprina.ui.admin.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -11,19 +10,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Event
 import androidx.compose.material.icons.outlined.PrecisionManufacturing
 import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -32,6 +27,7 @@ import com.didiprogrammer.almacaprina.business.roundTo1Decimal
 import com.didiprogrammer.almacaprina.ui.components.AlertRow
 import com.didiprogrammer.almacaprina.ui.components.AlmacaprinaCard
 import com.didiprogrammer.almacaprina.ui.components.QuickActionButton
+import com.didiprogrammer.almacaprina.ui.components.RefreshableContent
 import com.didiprogrammer.almacaprina.ui.components.SectionHeader
 import com.didiprogrammer.almacaprina.ui.components.SegmentedRow
 import com.didiprogrammer.almacaprina.ui.components.StatCard
@@ -58,12 +54,12 @@ fun AdminHomeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     com.didiprogrammer.almacaprina.ui.components.RefreshOnResume(viewModel::load)
 
-    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        if (uiState.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            return@Box
-        }
-
+    RefreshableContent(
+        isLoading = uiState.isLoading,
+        isRefreshing = uiState.isRefreshing,
+        onRefresh = viewModel::refresh,
+        modifier = Modifier.background(MaterialTheme.colorScheme.background)
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(Spacing.xxl),
@@ -143,13 +139,18 @@ private fun HerdStatusSection(counts: HerdStatusCounts, onClick: (String) -> Uni
             HerdStatusItem("Secas", counts.dry, "dry"),
             HerdStatusItem("Cabretonas", counts.youngDoes, "young_doe")
         )
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
-            items(items) { item ->
-                StatTile(
-                    label = item.label,
-                    value = item.count.toString(),
-                    onClick = { onClick(item.filterKey) }
-                )
+        // Grid manual de 2 columnas — items fijos y pocos, no hace falta LazyVerticalGrid
+        // (que además no anida bien dentro del LazyColumn de esta pantalla).
+        items.chunked(2).forEach { rowItems ->
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                rowItems.forEach { item ->
+                    StatTile(
+                        label = item.label,
+                        value = item.count.toString(),
+                        onClick = { onClick(item.filterKey) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
     }
@@ -218,7 +219,7 @@ private fun QuickActionsSection(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
         SectionHeader(title = "Accesos rápidos")
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.lg)) {
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             QuickActionButton("Registrar compra", Icons.Outlined.ShoppingCart, onRegistrarCompraClick)
             QuickActionButton("Nuevo lote", Icons.Outlined.PrecisionManufacturing, onNuevoLoteClick)
             QuickActionButton("Nueva tarea", Icons.Outlined.Event, onNuevaTareaClick)

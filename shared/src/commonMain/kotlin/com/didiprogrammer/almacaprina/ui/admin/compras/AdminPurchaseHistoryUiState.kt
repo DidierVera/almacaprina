@@ -12,6 +12,8 @@ data class PurchaseHistoryItem(
 
 data class AdminPurchaseHistoryUiState(
     val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
+    val errorMessage: String? = null,
     val allItems: List<PurchaseHistoryItem> = emptyList(),
     val selectedCategory: PurchaseCategory? = null,
     val fromDate: LocalDate? = null,

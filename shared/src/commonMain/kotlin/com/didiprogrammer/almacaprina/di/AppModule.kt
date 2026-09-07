@@ -40,6 +40,7 @@ import com.didiprogrammer.almacaprina.domain.repository.PurchaseRepository
 import com.didiprogrammer.almacaprina.domain.repository.ReproductiveEventRepository
 import com.didiprogrammer.almacaprina.domain.repository.SaleRepository
 import com.didiprogrammer.almacaprina.domain.repository.WeightRecordRepository
+import com.didiprogrammer.almacaprina.ui.admin.ajustes.AdminSettingsViewModel
 import com.didiprogrammer.almacaprina.ui.admin.hato.AdminGoatDetailViewModel
 import com.didiprogrammer.almacaprina.ui.admin.calendario.AdminCareTaskFormViewModel
 import com.didiprogrammer.almacaprina.ui.admin.calendario.AdminCareTaskListViewModel
@@ -189,6 +190,16 @@ val appModule = module {
             taskId = params.getOrNull(),
             careTaskRepository = get(),
             insumoRepository = get()
+        )
+    }
+
+    viewModel {
+        AdminSettingsViewModel(
+            businessSettingsRepository = get(),
+            purchaseRepository = get(),
+            healthRecordRepository = get(),
+            feedingRecordRepository = get(),
+            milkProductionRecordRepository = get()
         )
     }
 }

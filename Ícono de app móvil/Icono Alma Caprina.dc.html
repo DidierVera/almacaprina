@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/organic-58094566-d2e7-42fa-9832-4a6824ae6ced/styles.css">
+<script src="_ds/organic-58094566-d2e7-42fa-9832-4a6824ae6ced/_ds_bundle.js"></script>
+<style>body{margin:0}</style>
+</helmet>
+<div style="background:var(--color-bg); min-height:100vh; font-family:var(--font-body); color:var(--color-text); padding:56px 48px 88px; display:flex; flex-direction:column; gap:56px; max-width:1000px">
+
+  <header style="display:flex; flex-direction:column; gap:10px">
+    <span style="font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--color-accent-700)">Alma Caprina</span>
+    <h1 style="font-family:var(--font-heading); font-size:44px; line-height:1.05; margin:0">Ícono de aplicación</h1>
+    <p style="margin:0; max-width:52ch; font-size:16px; line-height:1.6; color:var(--color-neutral-700)">Vector redibujado del logo, en crema y verde. Sin texto, para que se lea a 48 px.</p>
+  </header>
+
+  <section style="display:flex; gap:44px; align-items:flex-end; flex-wrap:wrap">
+    <img src="icon.svg" width="200" height="200" alt="Ícono" style="border-radius:44px; box-shadow:var(--shadow-md); display:block">
+    <div style="display:flex; gap:22px; align-items:flex-end">
+      <img src="android/mipmap-xxxhdpi/ic_launcher.png" width="96" height="96" alt="96 px" style="display:block; border-radius:21px">
+      <img src="android/mipmap-xxxhdpi/ic_launcher_round.png" width="72" height="72" alt="Redondo" style="display:block">
+      <img src="ios/AppIcon.appiconset/icon-40-2x.png" width="48" height="48" alt="48 px" style="display:block; border-radius:11px">
+      <img src="ios/AppIcon.appiconset/icon-29.png" width="29" height="29" alt="29 px" style="display:block; border-radius:7px">
+    </div>
+    <div style="display:flex; flex-direction:column; gap:14px; padding:20px 24px; background:var(--color-accent-2-100); border-radius:var(--radius-lg)">
+      <span style="font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--color-accent-2-900)">Adaptive icon</span>
+      <img src="android/mipmap-xxxhdpi/ic_launcher_foreground.png" width="108" height="108" alt="Capa frontal" style="display:block; background:#f5ead8; border-radius:999px"></div>
+  </section>
+
+  <section style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:24px">
+    <div class="card" style="display:flex; flex-direction:column; gap:12px">
+      <span class="card-kicker">Android Studio</span>
+      <h2 class="card-title" style="margin:0">Dónde va cada archivo</h2>
+      <ol style="margin:0; padding-left:20px; font-size:15px; line-height:1.75; color:var(--color-neutral-800)">
+        <li>Copia las carpetas <code>mipmap-*</code> a <code>app/src/main/res/</code>.</li>
+        <li>Copia <code>values/ic_launcher_background.xml</code> a <code>app/src/main/res/values/</code>.</li>
+        <li>En <code>AndroidManifest.xml</code>, deja <code>android:icon="@mipmap/ic_launcher"</code> y <code>android:roundIcon="@mipmap/ic_launcher_round"</code>.</li>
+        <li>Build → Clean Project y vuelve a instalar.</li>
+      </ol>
+    </div>
+    <div class="card" style="display:flex; flex-direction:column; gap:12px">
+      <span class="card-kicker">iOS / Xcode</span>
+      <h2 class="card-title" style="margin:0">AppIcon</h2>
+      <ol style="margin:0; padding-left:20px; font-size:15px; line-height:1.75; color:var(--color-neutral-800)">
+        <li>Arrastra <code>AppIcon.appiconset</code> dentro de <code>Assets.xcassets</code>, reemplazando el existente.</li>
+        <li>Si usas Xcode 15 o superior basta <code>icon-1024.png</code> en el hueco único.</li>
+        <li>Target → General → App Icon: <code>AppIcon</code>.</li>
+      </ol>
+    </div>
+    <div class="card" style="display:flex; flex-direction:column; gap:12px">
+      <span class="card-kicker">Flutter y React Native</span>
+      <h2 class="card-title" style="margin:0">Un solo comando</h2>
+      <p class="card-body" style="margin:0">Usa <code>icon.svg</code> o <code>android/playstore-icon-512.png</code> como origen y deja que <code>flutter_launcher_icons</code> o <code>react-native-make</code> generen ambas plataformas.</p>
+    </div>
+  </section>
+
+  <p style="margin:0; max-width:60ch; font-size:14px; line-height:1.7; color:var(--color-neutral-700)">La cabra está dibujada en vector, no trazada del archivo original. Si consigues el logo en AI, EPS o SVG, lo cambio por la ilustración exacta y regenero todos los tamaños.</p>
+</div>
+</x-dc>
+</body>
+</html>

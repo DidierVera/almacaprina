@@ -27,30 +27,40 @@ class AdminProductionHistoryViewModel(
         load()
     }
 
-    fun load() {
+    fun load() = fetchData(isRefresh = false)
+
+    fun refresh() = fetchData(isRefresh = true)
+
+    private fun fetchData(isRefresh: Boolean) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            // Los 2 repositorios son independientes — se piden ambos a la vez.
-            val (batches, products) = coroutineScope {
-                val batchesDeferred = async { productionBatchRepository.getAll() }
-                val productsDeferred = async { productRepository.getAll() }
-                batchesDeferred.await() to productsDeferred.await()
-            }
-            val productsById = products.associateBy { it.id }
-            val items = batches.map { batch ->
-                val product = productsById[batch.outputProductId]
-                BatchHistoryItem(
-                    batch = batch,
-                    productName = product?.name ?: "Producto eliminado",
-                    productUnitLabel = product?.saleUnit?.label() ?: ""
-                )
-            }
-            _uiState.update {
-                it.copy(
-                    isLoading = false,
-                    allItems = items,
-                    derivedProducts = products.filter { p -> p.category == ProductCategory.DERIVED_DAIRY }
-                )
+            _uiState.update { it.copy(isLoading = !isRefresh, isRefreshing = isRefresh, errorMessage = null) }
+            try {
+                // Los 2 repositorios son independientes — se piden ambos a la vez.
+                val (batches, products) = coroutineScope {
+                    val batchesDeferred = async { productionBatchRepository.getAll() }
+                    val productsDeferred = async { productRepository.getAll() }
+                    batchesDeferred.await() to productsDeferred.await()
+                }
+                val productsById = products.associateBy { it.id }
+                val items = batches.map { batch ->
+                    val product = productsById[batch.outputProductId]
+                    BatchHistoryItem(
+                        batch = batch,
+                        productName = product?.name ?: "Producto eliminado",
+                        productUnitLabel = product?.saleUnit?.label() ?: ""
+                    )
+                }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isRefreshing = false,
+                        allItems = items,
+                        derivedProducts = products.filter { p -> p.category == ProductCategory.DERIVED_DAIRY }
+                    )
+                }
+            } catch (t: Throwable) {
+                t.printStackTrace()
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: "No se pudo cargar el historial de producción") }
             }
         }
     }

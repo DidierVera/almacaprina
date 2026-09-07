@@ -52,9 +52,13 @@ class AdminCatalogoViewModel(
         load()
     }
 
-    fun load() {
+    fun load() = fetchData(isRefresh = false)
+
+    fun refresh() = fetchData(isRefresh = true)
+
+    private fun fetchData(isRefresh: Boolean) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            _uiState.update { it.copy(isLoading = !isRefresh, isRefreshing = isRefresh, errorMessage = null) }
             try {
                 // Los 5 repositorios son independientes — se piden todos a la vez.
                 val (products, packagings, insumos, recipeItems, currency) = coroutineScope {
@@ -76,6 +80,7 @@ class AdminCatalogoViewModel(
                         ?: products.firstOrNull { p -> p.category == ProductCategory.DERIVED_DAIRY }?.id
                     it.copy(
                         isLoading = false,
+                        isRefreshing = false,
                         currency = currency,
                         products = products,
                         packagings = packagings,
@@ -85,7 +90,8 @@ class AdminCatalogoViewModel(
                     )
                 }
             } catch (t: Throwable) {
-                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: "No se pudo cargar el catálogo") }
+                t.printStackTrace()
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: "No se pudo cargar el catálogo") }
             }
         }
     }
@@ -195,6 +201,7 @@ class AdminCatalogoViewModel(
                 block()
                 load()
             } catch (t: Throwable) {
+                t.printStackTrace()
                 _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: "No se pudo guardar") }
             }
         }

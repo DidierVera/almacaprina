@@ -56,41 +56,50 @@ class AdminHatoListViewModel(
         load()
     }
 
-    fun load() {
+    fun load() = fetchData(isRefresh = false)
+
+    fun refresh() = fetchData(isRefresh = true)
+
+    private fun fetchData(isRefresh: Boolean) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+            _uiState.update { it.copy(isLoading = !isRefresh, isRefreshing = isRefresh, errorMessage = null) }
+            try {
+                val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
-            // Las 4 consultas son independientes — se piden todas a la vez.
-            val (goats, milkRecords, reproductiveEvents, weightRecords) = coroutineScope {
-                val goatsDeferred = async { goatRepository.getAll() }
-                val milkRecordsDeferred = async { milkProductionRecordRepository.getAll() }
-                val reproductiveEventsDeferred = async { reproductiveEventRepository.getAll() }
-                val weightRecordsDeferred = async { weightRecordRepository.getAll() }
-                AdminHatoListRawData(
-                    goats = goatsDeferred.await(),
-                    milkRecords = milkRecordsDeferred.await(),
-                    reproductiveEvents = reproductiveEventsDeferred.await(),
-                    weightRecords = weightRecordsDeferred.await()
-                )
+                // Las 4 consultas son independientes — se piden todas a la vez.
+                val (goats, milkRecords, reproductiveEvents, weightRecords) = coroutineScope {
+                    val goatsDeferred = async { goatRepository.getAll() }
+                    val milkRecordsDeferred = async { milkProductionRecordRepository.getAll() }
+                    val reproductiveEventsDeferred = async { reproductiveEventRepository.getAll() }
+                    val weightRecordsDeferred = async { weightRecordRepository.getAll() }
+                    AdminHatoListRawData(
+                        goats = goatsDeferred.await(),
+                        milkRecords = milkRecordsDeferred.await(),
+                        reproductiveEvents = reproductiveEventsDeferred.await(),
+                        weightRecords = weightRecordsDeferred.await()
+                    )
+                }
+                allGoats = goats
+                milkToday = milkRecords
+                    .filter { it.date == today }
+                    .groupBy { it.goatId }
+                    .mapValues { (_, records) -> records.sumOf { it.totalLitersDay() } }
+
+                pendingBirthByDoe = reproductiveEvents
+                    .filter { it.eventType == ReproductiveEventType.BREEDING && it.result == ReproductiveEventResult.PENDING }
+                    .mapNotNull { event -> expectedBirthDateOrNull(event.eventType, event.date)?.let { event.doeId to it } }
+                    .groupBy({ it.first }, { it.second })
+                    .mapValues { (_, dates) -> dates.min() }
+
+                lastWeightByGoat = weightRecords
+                    .groupBy { it.goatId }
+                    .mapValues { (_, records) -> records.maxOf { it.date } }
+
+                applyFilters(today)
+            } catch (t: Throwable) {
+                t.printStackTrace()
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: "No se pudo cargar el hato") }
             }
-            allGoats = goats
-            milkToday = milkRecords
-                .filter { it.date == today }
-                .groupBy { it.goatId }
-                .mapValues { (_, records) -> records.sumOf { it.totalLitersDay() } }
-
-            pendingBirthByDoe = reproductiveEvents
-                .filter { it.eventType == ReproductiveEventType.BREEDING && it.result == ReproductiveEventResult.PENDING }
-                .mapNotNull { event -> expectedBirthDateOrNull(event.eventType, event.date)?.let { event.doeId to it } }
-                .groupBy({ it.first }, { it.second })
-                .mapValues { (_, dates) -> dates.min() }
-
-            lastWeightByGoat = weightRecords
-                .groupBy { it.goatId }
-                .mapValues { (_, records) -> records.maxOf { it.date } }
-
-            applyFilters(today)
         }
     }
 
@@ -134,6 +143,6 @@ class AdminHatoListViewModel(
                 )
             }
 
-        _uiState.update { it.copy(isLoading = false, items = filtered) }
+        _uiState.update { it.copy(isLoading = false, isRefreshing = false, items = filtered) }
     }
 }

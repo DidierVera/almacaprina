@@ -25,19 +25,28 @@ class AdminCareTaskListViewModel(
         load()
     }
 
-    fun load() {
+    fun load() = fetchData(isRefresh = false)
+
+    fun refresh() = fetchData(isRefresh = true)
+
+    private fun fetchData(isRefresh: Boolean) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            // Los 2 repositorios son independientes — se piden ambos a la vez.
-            val (tasks, insumosById) = coroutineScope {
-                val tasksDeferred = async { careTaskRepository.getAll() }
-                val insumosDeferred = async { insumoRepository.getAll() }
-                tasksDeferred.await() to insumosDeferred.await().associateBy { it.id }
+            _uiState.update { it.copy(isLoading = !isRefresh, isRefreshing = isRefresh, errorMessage = null) }
+            try {
+                // Los 2 repositorios son independientes — se piden ambos a la vez.
+                val (tasks, insumosById) = coroutineScope {
+                    val tasksDeferred = async { careTaskRepository.getAll() }
+                    val insumosDeferred = async { insumoRepository.getAll() }
+                    tasksDeferred.await() to insumosDeferred.await().associateBy { it.id }
+                }
+                val items = tasks
+                    .sortedByDescending { it.active }
+                    .map { task -> CareTaskListItem(task = task, insumoName = task.insumoId?.let { insumosById[it]?.name }) }
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, items = items) }
+            } catch (t: Throwable) {
+                t.printStackTrace()
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: "No se pudo cargar el calendario") }
             }
-            val items = tasks
-                .sortedByDescending { it.active }
-                .map { task -> CareTaskListItem(task = task, insumoName = task.insumoId?.let { insumosById[it]?.name }) }
-            _uiState.update { it.copy(isLoading = false, items = items) }
         }
     }
 }

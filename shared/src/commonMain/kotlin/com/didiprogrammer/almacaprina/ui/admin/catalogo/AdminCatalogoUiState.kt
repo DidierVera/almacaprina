@@ -15,6 +15,7 @@ enum class CatalogoSubTab(val label: String) {
 
 data class AdminCatalogoUiState(
     val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
     val currency: String = "COP",
     val selectedTab: CatalogoSubTab = CatalogoSubTab.PRODUCTOS,
     val products: List<Product> = emptyList(),

@@ -10,6 +10,8 @@ data class GoatListItem(
 
 data class AdminHatoListUiState(
     val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
+    val errorMessage: String? = null,
     val searchQuery: String = "",
     val selectedStatus: GoatStatus? = null,
     val items: List<GoatListItem> = emptyList()

@@ -1,0 +1,3 @@
+password: Almacaprina2026*
+alias: almacaprinaalias
+ruta: repos/almacaprina\signature\almacaprinapasskey.jks

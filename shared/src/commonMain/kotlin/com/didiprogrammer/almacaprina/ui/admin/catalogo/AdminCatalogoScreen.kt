@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -40,6 +39,7 @@ import com.didiprogrammer.almacaprina.domain.model.Packaging
 import com.didiprogrammer.almacaprina.domain.model.Product
 import com.didiprogrammer.almacaprina.domain.model.ProductRecipeItem
 import com.didiprogrammer.almacaprina.ui.components.AlmacaprinaCard
+import com.didiprogrammer.almacaprina.ui.components.RefreshableContent
 import com.didiprogrammer.almacaprina.ui.components.StatusChip
 import com.didiprogrammer.almacaprina.ui.components.label
 import org.koin.compose.viewmodel.koinViewModel
@@ -94,11 +94,11 @@ fun AdminCatalogoScreen(viewModel: AdminCatalogoViewModel = koinViewModel()) {
                 }
             }
 
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            } else {
+            RefreshableContent(
+                isLoading = uiState.isLoading,
+                isRefreshing = uiState.isRefreshing,
+                onRefresh = viewModel::refresh
+            ) {
                 when (uiState.selectedTab) {
                     CatalogoSubTab.PRODUCTOS -> ProductosList(uiState.products, uiState.currency, onProductClick = { editingProduct = it })
                     CatalogoSubTab.ENVASES -> EnvasesList(uiState.packagings, uiState.currency, onPackagingClick = { editingPackaging = it })

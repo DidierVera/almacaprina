@@ -145,6 +145,7 @@ class AdminGoatDetailViewModel(
                     )
                 }
             } catch (t: Throwable) {
+                t.printStackTrace()
                 _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: "No se pudo cargar la ficha") }
             }
         }
@@ -170,6 +171,7 @@ class AdminGoatDetailViewModel(
                 )
                 load()
             } catch (t: Throwable) {
+                t.printStackTrace()
                 _uiState.update { it.copy(savingAction = false, errorMessage = t.message ?: "No se pudo guardar la pesada") }
             }
         }
@@ -240,6 +242,7 @@ class AdminGoatDetailViewModel(
 
                 load()
             } catch (t: Throwable) {
+                t.printStackTrace()
                 _uiState.update { it.copy(savingAction = false, errorMessage = t.message ?: "No se pudo guardar el evento") }
             }
         }
@@ -267,6 +270,7 @@ class AdminGoatDetailViewModel(
                 )
                 load()
             } catch (t: Throwable) {
+                t.printStackTrace()
                 _uiState.update { it.copy(savingAction = false, errorMessage = t.message ?: "No se pudo guardar el evento") }
             }
         }

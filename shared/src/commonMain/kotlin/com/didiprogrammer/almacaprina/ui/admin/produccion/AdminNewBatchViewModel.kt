@@ -158,6 +158,7 @@ class AdminNewBatchViewModel(
                     )
                 }
             } catch (t: Throwable) {
+                t.printStackTrace()
                 _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: "No se pudo cargar la información") }
             }
         }
@@ -250,6 +251,7 @@ class AdminNewBatchViewModel(
                 }
                 onSaved()
             } catch (t: Throwable) {
+                t.printStackTrace()
                 _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: "No se pudo guardar el lote") }
             }
         }

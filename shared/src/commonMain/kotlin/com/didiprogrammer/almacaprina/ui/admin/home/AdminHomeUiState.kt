@@ -30,6 +30,7 @@ data class HerdStatusCounts(
 
 data class AdminHomeUiState(
     val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
     val errorMessage: String? = null,
     val farmName: String = "",
     val currency: String = "COP",

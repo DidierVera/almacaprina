@@ -122,6 +122,7 @@ fun LoginScreen(
                             errorMessage = "No se encontró un perfil configurado para este usuario."
                         }
                     } catch (e: Exception) {
+                        e.printStackTrace()
                         isLoading = false
                         errorMessage = "Correo o contraseña incorrectos."
                     }

@@ -119,9 +119,14 @@ class AdminHomeViewModel(
         load()
     }
 
-    fun load() {
+    fun load() = fetchData(isRefresh = false)
+
+    /** Refresco por gesto de "pull to refresh" — deja la lista visible, solo muestra el indicador chico. */
+    fun refresh() = fetchData(isRefresh = true)
+
+    private fun fetchData(isRefresh: Boolean) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            _uiState.update { it.copy(isLoading = !isRefresh, isRefreshing = isRefresh, errorMessage = null) }
             try {
                 today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
@@ -193,6 +198,7 @@ class AdminHomeViewModel(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
+                        isRefreshing = false,
                         farmName = businessSettings?.farmName ?: "",
                         currency = businessSettings?.currency ?: "COP",
                         todayLiters = todayLiters,
@@ -204,7 +210,8 @@ class AdminHomeViewModel(
                 }
                 recomputeFinancialSummary(_uiState.value.financialPeriod)
             } catch (t: Throwable) {
-                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: "No se pudo cargar la información") }
+                t.printStackTrace()
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: "No se pudo cargar la información") }
             }
         }
     }

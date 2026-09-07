@@ -13,17 +13,20 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -33,6 +36,7 @@ import com.didiprogrammer.almacaprina.business.totalCost
 import com.didiprogrammer.almacaprina.domain.model.PurchaseCategory
 import com.didiprogrammer.almacaprina.ui.components.AlmacaprinaCard
 import com.didiprogrammer.almacaprina.ui.components.DateField
+import com.didiprogrammer.almacaprina.ui.components.RefreshableContent
 import com.didiprogrammer.almacaprina.ui.components.label
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -45,8 +49,14 @@ fun AdminPurchaseHistoryScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     com.didiprogrammer.almacaprina.ui.components.RefreshOnResume(viewModel::load)
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let { snackbarHostState.showSnackbar(it) }
+    }
+
     Scaffold(
         topBar = { TopAppBar(title = { Text("Compras") }) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = onNewPurchaseClick) {
                 Icon(Icons.Filled.Add, contentDescription = "Nueva compra")
@@ -99,25 +109,29 @@ fun AdminPurchaseHistoryScreen(
                 ) { Text("Limpiar fechas") }
             }
 
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-            } else if (uiState.filteredItems.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-                    Text("Sin compras registradas para este filtro.", style = MaterialTheme.typography.bodyMedium)
-                }
-            } else {
-                LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    item {
-                        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                            Text("Total del filtro", style = MaterialTheme.typography.titleSmall)
-                            Text(
-                                formatCurrency(uiState.totalAmount, uiState.currency),
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
+            RefreshableContent(
+                isLoading = uiState.isLoading,
+                isRefreshing = uiState.isRefreshing,
+                onRefresh = viewModel::refresh
+            ) {
+                if (uiState.filteredItems.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+                        Text("Sin compras registradas para este filtro.", style = MaterialTheme.typography.bodyMedium)
                     }
-                    items(uiState.filteredItems, key = { it.purchase.id }) { item ->
-                        PurchaseRow(item, uiState.currency)
+                } else {
+                    LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        item {
+                            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                                Text("Total del filtro", style = MaterialTheme.typography.titleSmall)
+                                Text(
+                                    formatCurrency(uiState.totalAmount, uiState.currency),
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                            }
+                        }
+                        items(uiState.filteredItems, key = { it.purchase.id }) { item ->
+                            PurchaseRow(item, uiState.currency)
+                        }
                     }
                 }
             }

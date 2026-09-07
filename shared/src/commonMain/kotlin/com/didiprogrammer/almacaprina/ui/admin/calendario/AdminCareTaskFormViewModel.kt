@@ -92,6 +92,7 @@ class AdminCareTaskFormViewModel(
                 }
                 onSaved()
             } catch (t: Throwable) {
+                t.printStackTrace()
                 _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: "No se pudo guardar la tarea") }
             }
         }

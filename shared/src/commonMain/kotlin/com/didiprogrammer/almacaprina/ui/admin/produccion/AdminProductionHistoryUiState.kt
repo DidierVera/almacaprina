@@ -11,6 +11,8 @@ data class BatchHistoryItem(
 
 data class AdminProductionHistoryUiState(
     val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
+    val errorMessage: String? = null,
     val allItems: List<BatchHistoryItem> = emptyList(),
     val derivedProducts: List<Product> = emptyList(),
     val selectedProductId: String? = null

@@ -13,15 +13,18 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -29,6 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.didiprogrammer.almacaprina.business.roundTo1Decimal
 import com.didiprogrammer.almacaprina.business.yieldRatio
 import com.didiprogrammer.almacaprina.ui.components.AlmacaprinaCard
+import com.didiprogrammer.almacaprina.ui.components.RefreshableContent
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Sección 4, pantalla 4.1 — Historial de lotes de producción. */
@@ -40,7 +44,13 @@ fun AdminProductionHistoryScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     com.didiprogrammer.almacaprina.ui.components.RefreshOnResume(viewModel::load)
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let { snackbarHostState.showSnackbar(it) }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = onNewBatchClick) {
                 Icon(Icons.Filled.Add, contentDescription = "Nuevo lote")
@@ -68,16 +78,20 @@ fun AdminProductionHistoryScreen(
                 }
             }
 
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-            } else if (uiState.filteredItems.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-                    Text("Sin lotes de producción registrados todavía.", style = MaterialTheme.typography.bodyMedium)
-                }
-            } else {
-                LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    items(uiState.filteredItems, key = { it.batch.id }) { item ->
-                        BatchRow(item)
+            RefreshableContent(
+                isLoading = uiState.isLoading,
+                isRefreshing = uiState.isRefreshing,
+                onRefresh = viewModel::refresh
+            ) {
+                if (uiState.filteredItems.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+                        Text("Sin lotes de producción registrados todavía.", style = MaterialTheme.typography.bodyMedium)
+                    }
+                } else {
+                    LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        items(uiState.filteredItems, key = { it.batch.id }) { item ->
+                            BatchRow(item)
+                        }
                     }
                 }
             }
