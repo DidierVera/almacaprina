@@ -12,11 +12,12 @@ enum class PinVerifyResult { CORRECT, INCORRECT, LOCKED_OUT, NO_PIN }
  * vigente: desbloquea la UI sobre esa sesión, no crea una nueva.
  */
 object PinManager {
-    fun hasPin(): Boolean = PinStorage.hasPin()
+    /** true solo si hay un PIN guardado Y le pertenece a [userId] — ver nota en PinStorage. */
+    fun hasPin(userId: String): Boolean = PinStorage.hasPin() && PinStorage.readUserId() == userId
 
-    fun setPin(pin: String) {
+    fun setPin(pin: String, userId: String) {
         val salt = randomSalt()
-        PinStorage.savePin(hashPin(pin, salt), salt)
+        PinStorage.savePin(hashPin(pin, salt), salt, userId)
         PinStorage.setFailedAttempts(0)
     }
 

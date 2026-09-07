@@ -15,6 +15,7 @@ private const val KEY_ALIAS = "almacaprina_pin_key"
 private const val PREF_HASH = "pin_hash_enc"
 private const val PREF_SALT = "pin_salt_enc"
 private const val PREF_ATTEMPTS = "pin_failed_attempts"
+private const val PREF_USER_ID = "pin_user_id"
 private const val GCM_TAG_LENGTH_BITS = 128
 private const val GCM_IV_LENGTH_BYTES = 12
 
@@ -28,10 +29,11 @@ actual object PinStorage {
         AndroidAppContext.appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
 
-    actual fun savePin(hash: String, salt: String) {
+    actual fun savePin(hash: String, salt: String, userId: String) {
         prefs.edit()
             .putString(PREF_HASH, encrypt(hash))
             .putString(PREF_SALT, encrypt(salt))
+            .putString(PREF_USER_ID, userId)
             .putInt(PREF_ATTEMPTS, 0)
             .apply()
     }
@@ -42,8 +44,10 @@ actual object PinStorage {
         return decrypt(encHash) to decrypt(encSalt)
     }
 
+    actual fun readUserId(): String? = prefs.getString(PREF_USER_ID, null)
+
     actual fun clearPin() {
-        prefs.edit().remove(PREF_HASH).remove(PREF_SALT).putInt(PREF_ATTEMPTS, 0).apply()
+        prefs.edit().remove(PREF_HASH).remove(PREF_SALT).remove(PREF_USER_ID).putInt(PREF_ATTEMPTS, 0).apply()
     }
 
     actual fun hasPin(): Boolean = prefs.contains(PREF_HASH)

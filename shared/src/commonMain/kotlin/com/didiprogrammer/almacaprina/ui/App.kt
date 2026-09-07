@@ -29,7 +29,9 @@ import com.didiprogrammer.almacaprina.ui.admin.AdminRootScreen
 import com.didiprogrammer.almacaprina.ui.auth.LoginScreen
 import com.didiprogrammer.almacaprina.ui.auth.PinSetupScreen
 import com.didiprogrammer.almacaprina.ui.auth.PinUnlockScreen
+import com.didiprogrammer.almacaprina.ui.campo.CampoRootScreen
 import com.didiprogrammer.almacaprina.ui.theme.FincaTheme
+import com.didiprogrammer.almacaprina.ui.ventas.VentasRootScreen
 import kotlinx.coroutines.launch
 import org.koin.compose.KoinApplication
 
@@ -73,10 +75,13 @@ fun App() {
                     LaunchedEffect(Unit) {
                         val destination = if (!AuthService.hasValidSession()) {
                             ROUTE_LOGIN
-                        } else if (PinManager.hasPin()) {
-                            ROUTE_PIN_UNLOCK
                         } else {
-                            homeRouteFor(AuthService.fetchOwnProfile()?.role)
+                            val userId = AuthService.currentUserId()
+                            if (userId != null && PinManager.hasPin(userId)) {
+                                ROUTE_PIN_UNLOCK
+                            } else {
+                                homeRouteFor(AuthService.fetchOwnProfile()?.role)
+                            }
                         }
                         navController.navigate(destination) {
                             popUpTo(ROUTE_SPLASH) { inclusive = true }
@@ -91,7 +96,8 @@ fun App() {
                     LoginScreen(
                         onLoginSuccess = { role ->
                             val destination = homeRouteFor(role)
-                            if (PinManager.hasPin()) {
+                            val userId = AuthService.currentUserId()
+                            if (userId != null && PinManager.hasPin(userId)) {
                                 navController.navigate(destination) { popUpTo(ROUTE_LOGIN) { inclusive = true } }
                             } else {
                                 navController.navigate(pinSetup(destination)) { popUpTo(ROUTE_LOGIN) { inclusive = true } }
@@ -130,10 +136,22 @@ fun App() {
 
                 // Campo y Ventas quedan fuera de este encargo (módulo de Compras/Admin).
                 composable(ROUTE_CAMPO_HOME) {
-                    PlaceholderHome(title = "Campo", subtitle = "Checklist diario — pendiente de construir")
+                    CampoRootScreen(
+                        onLogout = {
+                            navController.navigate(ROUTE_LOGIN) {
+                                popUpTo(navController.graph.id) { inclusive = true }
+                            }
+                        }
+                    )
                 }
                 composable(ROUTE_VENTAS_HOME) {
-                    PlaceholderHome(title = "Ventas", subtitle = "Módulo de ventas — pendiente de construir")
+                    VentasRootScreen(
+                        onLogout = {
+                            navController.navigate(ROUTE_LOGIN) {
+                                popUpTo(navController.graph.id) { inclusive = true }
+                            }
+                        }
+                    )
                 }
                 composable(ROUTE_ADMIN_HOME) {
                     AdminRootScreen(

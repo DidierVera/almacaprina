@@ -71,7 +71,10 @@ Puntos clave a respetar en el código:
 
 **Hato y producción de leche:**
 - `Goat` tiene auto-referencia a `mother_id` / `father_id`
-- `current_status` se deriva automáticamente de eventos reproductivos, EXCEPTO en altas manuales de cabras adultas sin historial (ej. compradas): ahí el formulario de alta pide el estado inicial como campo explícito
+- **`current_status` es SIEMPRE manual** — el admin lo define y actualiza a mano, NUNCA se deriva ni actualiza automáticamente por `ReproductiveEvent` (corrección explícita sobre el diseño original, confirmada por el dueño)
+- **`Goat` usa `breed_composition`** (array de {breed_name, percentage}), NO campos separados `breed`/`breed_cross` — esos dos campos ya no existen
+- Si el padre de una cabra es semental externo (no está en el sistema), el cálculo de `breed_composition` solo refleja el aporte conocido de la madre — no inventar un 50% para una raza desconocida
+- Altas manuales de cabras compradas (`origin = purchased`) con 6 meses o más (`GOAT_ADULT_AGE_MONTHS = 6`, confirmado) exigen seleccionar `current_status` explícitamente en el formulario
 - Gestación de cabra ≈ 150 días — usar esta constante para `expected_birth_date`
 - `MilkProductionRecord` tiene `no_milking_reason` (enum: dry, sick, under_treatment, other) confirmado con el dueño — no inventar otras categorías sin confirmar
 - `LactationNumber` ("2ª lactancia" en la UI) no es un campo guardado — se calcula contando partos exitosos previos de esa cabra
@@ -82,6 +85,8 @@ Puntos clave a respetar en el código:
 - Al guardar una `Purchase`, actualizar `Insumo.last_unit_cost` (o el costo del `Packaging` si category = packaging) automáticamente
 - **Confirmado con el dueño**: `Purchase.total_cost`, `HealthRecord.cost` y `FeedingRecord.cost` se suman TODOS por separado en `CostPerLiter`, sin deduplicación automática — es responsabilidad del usuario no registrar el mismo gasto en dos lados. No agregar lógica de "detección de duplicados" sin que el dueño lo pida explícitamente
 - Cuando `Purchase.category = packaging`, genera automáticamente un movimiento en `PackagingInventory` usando el `packaging_id` seleccionado
+- **Bug conocido pendiente de corregir**: `Purchase.unit` nunca se está poblando (siempre queda `null`) en el formulario de Nueva compra — debería heredar la unidad de `Insumo.unit_of_measure` o `Packaging`. No es bloqueante para Campo/Ventas, pero hay que corregirlo en algún momento
+- `Insumo` incluye `purchase_package_label` y `purchase_package_size` (cómo se compra normalmente, ej. "bulto de 40kg") — agregados a mitad de la sesión de construcción
 
 **Productos derivados y producción:**
 - `Sale` está generalizada por `product_id`, no asume leche. Para ventas de leche, referencia el `Product` semilla "Leche fresca". No hardcodear "litros" ni $12.000 en la lógica de ventas — deben salir de `Product`
@@ -108,6 +113,8 @@ Puntos clave a respetar en el código:
 - Las tareas de tipo `milking` y `weighing` son recordatorios hacia los flujos ya existentes de ordeño y pesada, no generan su propio registro
 - **`CareTask` es solo para tareas recurrentes a nivel de grupo de animales** (ej. dar concentrado a las lactantes todos los días). Un tratamiento puntual a una sola cabra (ej. una cita veterinaria única) se registra directo en `HealthRecord` desde la ficha técnica de esa cabra — no crear una `CareTask` para eso, evita mezclar dos casos de uso distintos en la misma entidad
 - El Home del rol Campo es un checklist diario (`DailyCareChecklist`), no solo la pantalla de ordeño — ordeño es la tarea destacada dentro de ese checklist, junto con las demás tareas generadas desde `CareTask` activas
+- **`DailyCareChecklist` también incluye recordatorios individuales de salud**: cualquier `HealthRecord` con `next_suggested_date ≤ hoy` aparece como tarjeta en el checklist (ej. "Desparasitante a Cabra 142"), no solo las tareas de grupo de `CareTask`. Confirmado explícitamente — no es un error, es una fuente adicional del checklist
+- Al marcar como hecho un recordatorio individual de salud desde el checklist, se **crea un `HealthRecord` nuevo** (no se edita el original). El recordatorio deja de aparecer cuando existe un `HealthRecord` posterior para la misma cabra del mismo `type` (o `insumo_id`) — esa es la señal de que ya se atendió, no un campo booleano de "resuelto"
 - `InsumoStockBalance` se calcula solo (compras − consumo registrado en FeedingRecord/HealthRecord/ProductionBatchInsumoUsage), nunca se captura manualmente
 - La alerta de insumo por agotarse compara `InsumoDaysRemaining` (existencias ÷ consumo diario planeado según `CareTask` activos) contra `Insumo.reorder_lead_time_days` — es una proyección basada en el calendario configurado, no un umbral fijo de cantidad
 
@@ -127,6 +134,52 @@ Puntos clave a respetar en el código:
 - Textos de interfaz de usuario (labels, botones, mensajes) en español
 - Todo cálculo de negocio (litros, costos, proyecciones, yield ratio) vive en `shared/business/`, nunca duplicado en Android o iOS
 - Antes de crear una tabla o campo nuevo, revisar si ya existe en `docs/data_model.md`
+
+## Convención de rutas de navegación
+
+Patrón confirmado ya en uso en el módulo Admin — **seguir exactamente esta forma** para Campo y Ventas, no inventar una convención distinta:
+
+- Prefijo por rol: `admin/...`, `campo/...`, `ventas/...`
+- Minúsculas, segmentos separados por `/`, snake_case cuando el segmento tiene más de una palabra
+- Parámetros con `{nombre}`: ej. `admin/hato/detalle/{goatId}`
+- Listas filtrables usan query param: ej. `admin/hato?status={status}`
+- Sub-secciones anidadas bajo un menú: ej. `admin/mas/compras`, `admin/mas/calendario`
+
+**Rutas ya existentes (Admin):**
+
+| Pantalla | Ruta |
+|---|---|
+| Inicio | `admin/inicio` |
+| Lista de Hato | `admin/hato` (+ `?status={status}`) |
+| Nueva cabra | `admin/hato/nueva` |
+| Ficha técnica de cabra | `admin/hato/detalle/{goatId}` |
+| Editar cabra | `admin/hato/editar/{goatId}` |
+| Catálogo | `admin/catalogo` |
+| Historial de producción | `admin/produccion` |
+| Nuevo lote | `admin/produccion/nuevo_lote` |
+| Más (menú) | `admin/mas` |
+| Ajustes | `admin/ajustes` |
+| Historial de compras | `admin/mas/compras` |
+| Nueva compra | `admin/mas/compras/nueva` |
+| Calendario de tareas | `admin/mas/calendario` |
+| Nueva/editar tarea | `admin/mas/calendario/nueva`, `admin/mas/calendario/editar/{taskId}` |
+
+**Rutas propuestas para los módulos que siguen (Campo y Ventas), mismo patrón:**
+
+| Pantalla | Ruta |
+|---|---|
+| Checklist diario (Home Campo) | `campo/checklist` |
+| Registrar ordeño (lista de cabras de la sesión) | `campo/ordeno` |
+| Registro individual de ordeño | `campo/ordeno/registro/{goatId}` |
+| Resumen de sesión de ordeño | `campo/ordeno/resumen` |
+| Registrar pesada | `campo/pesada/{goatId}` |
+| Inicio Ventas | `ventas/inicio` |
+| Nueva venta — cliente | `ventas/nueva/cliente` |
+| Nueva venta — producto | `ventas/nueva/producto` |
+| Nueva venta — cantidad y envase | `ventas/nueva/cantidad` |
+| Nueva venta — confirmar | `ventas/nueva/confirmar` |
+| Cobrar pendientes (lista) | `ventas/pendientes` |
+| Cobrar pendientes (detalle cliente) | `ventas/pendientes/detalle/{customerId}` |
 
 ## Asignación de módulos por rol
 

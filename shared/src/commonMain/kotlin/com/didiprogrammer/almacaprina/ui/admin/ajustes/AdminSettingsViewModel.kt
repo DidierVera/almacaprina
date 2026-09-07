@@ -97,7 +97,7 @@ class AdminSettingsViewModel(
                         targetDailyLitersGoalText = settings?.targetDailyLitersGoal?.let(::formatQuantity) ?: "",
                         depositAlertDaysText = settings?.depositAlertDays?.toString() ?: "",
                         costPerLiter = costPerLiterValue,
-                        hasPin = PinManager.hasPin()
+                        hasPin = AuthService.currentUserId()?.let { PinManager.hasPin(it) } == true
                     )
                 }
             } catch (t: Throwable) {
@@ -145,7 +145,8 @@ class AdminSettingsViewModel(
 
     /** El PIN es solo un candado local — cambiarlo no requiere tocar la sesión de Supabase. */
     fun onSetPin(pin: String) {
-        PinManager.setPin(pin)
+        val userId = AuthService.currentUserId() ?: return
+        PinManager.setPin(pin, userId)
         _uiState.update { it.copy(hasPin = true, successMessage = "PIN actualizado") }
     }
 

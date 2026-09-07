@@ -38,12 +38,12 @@ Este modelo soporta desde el día 1 no solo venta de leche cruda, sino también 
 | name | text | Nombre del animal |
 | photo_url | text | Foto de referencia |
 | sex | enum (male, female) | |
-| breed_composition | jsonb — array de `{breed_name: text, percentage: decimal}` | Puede ser 100% de una raza o una mezcla. Si `origin = born_on_farm` y se conocen ambos padres, se calcula automáticamente como el promedio de la composición de la madre y el padre (herencia 50/50) al crear la ficha del cabrito junto con el evento de parto; si `origin = purchased`, se captura manualmente. Siempre editable a mano después. Ver `business/averageBreedComposition` |
+| breed_composition | jsonb — array de `{breed_name: text, percentage: decimal}` | Puede ser 100% de una raza o una mezcla. Si `origin = born_on_farm` y se conocen ambos padres, se calcula automáticamente como el promedio de la composición de la madre y el padre (herencia 50/50) al crear la ficha del cabrito junto con el evento de parto; si `origin = purchased`, se captura manualmente. Siempre editable a mano después. Si el padre es semental externo (no está en el sistema), el cálculo solo refleja el aporte conocido de la madre — no se inventa un 50% para una raza desconocida. Ver `business/averageBreedComposition` |
 | birth_date | date | |
 | mother_id | UUID (FK → Goat) | Nula si es fundadora del hato o de origen externo |
 | father_id | UUID (FK → Goat) | Nula si es semental externo |
 | external_father_description | text | Si el padre no está en el sistema |
-| current_status | enum (kid, young_doe, in_production, pregnant, dry, breeding_buck, retired, deceased) | Derivado de eventos reproductivos, EXCEPTO en altas manuales de cabras adultas sin historial (ej. compradas) — ahí se pide como campo explícito en el alta |
+| current_status | enum (kid, young_doe, in_production, pregnant, dry, breeding_buck, retired, deceased) | **Siempre manual.** El admin lo define y actualiza a mano en cualquier momento — NO se deriva ni se actualiza automáticamente a partir de `ReproductiveEvent` (partos, montas, etc.). Corrección explícita confirmada con el dueño; cualquier versión anterior de este documento que diga lo contrario está desactualizada |
 | current_weight_kg | decimal | Último peso registrado (espejo del último WeightRecord) |
 | current_body_condition_score | integer (1-5) | Body Condition Score |
 | herd_entry_date | date | Nacimiento o compra |
@@ -52,6 +52,10 @@ Este modelo soporta desde el día 1 no solo venta de leche cruda, sino también 
 | exit_date | date | Nula si sigue activa |
 | exit_reason | text | Venta, muerte, descarte, etc. |
 | notes | text | Observaciones generales |
+
+**Índices sugeridos:** `tag_number` (único), `current_status` (para filtrar rápido el hato)
+
+**Regla de alta manual:** si `origin = purchased` y la cabra tiene **6 meses o más** al momento del alta (`GOAT_ADULT_AGE_MONTHS = 6`, confirmado con el dueño), el formulario exige seleccionar `current_status` explícitamente. Para cabras nacidas en el sistema, el estado inicial es `kid` por defecto pero igual queda editable en cualquier momento.
 
 **Índices sugeridos:** `tag_number` (único), `current_status` (para filtrar rápido el hato)
 
@@ -88,7 +92,7 @@ Frecuencia esperada: cada 15 días.
 | kid_ids | array de UUID (FK → Goat) | Vincula automáticamente con las fichas de los nuevos cabritos |
 | notes | text | Complicaciones, asistencia veterinaria, etc. |
 
-`current_status` de Goat se actualiza automáticamente según el último evento (ej: breeding registrado → status "pregnant" hasta que se registre el birth).
+`current_status` de Goat **NO** se actualiza automáticamente por este evento — es siempre manual (ver regla en la entidad `Goat`). `expected_birth_date` sí es útil para las alertas de `UpcomingAlerts` independientemente del estado manual de la cabra.
 
 ---
 
@@ -119,7 +123,7 @@ Producción de leche cruda en el establo — la fuente de todo lo demás (venta 
 | Field | Type | Descripción |
 |---|---|---|
 | id | UUID (PK) | |
-| goat_id | UUID (FK → Goat) | |
+| goat_id | UUID (FK → Goat), nullable | Nulo cuando el evento es a nivel de GRUPO — ej. una `CareTask` de tipo `medication` completada desde el checklist de Campo (`CareTask` es siempre de grupo, nunca de una cabra puntual). Los registros individuales (creados desde la ficha técnica) siempre lo llevan |
 | type | enum (vaccine, deworming, treatment, routine_checkup, diagnosis) | |
 | date | date | |
 | description | text | |
@@ -130,6 +134,8 @@ Producción de leche cruda en el establo — la fuente de todo lo demás (venta 
 | cost | decimal | Costo de este evento puntual. Se suma por separado a `Purchase` en `CostPerLiter` — ver regla de no deduplicación en las notas técnicas |
 | veterinarian | text | |
 | next_suggested_date | date | Para generar alertas automáticas |
+
+**Regla de resolución en el checklist diario:** un `HealthRecord` **individual** (`goat_id` no nulo) con `next_suggested_date ≤ hoy` aparece como tarjeta en `DailyCareChecklist` (ver esa vista). Se considera resuelto y deja de aparecer en cuanto existe **otro** `HealthRecord` posterior para la misma `goat_id` **del mismo `type`** (o mismo `insumo_id`, si aplica) — se asume que ese registro nuevo es el seguimiento. Al confirmar la tarjeta desde el checklist, la app **crea un `HealthRecord` nuevo** (la aplicación real de hoy, con su propio `insumo_id`/`cost`/`dosage`), no modifica el registro original — si hace falta otra dosis futura, ese nuevo registro lleva su propio `next_suggested_date`. Los `HealthRecord` de grupo (`goat_id` nulo) NO participan de este mecanismo de recordatorio — su ejecución se controla por `CareTask.frequency` + `CareTaskLog`, igual que `feeding`.
 
 ---
 
@@ -159,10 +165,10 @@ Catálogo de todo lo que se compra y se consume en la operación (no incluye env
 | unit_of_measure | enum (kg, g, liter, ml, unit) | |
 | last_unit_cost | decimal | Se actualiza automáticamente con cada `Purchase` de este insumo — sirve para prellenar costos en `FeedingRecord`, `HealthRecord` y `ProductionBatchInsumoUsage` antes de la próxima compra |
 | reorder_lead_time_days | integer | Cuántos días antes de quedarse sin existencias se quiere la alerta (ej. 3). Se compara contra `InsumoDaysRemaining` |
+| purchase_package_label | text | Cómo se compra normalmente (ej. "bulto de 40kg", "caja de 12 unidades") |
+| purchase_package_size | decimal | Cantidad que trae ese empaque, en `unit_of_measure` |
+| notes | text | |
 | active | boolean | Para descontinuar sin borrar historial |
-| purchase_package_label | text | Nombre del empaque en que normalmente se compra (ej. "Botella", "Bulto", "Saco"). Opcional — solo para facilitar el registro de `Purchase` por empaque en vez de calcular manualmente la conversión a `unit_of_measure` |
-| purchase_package_size | decimal | Contenido de un empaque, expresado en `unit_of_measure` (ej. 50 para una botella de 50 ml de cuajo). Junto con `purchase_package_label`, permite que "Nueva compra" calcule `quantity` y `unit_cost` a partir de "N° de empaques" y "costo por empaque" |
-| notes | text | Observaciones libres opcionales |
 
 ---
 
@@ -423,27 +429,29 @@ CareTask (1) ──< (N) CareTaskLog
 
 ## Vistas calculadas
 
-| Vista | Cálculo | Uso |
-|---|---|---|
-| `DailyHerdProduction` | Σ total_liters_day por fecha | Producción total de leche cruda del día |
-| `RawMilkAvailableBalance` | Σ DailyHerdProduction − Σ Sale.quantity_sold (producto = leche) − Σ ProductionBatch.milk_liters_used | Litros de leche cruda realmente disponibles |
-| `DerivedProductInventory` | Σ ProductionBatch.output_quantity − Σ Sale.quantity_sold, por producto derivado | Stock de queso/kéfir/mantequilla |
-| `ProductYieldRatio` | Promedio histórico de `yield_ratio` por producto derivado | Litros de leche reales necesarios por unidad de cada producto |
-| `ProductCostPerUnit` | ((milk_liters_used × CostPerLiter del día) + Σ ProductionBatchInsumoUsage.cost del lote) / output_quantity | Costo real de producir una unidad, desglosado por insumo, no un número suelto |
-| `CurrentHerdStatus` | Conteo de cabras por `current_status` | Dashboard principal |
-| `CostPerLiter` | Σ costos (Purchase + HealthRecord.cost + FeedingRecord.cost) / litros producidos, por período | Costo de producir un litro de leche cruda |
-| `FutureProductionProjection` | Basado en `expected_birth_date` + curva de lactancia estándar | Planeación de la meta de 85 L/día |
-| `UpcomingAlerts` | Vacunas/desparasitaciones próximas + pesadas quincenales vencidas + apareamientos proyectados + insumos donde `InsumoDaysRemaining` ≤ `Insumo.reorder_lead_time_days` + `AgedPackagingDeposits` | Notificaciones |
-| `NetMargin` | Σ Sale.total_value − Σ Purchase.total_cost (período) | Rentabilidad del negocio |
-| `CustomerPackagingDepositBalance` | Σ deposit_charged − Σ deposit_returned, por cliente | Envases retornables que debe cada cliente |
-| `TotalPackagingDepositsOut` | Σ de `CustomerPackagingDepositBalance` de todos los clientes | Contador global para el Home de Ventas |
-| `AgedPackagingDeposits` | PackagingDepositTransaction (deposit_charged, sin deposit_returned correspondiente) con antigüedad ≥ `BusinessSettings.deposit_alert_days` | Alimenta la alerta "Depósitos sin devolver" en `UpcomingAlerts` |
-| `PendingSalesBalance` | Σ Sale.total_value donde payment_status = pending, por cliente | Cartera pendiente de cobro (fiado) |
-| `LactationNumber` | Conteo de ReproductiveEvent (event_type=birth, result=successful) de esa cabra hasta la fecha | El "2ª lactancia" mostrado en ficha técnica y ordeño — no se guarda, se calcula |
-| `InsumoStockBalance` | Σ Purchase.quantity − Σ FeedingRecord.quantity − Σ HealthRecord.quantity_used − Σ ProductionBatchInsumoUsage.quantity_used, por insumo | Existencias reales de cada insumo, sin que nadie lo cuente a mano |
-| `InsumoPlannedDailyConsumption` | Σ CareTask.quantity_per_occurrence de tareas activas diarias, por insumo | Cuánto se espera consumir por día según el calendario configurado |
-| `InsumoDaysRemaining` | InsumoStockBalance ÷ InsumoPlannedDailyConsumption, por insumo | Días de existencias al ritmo actual de consumo |
-| `DailyCareChecklist` | CareTask activos aplicables hoy, cruzados con CareTaskLog del día | El checklist diario que ve Campo (ordeñar, dar concentrado, dar forraje...) |
+**Estado real de implementación (confirmado por inventario de Claude Code):**
+
+| Vista | Cálculo | Uso | Estado |
+|---|---|---|---|
+| `DailyHerdProduction` | Σ total_liters_day por fecha | Producción total de leche cruda del día | ✅ Implementada |
+| `RawMilkAvailableBalance` | Σ DailyHerdProduction − Σ Sale.quantity_sold (producto = leche) − Σ ProductionBatch.milk_liters_used | Litros de leche cruda realmente disponibles | ✅ Implementada |
+| `DerivedProductInventory` | Σ ProductionBatch.output_quantity − Σ Sale.quantity_sold, por producto derivado | Stock de queso/kéfir/mantequilla | ❌ Pendiente |
+| `ProductYieldRatio` | Promedio histórico de `yield_ratio` por producto derivado | Litros de leche reales necesarios por unidad de cada producto | ✅ Implementada (usada en Nuevo lote) |
+| `ProductCostPerUnit` | ((milk_liters_used × CostPerLiter del día) + Σ ProductionBatchInsumoUsage.cost del lote) / output_quantity | Costo real de producir una unidad | ❌ Pendiente |
+| `CurrentHerdStatus` | Conteo de cabras por `current_status` | Dashboard principal | ✅ Implementada |
+| `CostPerLiter` | Σ costos (Purchase + HealthRecord.cost + FeedingRecord.cost) / litros producidos, por período | Costo de producir un litro de leche cruda | ✅ Implementada (solo lectura en Ajustes) |
+| `FutureProductionProjection` | Basado en `expected_birth_date` + curva de lactancia estándar | Planeación de la meta de 85 L/día | ❌ Pendiente |
+| `UpcomingAlerts` | Vacunas/desparasitaciones próximas + pesadas quincenales vencidas + apareamientos proyectados + insumos por agotarse + depósitos envejecidos | Notificaciones | ⚠️ Parcial — hoy son piezas sueltas combinadas ad-hoc en `AdminHomeViewModel`, no una función única. Si se refactoriza, mantener el mismo resultado visual ya validado en el mockup |
+| `CustomerPackagingDepositBalance` | Σ deposit_charged − Σ deposit_returned, por cliente | Envases retornables que debe cada cliente | ❌ Pendiente — **necesaria para el módulo Ventas** |
+| `TotalPackagingDepositsOut` | Σ de `CustomerPackagingDepositBalance` de todos los clientes | Contador global para el Home de Ventas | ❌ Pendiente — **necesaria para el módulo Ventas** |
+| `AgedPackagingDeposits` | PackagingDepositTransaction (deposit_charged, sin deposit_returned correspondiente) con antigüedad ≥ `BusinessSettings.deposit_alert_days` | Alerta "Depósitos sin devolver" | ❌ Pendiente |
+| `PendingSalesBalance` | Σ Sale.total_value donde payment_status = pending, por cliente | Cartera pendiente de cobro (fiado) | ❌ Pendiente — **necesaria para el módulo Ventas** |
+| `NetMargin` | Σ Sale.total_value − Σ Purchase.total_cost (período) | Rentabilidad del negocio | ❌ Pendiente |
+| `LactationNumber` | Conteo de ReproductiveEvent (event_type=birth, result=successful) de esa cabra hasta la fecha | El "2ª lactancia" mostrado en ficha técnica y ordeño | ❌ Pendiente |
+| `InsumoStockBalance` | Σ Purchase.quantity − Σ FeedingRecord.quantity − Σ HealthRecord.quantity_used − Σ ProductionBatchInsumoUsage.quantity_used, por insumo | Existencias reales de cada insumo | ❌ Pendiente |
+| `InsumoPlannedDailyConsumption` | Σ CareTask.quantity_per_occurrence de tareas activas diarias, por insumo | Cuánto se espera consumir por día | ❌ Pendiente |
+| `InsumoDaysRemaining` | InsumoStockBalance ÷ InsumoPlannedDailyConsumption, por insumo | Días de existencias al ritmo actual de consumo | ❌ Pendiente (el mockup de alertas la muestra, pero es simulada/estática todavía) |
+| `DailyCareChecklist` | Unión de dos fuentes: (1) CareTask activos aplicables hoy, cruzados con CareTaskLog del día; (2) HealthRecord individuales con `next_suggested_date` ≤ hoy sin seguimiento posterior registrado (ver regla de resolución bajo `HealthRecord`) | El checklist diario que ve Campo — tareas de grupo Y seguimientos de salud puntuales a una cabra específica | ❌ Pendiente — **es la pieza central del módulo Campo que sigue** |
 
 ---
 

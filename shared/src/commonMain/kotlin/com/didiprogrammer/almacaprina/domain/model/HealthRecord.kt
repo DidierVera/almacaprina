@@ -16,7 +16,9 @@ enum class HealthRecordType {
 @Serializable
 data class HealthRecord(
     val id: String,
-    @SerialName("goat_id") val goatId: String,
+    /** Nulo cuando el evento es a nivel de GRUPO (ej. una CareTask de medicación completada
+     * desde el checklist de Campo) en vez de a una cabra puntual — ver CareTask.animal_group. */
+    @SerialName("goat_id") val goatId: String? = null,
     val type: HealthRecordType,
     val date: LocalDate,
     val description: String? = null,

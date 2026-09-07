@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.didiprogrammer.almacaprina.data.remote.AuthService
 import com.didiprogrammer.almacaprina.security.PinManager
 import com.didiprogrammer.almacaprina.ui.components.FormField
 import com.didiprogrammer.almacaprina.ui.components.PrimaryButton
@@ -108,7 +109,7 @@ fun PinSetupScreen(onContinue: () -> Unit) {
                 if (pin != confirmPin) {
                     errorMessage = "Los PIN no coinciden."
                 } else {
-                    PinManager.setPin(pin)
+                    AuthService.currentUserId()?.let { userId -> PinManager.setPin(pin, userId) }
                     onContinue()
                 }
             },

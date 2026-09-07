@@ -52,6 +52,14 @@ import com.didiprogrammer.almacaprina.ui.admin.hato.AdminGoatFormViewModel
 import com.didiprogrammer.almacaprina.ui.admin.home.AdminHomeViewModel
 import com.didiprogrammer.almacaprina.ui.admin.produccion.AdminNewBatchViewModel
 import com.didiprogrammer.almacaprina.ui.admin.produccion.AdminProductionHistoryViewModel
+import com.didiprogrammer.almacaprina.ui.campo.checklist.CampoChecklistViewModel
+import com.didiprogrammer.almacaprina.ui.campo.ordeno.MilkingSessionViewModel
+import com.didiprogrammer.almacaprina.ui.campo.pesada.CampoWeighingEntryViewModel
+import com.didiprogrammer.almacaprina.ui.campo.pesada.CampoWeighingListViewModel
+import com.didiprogrammer.almacaprina.ui.ventas.home.VentasHomeViewModel
+import com.didiprogrammer.almacaprina.ui.ventas.nueva.NewSaleViewModel
+import com.didiprogrammer.almacaprina.ui.ventas.pendientes.PendingSalesDetailViewModel
+import com.didiprogrammer.almacaprina.ui.ventas.pendientes.PendingSalesListViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -200,6 +208,84 @@ val appModule = module {
             healthRecordRepository = get(),
             feedingRecordRepository = get(),
             milkProductionRecordRepository = get()
+        )
+    }
+
+    // ---------- Ventas ----------
+    viewModel {
+        VentasHomeViewModel(
+            saleRepository = get(),
+            productRepository = get(),
+            packagingRepository = get(),
+            packagingDepositTransactionRepository = get(),
+            businessSettingsRepository = get()
+        )
+    }
+
+    viewModel {
+        NewSaleViewModel(
+            saleRepository = get(),
+            customerRepository = get(),
+            productRepository = get(),
+            packagingRepository = get(),
+            packagingDepositTransactionRepository = get(),
+            businessSettingsRepository = get()
+        )
+    }
+
+    viewModel {
+        PendingSalesListViewModel(
+            saleRepository = get(),
+            customerRepository = get(),
+            packagingRepository = get(),
+            businessSettingsRepository = get()
+        )
+    }
+
+    viewModel { params ->
+        PendingSalesDetailViewModel(
+            customerId = params.get(),
+            saleRepository = get(),
+            customerRepository = get(),
+            productRepository = get(),
+            packagingRepository = get(),
+            businessSettingsRepository = get()
+        )
+    }
+
+    // ---------- Campo ----------
+    viewModel {
+        CampoChecklistViewModel(
+            goatRepository = get(),
+            careTaskRepository = get(),
+            careTaskLogRepository = get(),
+            healthRecordRepository = get(),
+            feedingRecordRepository = get(),
+            milkProductionRecordRepository = get(),
+            insumoRepository = get()
+        )
+    }
+
+    viewModel {
+        MilkingSessionViewModel(
+            goatRepository = get(),
+            milkProductionRecordRepository = get(),
+            reproductiveEventRepository = get()
+        )
+    }
+
+    viewModel {
+        CampoWeighingListViewModel(
+            goatRepository = get(),
+            weightRecordRepository = get()
+        )
+    }
+
+    viewModel { params ->
+        CampoWeighingEntryViewModel(
+            goatId = params.get(),
+            goatRepository = get(),
+            weightRecordRepository = get()
         )
     }
 }

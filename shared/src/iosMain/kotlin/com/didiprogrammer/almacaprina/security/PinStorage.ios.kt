@@ -39,6 +39,7 @@ private const val SERVICE = "com.didiprogrammer.almacaprina.pin"
 private const val ACCOUNT_HASH = "pin_hash"
 private const val ACCOUNT_SALT = "pin_salt"
 private const val PREF_ATTEMPTS = "pin_failed_attempts"
+private const val PREF_USER_ID = "pin_user_id"
 
 /**
  * Guarda el hash+salt del PIN en el Keychain de iOS (cifrado por el sistema en
@@ -47,9 +48,10 @@ private const val PREF_ATTEMPTS = "pin_failed_attempts"
  */
 @OptIn(ExperimentalForeignApi::class)
 actual object PinStorage {
-    actual fun savePin(hash: String, salt: String) {
+    actual fun savePin(hash: String, salt: String, userId: String) {
         keychainSet(ACCOUNT_HASH, hash)
         keychainSet(ACCOUNT_SALT, salt)
+        NSUserDefaults.standardUserDefaults.setObject(userId, PREF_USER_ID)
         setFailedAttemptsInternal(0)
     }
 
@@ -59,9 +61,12 @@ actual object PinStorage {
         return hash to salt
     }
 
+    actual fun readUserId(): String? = NSUserDefaults.standardUserDefaults.stringForKey(PREF_USER_ID)
+
     actual fun clearPin() {
         keychainDelete(ACCOUNT_HASH)
         keychainDelete(ACCOUNT_SALT)
+        NSUserDefaults.standardUserDefaults.removeObjectForKey(PREF_USER_ID)
         setFailedAttemptsInternal(0)
     }
 
