@@ -3,6 +3,7 @@ package com.didiprogrammer.almacaprina.data.remote
 object SupabaseTables {
     const val PROFILES = "profiles"
     const val GOATS = "goats"
+    const val BREEDS = "breeds"
     const val WEIGHT_RECORDS = "weight_records"
     const val REPRODUCTIVE_EVENTS = "reproductive_events"
     const val MILK_PRODUCTION_RECORDS = "milk_production_records"

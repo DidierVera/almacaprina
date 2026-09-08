@@ -1,6 +1,7 @@
 package com.didiprogrammer.almacaprina.ui.admin.calendario
 
 import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_care_task_form_error_delete
 import almacaprina.shared.generated.resources.admin_care_task_form_error_duplicate_milking
 import almacaprina.shared.generated.resources.admin_care_task_form_error_save
 import androidx.lifecycle.ViewModel
@@ -111,6 +112,20 @@ class AdminCareTaskFormViewModel(
             } catch (t: Throwable) {
                 t.printStackTrace()
                 _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: getString(Res.string.admin_care_task_form_error_save)) }
+            }
+        }
+    }
+
+    fun delete(onDeleted: () -> Unit) {
+        val id = taskId ?: return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSaving = true, errorMessage = null) }
+            try {
+                careTaskRepository.delete(id)
+                onDeleted()
+            } catch (t: Throwable) {
+                t.printStackTrace()
+                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: getString(Res.string.admin_care_task_form_error_delete)) }
             }
         }
     }

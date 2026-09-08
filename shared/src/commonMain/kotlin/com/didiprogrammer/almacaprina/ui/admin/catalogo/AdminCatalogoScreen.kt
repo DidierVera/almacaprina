@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.didiprogrammer.almacaprina.business.formatCurrency
+import com.didiprogrammer.almacaprina.domain.model.Breed
 import com.didiprogrammer.almacaprina.domain.model.Insumo
 import com.didiprogrammer.almacaprina.domain.model.Packaging
 import com.didiprogrammer.almacaprina.domain.model.Product
@@ -45,10 +46,13 @@ import almacaprina.shared.generated.resources.Res
 import almacaprina.shared.generated.resources.admin_catalog_active_label
 import almacaprina.shared.generated.resources.admin_catalog_add_recipe_item_content_description
 import almacaprina.shared.generated.resources.admin_catalog_add_product_packaging_content_description
+import almacaprina.shared.generated.resources.admin_catalog_breed_no_prefix_fallback
+import almacaprina.shared.generated.resources.admin_catalog_breeds_empty
 import almacaprina.shared.generated.resources.admin_catalog_empty_recipe_message
 import almacaprina.shared.generated.resources.admin_catalog_empty_product_packaging_message
 import almacaprina.shared.generated.resources.admin_catalog_inactive_label
 import almacaprina.shared.generated.resources.admin_catalog_insumos_empty
+import almacaprina.shared.generated.resources.admin_catalog_new_breed_content_description
 import almacaprina.shared.generated.resources.admin_catalog_new_insumo_content_description
 import almacaprina.shared.generated.resources.admin_catalog_new_packaging_content_description
 import almacaprina.shared.generated.resources.admin_catalog_new_product_content_description
@@ -80,9 +84,11 @@ fun AdminCatalogoScreen(viewModel: AdminCatalogoViewModel = koinViewModel()) {
     var showNewInsumoDialog by remember { mutableStateOf(false) }
     var showAddRecipeItemDialog by remember { mutableStateOf(false) }
     var showAddProductPackagingDialog by remember { mutableStateOf(false) }
+    var showNewBreedDialog by remember { mutableStateOf(false) }
     var editingProduct by remember { mutableStateOf<Product?>(null) }
     var editingPackaging by remember { mutableStateOf<Packaging?>(null) }
     var editingInsumo by remember { mutableStateOf<Insumo?>(null) }
+    var editingBreed by remember { mutableStateOf<Breed?>(null) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(uiState.errorMessage) {
@@ -111,6 +117,9 @@ fun AdminCatalogoScreen(viewModel: AdminCatalogoViewModel = koinViewModel()) {
                     FloatingActionButton(onClick = { showAddProductPackagingDialog = true }) {
                         Icon(Icons.Filled.Add, contentDescription = stringResource(Res.string.admin_catalog_add_product_packaging_content_description))
                     }
+                }
+                CatalogoSubTab.RAZAS -> FloatingActionButton(onClick = { showNewBreedDialog = true }) {
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(Res.string.admin_catalog_new_breed_content_description))
                 }
             }
         }
@@ -154,6 +163,7 @@ fun AdminCatalogoScreen(viewModel: AdminCatalogoViewModel = koinViewModel()) {
                         onSetDefault = viewModel::setDefaultPackagingOption,
                         onRemove = viewModel::deleteProductPackagingOption
                     )
+                    CatalogoSubTab.RAZAS -> RazasList(uiState.breeds, onBreedClick = { editingBreed = it })
                 }
             }
         }
@@ -240,6 +250,26 @@ fun AdminCatalogoScreen(viewModel: AdminCatalogoViewModel = koinViewModel()) {
             }
         )
     }
+    if (showNewBreedDialog) {
+        BreedFormDialog(
+            existing = null,
+            onDismiss = { showNewBreedDialog = false },
+            onSave = { name, prefix ->
+                viewModel.addBreed(name, prefix)
+                showNewBreedDialog = false
+            }
+        )
+    }
+    editingBreed?.let { breed ->
+        BreedFormDialog(
+            existing = breed,
+            onDismiss = { editingBreed = null },
+            onSave = { name, prefix ->
+                viewModel.updateBreed(breed, name, prefix)
+                editingBreed = null
+            }
+        )
+    }
 }
 
 @Composable
@@ -321,6 +351,27 @@ private fun InsumosList(insumos: List<Insumo>, currency: String, onInsumoClick: 
                         )
                         ActiveChip(insumo.active)
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RazasList(breeds: List<Breed>, onBreedClick: (Breed) -> Unit) {
+    if (breeds.isEmpty()) {
+        EmptyState(stringResource(Res.string.admin_catalog_breeds_empty))
+        return
+    }
+    LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        items(breeds, key = { it.id }) { breed ->
+            AlmacaprinaCard(onClick = { onBreedClick(breed) }) {
+                Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                    Text(breed.name, style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        breed.prefix ?: stringResource(Res.string.admin_catalog_breed_no_prefix_fallback),
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             }
         }

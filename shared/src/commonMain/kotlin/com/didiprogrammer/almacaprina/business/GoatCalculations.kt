@@ -18,6 +18,7 @@ import almacaprina.shared.generated.resources.goat_context_no_weighings
 import almacaprina.shared.generated.resources.goat_context_pregnant_fallback
 import almacaprina.shared.generated.resources.goat_no_data_registered
 import androidx.compose.runtime.Composable
+import com.didiprogrammer.almacaprina.domain.model.Breed
 import com.didiprogrammer.almacaprina.domain.model.BreedPercentage
 import com.didiprogrammer.almacaprina.domain.model.Goat
 import com.didiprogrammer.almacaprina.domain.model.GoatStatus
@@ -112,11 +113,19 @@ fun averageBreedComposition(
 /** Suma de porcentajes — referencia informativa en el formulario (idealmente 100). */
 fun breedCompositionTotal(composition: List<BreedPercentage>): Double = composition.sumOf { it.percentage }
 
-/** Etiqueta legible para la ficha técnica (ej. "100% Alpina", "50% Alpina · 50% Nubia"). */
+/**
+ * Etiqueta legible para la ficha técnica (ej. "100% AL", "50% AL · 50% NU") — usa el
+ * prefijo de cada raza del maestro (ver [Breed]) en vez del nombre completo, para que el
+ * resumen quede corto. Si una raza no tiene prefijo configurado, cae de vuelta a su nombre.
+ */
 @Composable
-fun breedCompositionLabel(composition: List<BreedPercentage>): String =
+fun breedCompositionLabel(composition: List<BreedPercentage>, breeds: List<Breed>): String =
     if (composition.isEmpty()) {
         stringResource(Res.string.goat_no_data_registered)
     } else {
-        composition.joinToString(" · ") { "${roundTo1Decimal(it.percentage)}% ${it.breedName}" }
+        val prefixByName = breeds.associateBy { it.name }
+        composition.joinToString(" · ") { entry ->
+            val displayName = prefixByName[entry.breedName]?.prefix?.ifBlank { null } ?: entry.breedName
+            "${roundTo1Decimal(entry.percentage)}% $displayName"
+        }
     }

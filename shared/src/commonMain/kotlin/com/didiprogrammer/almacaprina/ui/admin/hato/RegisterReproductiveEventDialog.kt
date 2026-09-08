@@ -5,11 +5,14 @@ import almacaprina.shared.generated.resources.admin_goat_form_name_label
 import almacaprina.shared.generated.resources.admin_repro_event_add_kid_button
 import almacaprina.shared.generated.resources.admin_repro_event_buck_label
 import almacaprina.shared.generated.resources.admin_repro_event_dialog_title
+import almacaprina.shared.generated.resources.admin_repro_event_edit_dialog_title
+import almacaprina.shared.generated.resources.admin_repro_event_kid_number_label
 import almacaprina.shared.generated.resources.admin_repro_event_kid_records_label
 import almacaprina.shared.generated.resources.admin_repro_event_kid_sex_female_short
 import almacaprina.shared.generated.resources.admin_repro_event_kid_sex_male_short
 import almacaprina.shared.generated.resources.admin_repro_event_kid_tag_label
 import almacaprina.shared.generated.resources.admin_repro_event_kids_alive_label
+import almacaprina.shared.generated.resources.admin_repro_event_kids_already_registered_note
 import almacaprina.shared.generated.resources.admin_repro_event_kids_born_label
 import almacaprina.shared.generated.resources.admin_repro_event_no_change_option
 import almacaprina.shared.generated.resources.admin_repro_event_remove_kid_content_description
@@ -18,24 +21,19 @@ import almacaprina.shared.generated.resources.admin_repro_event_resulting_status
 import almacaprina.shared.generated.resources.admin_repro_event_type_label
 import almacaprina.shared.generated.resources.common_cancel
 import almacaprina.shared.generated.resources.common_save_button
-import almacaprina.shared.generated.resources.repro_event_result_failed
-import almacaprina.shared.generated.resources.repro_event_result_pending
-import almacaprina.shared.generated.resources.repro_event_result_successful
-import almacaprina.shared.generated.resources.repro_event_type_abortion
-import almacaprina.shared.generated.resources.repro_event_type_birth
-import almacaprina.shared.generated.resources.repro_event_type_breeding
-import almacaprina.shared.generated.resources.repro_event_type_heat_detected
-import almacaprina.shared.generated.resources.repro_event_type_pregnancy_diagnosis
 import almacaprina.shared.generated.resources.weighing_entry_date_label
 import almacaprina.shared.generated.resources.weighing_entry_notes_label
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -45,6 +43,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -54,11 +53,13 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.didiprogrammer.almacaprina.domain.model.Goat
 import com.didiprogrammer.almacaprina.domain.model.GoatSex
 import com.didiprogrammer.almacaprina.domain.model.GoatStatus
+import com.didiprogrammer.almacaprina.domain.model.ReproductiveEvent
 import com.didiprogrammer.almacaprina.domain.model.ReproductiveEventResult
 import com.didiprogrammer.almacaprina.domain.model.ReproductiveEventType
 import com.didiprogrammer.almacaprina.ui.components.DateField
@@ -97,16 +98,17 @@ data class ReproductiveEventFormResult(
 @Composable
 fun RegisterReproductiveEventDialog(
     bucks: List<Goat>,
+    existingEvent: ReproductiveEvent? = null,
     onDismiss: () -> Unit,
     onSave: (ReproductiveEventFormResult) -> Unit
 ) {
-    var date by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
-    var eventType by remember { mutableStateOf(ReproductiveEventType.BREEDING) }
-    var buckId by remember { mutableStateOf<String?>(null) }
-    var result by remember { mutableStateOf(ReproductiveEventResult.PENDING) }
-    var kidsBorn by remember { mutableStateOf("") }
-    var kidsAlive by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf("") }
+    var date by remember { mutableStateOf(existingEvent?.date ?: Clock.System.todayIn(TimeZone.currentSystemDefault())) }
+    var eventType by remember { mutableStateOf(existingEvent?.eventType ?: ReproductiveEventType.BREEDING) }
+    var buckId by remember { mutableStateOf(existingEvent?.buckId) }
+    var result by remember { mutableStateOf(existingEvent?.result ?: ReproductiveEventResult.PENDING) }
+    var kidsBorn by remember { mutableStateOf(existingEvent?.kidsBornCount?.toString() ?: "") }
+    var kidsAlive by remember { mutableStateOf(existingEvent?.kidsAliveCount?.toString() ?: "") }
+    var notes by remember { mutableStateOf(existingEvent?.notes ?: "") }
     var resultingDoeStatus by remember { mutableStateOf<GoatStatus?>(null) }
     val newKidNames = remember { mutableStateListOf<String>() }
     val newKidTags = remember { mutableStateListOf<String>() }
@@ -114,7 +116,14 @@ fun RegisterReproductiveEventDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.admin_repro_event_dialog_title)) },
+        title = {
+            Text(
+                stringResource(
+                    if (existingEvent != null) Res.string.admin_repro_event_edit_dialog_title
+                    else Res.string.admin_repro_event_dialog_title
+                )
+            )
+        },
         text = {
             Column(
                 modifier = Modifier.heightIn(max = 520.dp).verticalScroll(rememberScrollState()),
@@ -128,7 +137,7 @@ fun RegisterReproductiveEventDialog(
                         FilterChip(
                             selected = eventType == type,
                             onClick = { eventType = type },
-                            label = { Text(type.spanishLabel()) }
+                            label = { Text(type.label()) }
                         )
                     }
                 }
@@ -152,7 +161,7 @@ fun RegisterReproductiveEventDialog(
                         FilterChip(
                             selected = result == r,
                             onClick = { result = r },
-                            label = { Text(r.spanishLabel()) }
+                            label = { Text(r.label()) }
                         )
                     }
                 }
@@ -201,49 +210,75 @@ fun RegisterReproductiveEventDialog(
 
                     if (result == ReproductiveEventResult.SUCCESSFUL) {
                         HorizontalDivider()
-                        Text(stringResource(Res.string.admin_repro_event_kid_records_label))
-                        newKidNames.indices.forEach { index ->
-                            Row(
-                                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                OutlinedTextField(
-                                    value = newKidNames[index],
-                                    onValueChange = { newKidNames[index] = it },
-                                    label = { Text(stringResource(Res.string.admin_goat_form_name_label)) },
-                                    modifier = Modifier.weight(1f),
-                                    singleLine = true
-                                )
-                                OutlinedTextField(
-                                    value = newKidTags[index],
-                                    onValueChange = { newKidTags[index] = it },
-                                    label = { Text(stringResource(Res.string.admin_repro_event_kid_tag_label)) },
-                                    modifier = Modifier.weight(1f),
-                                    singleLine = true
-                                )
-                                FilterChip(
-                                    selected = newKidSexes[index] == GoatSex.FEMALE,
-                                    onClick = {
-                                        newKidSexes[index] = if (newKidSexes[index] == GoatSex.FEMALE) GoatSex.MALE else GoatSex.FEMALE
-                                    },
-                                    label = { Text(stringResource(if (newKidSexes[index] == GoatSex.FEMALE) Res.string.admin_repro_event_kid_sex_female_short else Res.string.admin_repro_event_kid_sex_male_short)) }
-                                )
-                                IconButton(onClick = {
-                                    newKidNames.removeAt(index)
-                                    newKidTags.removeAt(index)
-                                    newKidSexes.removeAt(index)
-                                }) {
-                                    Icon(Icons.Outlined.Close, contentDescription = stringResource(Res.string.admin_repro_event_remove_kid_content_description))
+                        if (existingEvent == null) {
+                            Text(stringResource(Res.string.admin_repro_event_kid_records_label))
+                            newKidNames.indices.forEach { index ->
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(10.dp))
+                                        .padding(10.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            stringResource(Res.string.admin_repro_event_kid_number_label, index + 1),
+                                            style = MaterialTheme.typography.labelLarge
+                                        )
+                                        IconButton(onClick = {
+                                            newKidNames.removeAt(index)
+                                            newKidTags.removeAt(index)
+                                            newKidSexes.removeAt(index)
+                                        }) {
+                                            Icon(Icons.Outlined.Close, contentDescription = stringResource(Res.string.admin_repro_event_remove_kid_content_description))
+                                        }
+                                    }
+                                    OutlinedTextField(
+                                        value = newKidNames[index],
+                                        onValueChange = { newKidNames[index] = it },
+                                        label = { Text(stringResource(Res.string.admin_goat_form_name_label)) },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        singleLine = true
+                                    )
+                                    OutlinedTextField(
+                                        value = newKidTags[index],
+                                        onValueChange = { newKidTags[index] = it },
+                                        label = { Text(stringResource(Res.string.admin_repro_event_kid_tag_label)) },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        singleLine = true
+                                    )
+                                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        FilterChip(
+                                            selected = newKidSexes[index] == GoatSex.FEMALE,
+                                            onClick = { newKidSexes[index] = GoatSex.FEMALE },
+                                            label = { Text(stringResource(Res.string.admin_repro_event_kid_sex_female_short)) }
+                                        )
+                                        FilterChip(
+                                            selected = newKidSexes[index] == GoatSex.MALE,
+                                            onClick = { newKidSexes[index] = GoatSex.MALE },
+                                            label = { Text(stringResource(Res.string.admin_repro_event_kid_sex_male_short)) }
+                                        )
+                                    }
                                 }
                             }
-                        }
-                        TextButton(onClick = {
-                            newKidNames.add("")
-                            newKidTags.add("")
-                            newKidSexes.add(GoatSex.FEMALE)
-                        }) {
-                            Icon(Icons.Outlined.Add, contentDescription = null)
-                            Text(" " + stringResource(Res.string.admin_repro_event_add_kid_button))
+                            TextButton(onClick = {
+                                newKidNames.add("")
+                                newKidTags.add("")
+                                newKidSexes.add(GoatSex.FEMALE)
+                            }) {
+                                Icon(Icons.Outlined.Add, contentDescription = null)
+                                Text(" " + stringResource(Res.string.admin_repro_event_add_kid_button))
+                            }
+                        } else {
+                            Text(
+                                stringResource(Res.string.admin_repro_event_kids_already_registered_note),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
                         }
                     }
                 }
@@ -279,23 +314,3 @@ fun RegisterReproductiveEventDialog(
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.common_cancel)) } }
     )
 }
-
-@Composable
-private fun ReproductiveEventType.spanishLabel(): String = stringResource(
-    when (this) {
-        ReproductiveEventType.HEAT_DETECTED -> Res.string.repro_event_type_heat_detected
-        ReproductiveEventType.BREEDING -> Res.string.repro_event_type_breeding
-        ReproductiveEventType.PREGNANCY_DIAGNOSIS -> Res.string.repro_event_type_pregnancy_diagnosis
-        ReproductiveEventType.BIRTH -> Res.string.repro_event_type_birth
-        ReproductiveEventType.ABORTION -> Res.string.repro_event_type_abortion
-    }
-)
-
-@Composable
-private fun ReproductiveEventResult.spanishLabel(): String = stringResource(
-    when (this) {
-        ReproductiveEventResult.PENDING -> Res.string.repro_event_result_pending
-        ReproductiveEventResult.SUCCESSFUL -> Res.string.repro_event_result_successful
-        ReproductiveEventResult.FAILED -> Res.string.repro_event_result_failed
-    }
-)

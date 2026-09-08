@@ -68,6 +68,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.didiprogrammer.almacaprina.business.breedCompositionLabel
+import com.didiprogrammer.almacaprina.domain.model.Breed
 import com.didiprogrammer.almacaprina.domain.model.BreedPercentage
 import com.didiprogrammer.almacaprina.domain.model.GoatOrigin
 import com.didiprogrammer.almacaprina.domain.model.GoatSex
@@ -79,6 +80,7 @@ import com.didiprogrammer.almacaprina.ui.components.AlmacaprinaCard
 import com.didiprogrammer.almacaprina.ui.components.GoatAvatar
 import com.didiprogrammer.almacaprina.ui.components.GoatStatusChip
 import com.didiprogrammer.almacaprina.ui.components.SectionHeader
+import com.didiprogrammer.almacaprina.ui.components.label
 import com.didiprogrammer.almacaprina.ui.components.SimpleLineChart
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -99,6 +101,7 @@ fun AdminGoatDetailScreen(
     com.didiprogrammer.almacaprina.ui.components.RefreshOnResume(viewModel::load)
     var showWeightDialog by remember { mutableStateOf(false) }
     var showReproEventDialog by remember { mutableStateOf(false) }
+    var editingReproEvent by remember { mutableStateOf<ReproductiveEvent?>(null) }
     var showHealthEventDialog by remember { mutableStateOf(false) }
 
     if (uiState.isLoading || uiState.goat == null) {
@@ -178,6 +181,7 @@ fun AdminGoatDetailScreen(
             when (uiState.selectedTab) {
                 GoatDetailTab.DATOS_BASICOS -> DatosBasicosTab(
                     breedComposition = goat.breedComposition,
+                    breeds = uiState.breeds,
                     birthDate = goat.birthDate.toString(),
                     weaningDate = goat.weaningDate?.toString(),
                     origin = goat.origin,
@@ -195,7 +199,8 @@ fun AdminGoatDetailScreen(
                 )
                 GoatDetailTab.REPRODUCCION -> ReproduccionTab(
                     events = uiState.reproductiveEvents,
-                    nextExpectedBirth = uiState.nextExpectedBirth
+                    nextExpectedBirth = uiState.nextExpectedBirth,
+                    onEventClick = { event -> editingReproEvent = event }
                 )
                 GoatDetailTab.SALUD -> SaludTab(records = uiState.healthRecords)
                 GoatDetailTab.PRODUCCION_LECHE -> ProduccionLecheTab(records = uiState.milkRecords)
@@ -212,13 +217,23 @@ fun AdminGoatDetailScreen(
             }
         )
     }
-    if (showReproEventDialog) {
+    if (showReproEventDialog || editingReproEvent != null) {
         RegisterReproductiveEventDialog(
             bucks = uiState.availableBucks,
-            onDismiss = { showReproEventDialog = false },
-            onSave = { form ->
-                viewModel.onSaveReproductiveEvent(form)
+            existingEvent = editingReproEvent,
+            onDismiss = {
                 showReproEventDialog = false
+                editingReproEvent = null
+            },
+            onSave = { form ->
+                val editing = editingReproEvent
+                if (editing != null) {
+                    viewModel.onUpdateReproductiveEvent(editing.id, form)
+                } else {
+                    viewModel.onSaveReproductiveEvent(form)
+                }
+                showReproEventDialog = false
+                editingReproEvent = null
             }
         )
     }
@@ -259,6 +274,7 @@ private fun GoatDetailHeader(
 @Composable
 private fun DatosBasicosTab(
     breedComposition: List<BreedPercentage>,
+    breeds: List<Breed>,
     birthDate: String,
     weaningDate: String?,
     origin: GoatOrigin,
@@ -274,7 +290,7 @@ private fun DatosBasicosTab(
         item {
             AlmacaprinaCard {
                 InfoRow(stringResource(Res.string.admin_goat_detail_sex_label), stringResource(if (sex == GoatSex.FEMALE) Res.string.admin_goat_detail_sex_female else Res.string.admin_goat_detail_sex_male))
-                InfoRow(stringResource(Res.string.admin_goat_detail_breed_composition_label), breedCompositionLabel(breedComposition))
+                InfoRow(stringResource(Res.string.admin_goat_detail_breed_composition_label), breedCompositionLabel(breedComposition, breeds))
                 InfoRow(stringResource(Res.string.admin_goat_detail_birth_label), birthDate)
                 if (weaningDate != null) InfoRow(stringResource(Res.string.admin_goat_detail_weaning_label), weaningDate)
                 InfoRow(stringResource(Res.string.admin_goat_detail_origin_label), stringResource(if (origin == GoatOrigin.BORN_ON_FARM) Res.string.admin_goat_detail_origin_born else Res.string.admin_goat_detail_origin_purchased))
@@ -358,7 +374,11 @@ private fun PesoTab(weightRecords: List<WeightRecord>, currentBcs: Int?) {
 }
 
 @Composable
-private fun ReproduccionTab(events: List<ReproductiveEvent>, nextExpectedBirth: kotlinx.datetime.LocalDate?) {
+private fun ReproduccionTab(
+    events: List<ReproductiveEvent>,
+    nextExpectedBirth: kotlinx.datetime.LocalDate?,
+    onEventClick: (ReproductiveEvent) -> Unit
+) {
     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (nextExpectedBirth != null) {
             item {
@@ -372,13 +392,13 @@ private fun ReproduccionTab(events: List<ReproductiveEvent>, nextExpectedBirth: 
             item { Text(stringResource(Res.string.admin_goat_detail_no_repro_events), style = MaterialTheme.typography.bodyMedium) }
         }
         items(events) { event ->
-            AlmacaprinaCard {
+            AlmacaprinaCard(onClick = { onEventClick(event) }) {
                 Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                    Text(event.eventType.name, style = MaterialTheme.typography.titleSmall)
+                    Text(event.eventType.label(), style = MaterialTheme.typography.titleSmall)
                     Text(event.date.toString(), style = MaterialTheme.typography.bodySmall)
                 }
                 Text(
-                    text = stringResource(Res.string.admin_goat_detail_result_prefix, event.result.name),
+                    text = stringResource(Res.string.admin_goat_detail_result_prefix, event.result.label()),
                     style = MaterialTheme.typography.bodySmall,
                     color = if (event.result == ReproductiveEventResult.SUCCESSFUL) {
                         MaterialTheme.colorScheme.primary
@@ -401,7 +421,7 @@ private fun SaludTab(records: List<HealthRecord>) {
         items(records) { record ->
             AlmacaprinaCard {
                 Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                    Text(record.type.name, style = MaterialTheme.typography.titleSmall)
+                    Text(record.type.label(), style = MaterialTheme.typography.titleSmall)
                     Text(record.date.toString(), style = MaterialTheme.typography.bodySmall)
                 }
                 record.description?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }

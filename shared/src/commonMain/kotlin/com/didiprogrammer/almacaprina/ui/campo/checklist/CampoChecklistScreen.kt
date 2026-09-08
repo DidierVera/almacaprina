@@ -8,6 +8,7 @@ import almacaprina.shared.generated.resources.campo_checklist_deleted_goat_fallb
 import almacaprina.shared.generated.resources.campo_checklist_diff_label
 import almacaprina.shared.generated.resources.campo_checklist_expected_quantity
 import almacaprina.shared.generated.resources.campo_checklist_health_chip_label
+import almacaprina.shared.generated.resources.campo_checklist_health_reminder_title
 import almacaprina.shared.generated.resources.campo_checklist_health_reminder_default_subtitle
 import almacaprina.shared.generated.resources.campo_checklist_logout_content_description
 import almacaprina.shared.generated.resources.campo_checklist_milking_chip_label
@@ -272,7 +273,7 @@ fun CampoChecklistScreen(
     if (confirmingReminder != null) {
         AlertDialog(
             onDismissRequest = viewModel::onDismissHealthReminderConfirm,
-            title = { Text(confirmingReminder.type.name) },
+            title = { Text(confirmingReminder.type.label()) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                     Text(stringResource(Res.string.campo_checklist_quantity_applied_label), style = MaterialTheme.typography.bodySmall, color = TintaSuave)
@@ -348,7 +349,7 @@ private fun HealthReminderRow(reminder: ChecklistHealthReminder, onClick: () -> 
     val goatLabel = reminder.goat?.let { "${it.name} (${it.tagNumber})" } ?: stringResource(Res.string.campo_checklist_deleted_goat_fallback)
     ChecklistRow(
         completed = reminder.completed,
-        title = "${reminder.healthRecord.type.name.lowercase().replaceFirstChar { it.uppercase() }} a $goatLabel",
+        title = stringResource(Res.string.campo_checklist_health_reminder_title, reminder.healthRecord.type.label(), goatLabel),
         chipLabel = stringResource(Res.string.campo_checklist_health_chip_label),
         chipBg = Terracota.copy(alpha = 0.15f),
         chipFg = Terracota,

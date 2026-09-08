@@ -13,11 +13,6 @@ import almacaprina.shared.generated.resources.admin_health_event_veterinarian_la
 import almacaprina.shared.generated.resources.admin_health_event_withdrawal_days_label
 import almacaprina.shared.generated.resources.common_cancel
 import almacaprina.shared.generated.resources.common_save_button
-import almacaprina.shared.generated.resources.health_record_type_deworming
-import almacaprina.shared.generated.resources.health_record_type_diagnosis
-import almacaprina.shared.generated.resources.health_record_type_routine_checkup
-import almacaprina.shared.generated.resources.health_record_type_treatment
-import almacaprina.shared.generated.resources.health_record_type_vaccine
 import almacaprina.shared.generated.resources.weighing_entry_date_label
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.didiprogrammer.almacaprina.domain.model.HealthRecordType
 import com.didiprogrammer.almacaprina.domain.model.Insumo
 import com.didiprogrammer.almacaprina.ui.components.DateField
+import com.didiprogrammer.almacaprina.ui.components.label
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
@@ -95,7 +91,7 @@ fun RegisterHealthEventDialog(
                         FilterChip(
                             selected = type == t,
                             onClick = { type = t },
-                            label = { Text(t.spanishLabel()) }
+                            label = { Text(t.label()) }
                         )
                     }
                 }
@@ -183,14 +179,3 @@ fun RegisterHealthEventDialog(
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.common_cancel)) } }
     )
 }
-
-@Composable
-private fun HealthRecordType.spanishLabel(): String = stringResource(
-    when (this) {
-        HealthRecordType.VACCINE -> Res.string.health_record_type_vaccine
-        HealthRecordType.DEWORMING -> Res.string.health_record_type_deworming
-        HealthRecordType.TREATMENT -> Res.string.health_record_type_treatment
-        HealthRecordType.ROUTINE_CHECKUP -> Res.string.health_record_type_routine_checkup
-        HealthRecordType.DIAGNOSIS -> Res.string.health_record_type_diagnosis
-    }
-)

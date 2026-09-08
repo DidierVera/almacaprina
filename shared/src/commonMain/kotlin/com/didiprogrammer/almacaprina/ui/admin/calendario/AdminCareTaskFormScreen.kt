@@ -10,9 +10,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -24,7 +29,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -36,6 +43,9 @@ import com.didiprogrammer.almacaprina.domain.model.TimeOfDay
 import almacaprina.shared.generated.resources.Res
 import almacaprina.shared.generated.resources.admin_care_task_active_label
 import almacaprina.shared.generated.resources.admin_care_task_form_animal_group_label
+import almacaprina.shared.generated.resources.admin_care_task_form_delete_confirm_message
+import almacaprina.shared.generated.resources.admin_care_task_form_delete_confirm_title
+import almacaprina.shared.generated.resources.admin_care_task_form_delete_content_description
 import almacaprina.shared.generated.resources.admin_care_task_form_edit_title
 import almacaprina.shared.generated.resources.admin_care_task_form_frequency_label
 import almacaprina.shared.generated.resources.admin_care_task_form_no_insumos_message
@@ -45,6 +55,7 @@ import almacaprina.shared.generated.resources.admin_goat_form_name_label
 import almacaprina.shared.generated.resources.admin_health_event_type_label
 import almacaprina.shared.generated.resources.admin_home_new_task_action
 import almacaprina.shared.generated.resources.admin_recipe_item_insumo_label
+import almacaprina.shared.generated.resources.admin_settings_delete_button
 import almacaprina.shared.generated.resources.common_cancel
 import almacaprina.shared.generated.resources.common_save_button
 import com.didiprogrammer.almacaprina.ui.components.label
@@ -61,6 +72,7 @@ fun AdminCareTaskFormScreen(
     viewModel: AdminCareTaskFormViewModel = koinViewModel(parameters = { parametersOf(taskId) })
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var showDeleteConfirm by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(uiState.errorMessage) {
@@ -68,7 +80,18 @@ fun AdminCareTaskFormScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(stringResource(if (uiState.isEditing) Res.string.admin_care_task_form_edit_title else Res.string.admin_home_new_task_action)) }) },
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(if (uiState.isEditing) Res.string.admin_care_task_form_edit_title else Res.string.admin_home_new_task_action)) },
+                actions = {
+                    if (uiState.isEditing) {
+                        IconButton(onClick = { showDeleteConfirm = true }) {
+                            Icon(Icons.Filled.Delete, contentDescription = stringResource(Res.string.admin_care_task_form_delete_content_description))
+                        }
+                    }
+                }
+            )
+        },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         LazyColumn(
@@ -195,5 +218,20 @@ fun AdminCareTaskFormScreen(
                 }
             }
         }
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text(stringResource(Res.string.admin_care_task_form_delete_confirm_title)) },
+            text = { Text(stringResource(Res.string.admin_care_task_form_delete_confirm_message)) },
+            confirmButton = {
+                Button(onClick = {
+                    showDeleteConfirm = false
+                    viewModel.delete(onSaved)
+                }) { Text(stringResource(Res.string.admin_settings_delete_button)) }
+            },
+            dismissButton = { OutlinedButton(onClick = { showDeleteConfirm = false }) { Text(stringResource(Res.string.common_cancel)) } }
+        )
     }
 }

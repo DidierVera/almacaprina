@@ -11,6 +11,7 @@ import com.didiprogrammer.almacaprina.business.ageLabel
 import com.didiprogrammer.almacaprina.business.averageBreedComposition
 import com.didiprogrammer.almacaprina.business.expectedBirthDateOrNull
 import com.didiprogrammer.almacaprina.business.lactationNumber
+import com.didiprogrammer.almacaprina.domain.model.Breed
 import com.didiprogrammer.almacaprina.domain.model.Goat
 import com.didiprogrammer.almacaprina.domain.model.GoatOrigin
 import com.didiprogrammer.almacaprina.domain.model.GoatSex
@@ -23,6 +24,7 @@ import com.didiprogrammer.almacaprina.domain.model.ReproductiveEvent
 import com.didiprogrammer.almacaprina.domain.model.ReproductiveEventResult
 import com.didiprogrammer.almacaprina.domain.model.ReproductiveEventType
 import com.didiprogrammer.almacaprina.domain.model.WeightRecord
+import com.didiprogrammer.almacaprina.domain.repository.BreedRepository
 import com.didiprogrammer.almacaprina.domain.repository.GoatRepository
 import com.didiprogrammer.almacaprina.domain.repository.HealthRecordRepository
 import com.didiprogrammer.almacaprina.domain.repository.InsumoRepository
@@ -50,7 +52,8 @@ private data class AdminGoatDetailRawData(
     val reproductiveEvents: List<ReproductiveEvent>,
     val healthRecords: List<HealthRecord>,
     val milkRecords: List<MilkProductionRecord>,
-    val insumos: List<Insumo>
+    val insumos: List<Insumo>,
+    val breeds: List<Breed>
 )
 
 class AdminGoatDetailViewModel(
@@ -60,7 +63,8 @@ class AdminGoatDetailViewModel(
     private val reproductiveEventRepository: ReproductiveEventRepository,
     private val healthRecordRepository: HealthRecordRepository,
     private val milkProductionRecordRepository: MilkProductionRecordRepository,
-    private val insumoRepository: InsumoRepository
+    private val insumoRepository: InsumoRepository,
+    private val breedRepository: BreedRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AdminGoatDetailUiState())
@@ -78,7 +82,7 @@ class AdminGoatDetailViewModel(
 
                 // Ninguna de estas consultas depende del resultado de otra (todas
                 // filtran por el goatId ya conocido) — se piden todas a la vez.
-                val (goat, allGoats, weightRecordsRaw, reproductiveEventsRaw, healthRecordsRaw, milkRecordsRaw, insumos) = coroutineScope {
+                val (goat, allGoats, weightRecordsRaw, reproductiveEventsRaw, healthRecordsRaw, milkRecordsRaw, insumos, breeds) = coroutineScope {
                     val goatDeferred = async { goatRepository.getById(goatId) }
                     val allGoatsDeferred = async { goatRepository.getAll() }
                     val weightRecordsDeferred = async { weightRecordRepository.getAll() }
@@ -86,6 +90,7 @@ class AdminGoatDetailViewModel(
                     val healthRecordsDeferred = async { healthRecordRepository.getAll() }
                     val milkRecordsDeferred = async { milkProductionRecordRepository.getAll() }
                     val insumosDeferred = async { insumoRepository.getAll() }
+                    val breedsDeferred = async { breedRepository.getAll() }
 
                     AdminGoatDetailRawData(
                         goat = goatDeferred.await(),
@@ -94,7 +99,8 @@ class AdminGoatDetailViewModel(
                         reproductiveEvents = reproductiveEventsDeferred.await(),
                         healthRecords = healthRecordsDeferred.await(),
                         milkRecords = milkRecordsDeferred.await(),
-                        insumos = insumosDeferred.await()
+                        insumos = insumosDeferred.await(),
+                        breeds = breedsDeferred.await()
                     )
                 }
 
@@ -147,7 +153,8 @@ class AdminGoatDetailViewModel(
                         milkRecords = milkRecords,
                         availableBucks = allGoats.filter { g -> g.sex == GoatSex.MALE && g.id != goatId },
                         availableDoes = allGoats.filter { g -> g.sex == GoatSex.FEMALE && g.id != goatId },
-                        veterinaryInsumos = veterinaryInsumos
+                        veterinaryInsumos = veterinaryInsumos,
+                        breeds = breeds
                     )
                 }
             } catch (t: Throwable) {
@@ -240,6 +247,44 @@ class AdminGoatDetailViewModel(
                 // del dueño: un aborto puede dejarla seca o en producción según la etapa de
                 // gestación en que ocurrió, así que no se infiere automáticamente del evento).
                 // Solo se actualiza si el admin lo eligió explícitamente en el formulario.
+                form.resultingDoeStatus?.let { newStatus ->
+                    _uiState.value.goat?.let { currentGoat ->
+                        goatRepository.update(goatId, currentGoat.copy(currentStatus = newStatus))
+                    }
+                }
+
+                load()
+            } catch (t: Throwable) {
+                t.printStackTrace()
+                _uiState.update { it.copy(savingAction = false, errorMessage = t.message ?: getString(Res.string.admin_goat_detail_error_save_event)) }
+            }
+        }
+    }
+
+    fun onUpdateReproductiveEvent(eventId: String, form: ReproductiveEventFormResult) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(savingAction = true) }
+            try {
+                // Los cabritos ya fueron creados al registrar el parto original — el diálogo
+                // no permite crear nuevos aquí, así que se preserva el kid_ids existente.
+                val existingKidIds = _uiState.value.reproductiveEvents.firstOrNull { it.id == eventId }?.kidIds
+
+                reproductiveEventRepository.update(
+                    eventId,
+                    ReproductiveEvent(
+                        id = eventId,
+                        doeId = goatId,
+                        eventType = form.eventType,
+                        date = form.date,
+                        buckId = form.buckId,
+                        result = form.result,
+                        kidsBornCount = form.kidsBornCount,
+                        kidsAliveCount = form.kidsAliveCount,
+                        kidIds = existingKidIds,
+                        notes = form.notes
+                    )
+                )
+
                 form.resultingDoeStatus?.let { newStatus ->
                     _uiState.value.goat?.let { currentGoat ->
                         goatRepository.update(goatId, currentGoat.copy(currentStatus = newStatus))

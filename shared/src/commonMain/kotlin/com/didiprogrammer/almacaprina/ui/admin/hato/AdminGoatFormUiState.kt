@@ -2,6 +2,7 @@ package com.didiprogrammer.almacaprina.ui.admin.hato
 
 import com.didiprogrammer.almacaprina.business.breedCompositionTotal
 import com.didiprogrammer.almacaprina.business.isLikelyAdult
+import com.didiprogrammer.almacaprina.domain.model.Breed
 import com.didiprogrammer.almacaprina.domain.model.BreedPercentage
 import com.didiprogrammer.almacaprina.domain.model.Goat
 import com.didiprogrammer.almacaprina.domain.model.GoatOrigin
@@ -41,7 +42,8 @@ data class AdminGoatFormUiState(
     val currentStatus: GoatStatus? = null,
     val initialStatus: GoatStatus? = null,
     val allGoats: List<Goat> = emptyList(),
-    val today: LocalDate? = null
+    val today: LocalDate? = null,
+    val breeds: List<Breed> = emptyList()
 ) {
     val isEditing: Boolean get() = editingGoatId != null
 

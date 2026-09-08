@@ -5,6 +5,7 @@ import almacaprina.shared.generated.resources.admin_catalog_error_load
 import almacaprina.shared.generated.resources.common_error_save_failed
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.didiprogrammer.almacaprina.domain.model.Breed
 import com.didiprogrammer.almacaprina.domain.model.Insumo
 import com.didiprogrammer.almacaprina.domain.model.InsumoCategory
 import com.didiprogrammer.almacaprina.domain.model.Packaging
@@ -14,6 +15,7 @@ import com.didiprogrammer.almacaprina.domain.model.ProductPackagingOption
 import com.didiprogrammer.almacaprina.domain.model.ProductRecipeItem
 import com.didiprogrammer.almacaprina.domain.model.SaleUnit
 import com.didiprogrammer.almacaprina.domain.model.UnitOfMeasure
+import com.didiprogrammer.almacaprina.domain.repository.BreedRepository
 import com.didiprogrammer.almacaprina.domain.repository.BusinessSettingsRepository
 import com.didiprogrammer.almacaprina.domain.repository.InsumoRepository
 import com.didiprogrammer.almacaprina.domain.repository.PackagingRepository
@@ -37,12 +39,13 @@ private data class AdminCatalogoRawData(
     val insumos: List<Insumo>,
     val recipeItems: List<ProductRecipeItem>,
     val productPackagingOptions: List<ProductPackagingOption>,
+    val breeds: List<Breed>,
     val currency: String
 )
 
 /**
- * Sección 3 — Catálogo. Un solo ViewModel para los 5 sub-tabs (Productos, Envases,
- * Insumos, Recetas, Empaques) porque son catálogos pequeños que se cargan completos de una vez.
+ * Sección 3 — Catálogo. Un solo ViewModel para los 6 sub-tabs (Productos, Envases,
+ * Insumos, Recetas, Empaques, Razas) porque son catálogos pequeños que se cargan completos de una vez.
  */
 class AdminCatalogoViewModel(
     private val productRepository: ProductRepository,
@@ -50,6 +53,7 @@ class AdminCatalogoViewModel(
     private val insumoRepository: InsumoRepository,
     private val productRecipeItemRepository: ProductRecipeItemRepository,
     private val productPackagingOptionRepository: ProductPackagingOptionRepository,
+    private val breedRepository: BreedRepository,
     private val businessSettingsRepository: BusinessSettingsRepository
 ) : ViewModel() {
 
@@ -68,13 +72,14 @@ class AdminCatalogoViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = !isRefresh, isRefreshing = isRefresh, errorMessage = null) }
             try {
-                // Los 6 repositorios son independientes — se piden todos a la vez.
+                // Los 7 repositorios son independientes — se piden todos a la vez.
                 val raw = coroutineScope {
                     val productsDeferred = async { productRepository.getAll() }
                     val packagingsDeferred = async { packagingRepository.getAll() }
                     val insumosDeferred = async { insumoRepository.getAll() }
                     val recipeItemsDeferred = async { productRecipeItemRepository.getAll() }
                     val productPackagingOptionsDeferred = async { productPackagingOptionRepository.getAll() }
+                    val breedsDeferred = async { breedRepository.getAll() }
                     val currencyDeferred = async { businessSettingsRepository.getAll().firstOrNull()?.currency ?: "COP" }
                     AdminCatalogoRawData(
                         products = productsDeferred.await(),
@@ -82,6 +87,7 @@ class AdminCatalogoViewModel(
                         insumos = insumosDeferred.await(),
                         recipeItems = recipeItemsDeferred.await(),
                         productPackagingOptions = productPackagingOptionsDeferred.await(),
+                        breeds = breedsDeferred.await(),
                         currency = currencyDeferred.await()
                     )
                 }
@@ -99,7 +105,8 @@ class AdminCatalogoViewModel(
                         recipeItems = raw.recipeItems,
                         selectedRecipeProductId = defaultRecipeProduct,
                         productPackagingOptions = raw.productPackagingOptions,
-                        selectedPackagingProductId = defaultPackagingProduct
+                        selectedPackagingProductId = defaultPackagingProduct,
+                        breeds = raw.breeds
                     )
                 }
             } catch (t: Throwable) {
@@ -229,6 +236,18 @@ class AdminCatalogoViewModel(
     fun deleteProductPackagingOption(id: String) {
         save {
             productPackagingOptionRepository.delete(id)
+        }
+    }
+
+    fun addBreed(name: String, prefix: String?) {
+        save {
+            breedRepository.insert(Breed(id = newId(), name = name, prefix = prefix))
+        }
+    }
+
+    fun updateBreed(existing: Breed, name: String, prefix: String?) {
+        save {
+            breedRepository.update(existing.id, existing.copy(name = name, prefix = prefix))
         }
     }
 

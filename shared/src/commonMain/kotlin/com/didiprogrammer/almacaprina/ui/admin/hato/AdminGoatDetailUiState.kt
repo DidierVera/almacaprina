@@ -7,6 +7,7 @@ import almacaprina.shared.generated.resources.goat_detail_tab_produccion_leche
 import almacaprina.shared.generated.resources.goat_detail_tab_reproduccion
 import almacaprina.shared.generated.resources.goat_detail_tab_salud
 import androidx.compose.runtime.Composable
+import com.didiprogrammer.almacaprina.domain.model.Breed
 import com.didiprogrammer.almacaprina.domain.model.Goat
 import com.didiprogrammer.almacaprina.domain.model.HealthRecord
 import com.didiprogrammer.almacaprina.domain.model.Insumo
@@ -51,6 +52,7 @@ data class AdminGoatDetailUiState(
     val availableBucks: List<Goat> = emptyList(),
     val availableDoes: List<Goat> = emptyList(),
     val veterinaryInsumos: List<Insumo> = emptyList(),
+    val breeds: List<Breed> = emptyList(),
     val savingAction: Boolean = false,
     val errorMessage: String? = null
 ) {

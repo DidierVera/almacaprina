@@ -7,13 +7,17 @@ import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.business.averageBreedComposition
 import com.didiprogrammer.almacaprina.business.formatQuantity
 import com.didiprogrammer.almacaprina.data.remote.PhotoUploadService
+import com.didiprogrammer.almacaprina.domain.model.Breed
 import com.didiprogrammer.almacaprina.domain.model.BreedPercentage
 import com.didiprogrammer.almacaprina.domain.model.Goat
 import com.didiprogrammer.almacaprina.domain.model.GoatOrigin
 import com.didiprogrammer.almacaprina.domain.model.GoatSex
 import com.didiprogrammer.almacaprina.domain.model.GoatStatus
+import com.didiprogrammer.almacaprina.domain.repository.BreedRepository
 import com.didiprogrammer.almacaprina.domain.repository.GoatRepository
 import com.didiprogrammer.almacaprina.util.newId
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,7 +35,8 @@ import org.jetbrains.compose.resources.getString
  */
 class AdminGoatFormViewModel(
     private val goatId: String?,
-    private val goatRepository: GoatRepository
+    private val goatRepository: GoatRepository,
+    private val breedRepository: BreedRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AdminGoatFormUiState(editingGoatId = goatId))
@@ -44,7 +49,11 @@ class AdminGoatFormViewModel(
     init {
         viewModelScope.launch {
             val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-            val allGoats = goatRepository.getAll()
+            val (allGoats, breeds) = coroutineScope {
+                val allGoatsDeferred = async { goatRepository.getAll() }
+                val breedsDeferred = async { breedRepository.getAll() }
+                allGoatsDeferred.await() to breedsDeferred.await()
+            }
             val existing = goatId?.let { id -> allGoats.firstOrNull { it.id == id } ?: goatRepository.getById(id) }
             existingGoat = existing
 
@@ -56,6 +65,7 @@ class AdminGoatFormViewModel(
                         isLoading = false,
                         allGoats = allGoats,
                         today = today,
+                        breeds = breeds,
                         name = existing.name,
                         tagNumber = existing.tagNumber,
                         sex = existing.sex,
@@ -71,7 +81,7 @@ class AdminGoatFormViewModel(
                     )
                 }
             } else {
-                _uiState.update { it.copy(isLoading = false, allGoats = allGoats, today = today) }
+                _uiState.update { it.copy(isLoading = false, allGoats = allGoats, today = today, breeds = breeds) }
             }
         }
     }
@@ -109,6 +119,25 @@ class AdminGoatFormViewModel(
 
     fun onBreedRowPercentageChanged(rowId: String, percentageText: String) = _uiState.update { state ->
         state.copy(breedRows = state.breedRows.map { row -> if (row.rowId == rowId) row.copy(percentageText = percentageText) else row })
+    }
+
+    /** Crea una raza nueva en el maestro de razas (Catálogo) y la asigna de una vez a la fila
+     * que abrió el selector — evita salir del formulario para dar de alta una raza nueva. */
+    fun createAndSelectBreed(rowId: String, name: String) {
+        viewModelScope.launch {
+            try {
+                val breed = breedRepository.insert(Breed(id = newId(), name = name))
+                _uiState.update { state ->
+                    state.copy(
+                        breeds = state.breeds + breed,
+                        breedRows = state.breedRows.map { row -> if (row.rowId == rowId) row.copy(breedName = breed.name) else row }
+                    )
+                }
+            } catch (t: Throwable) {
+                t.printStackTrace()
+                _uiState.update { it.copy(errorMessage = t.message ?: getString(Res.string.admin_goat_form_error_save)) }
+            }
+        }
     }
 
     /**

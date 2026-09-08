@@ -3,6 +3,11 @@ package com.didiprogrammer.almacaprina.ui.admin.home
 import almacaprina.shared.generated.resources.Res
 import almacaprina.shared.generated.resources.admin_home_alert_birth_expected
 import almacaprina.shared.generated.resources.admin_home_alert_health_upcoming
+import almacaprina.shared.generated.resources.health_record_type_deworming
+import almacaprina.shared.generated.resources.health_record_type_diagnosis
+import almacaprina.shared.generated.resources.health_record_type_routine_checkup
+import almacaprina.shared.generated.resources.health_record_type_treatment
+import almacaprina.shared.generated.resources.health_record_type_vaccine
 import almacaprina.shared.generated.resources.admin_home_alert_insumo_low_stock_one
 import almacaprina.shared.generated.resources.admin_home_alert_insumo_low_stock_other
 import almacaprina.shared.generated.resources.admin_home_alert_weighing_overdue
@@ -26,6 +31,7 @@ import com.didiprogrammer.almacaprina.domain.model.FeedingRecord
 import com.didiprogrammer.almacaprina.domain.model.Goat
 import com.didiprogrammer.almacaprina.domain.model.GoatStatus
 import com.didiprogrammer.almacaprina.domain.model.HealthRecord
+import com.didiprogrammer.almacaprina.domain.model.HealthRecordType
 import com.didiprogrammer.almacaprina.domain.model.Insumo
 import com.didiprogrammer.almacaprina.domain.model.MilkProductionRecord
 import com.didiprogrammer.almacaprina.domain.model.Packaging
@@ -278,7 +284,15 @@ class AdminHomeViewModel(
         val alerts = mutableListOf<HomeAlert>()
 
         upcomingHealthAlerts(healthRecords, today).forEach { record ->
-            val label = record.type.name.lowercase().replaceFirstChar { it.uppercase() }
+            val label = getString(
+                when (record.type) {
+                    HealthRecordType.VACCINE -> Res.string.health_record_type_vaccine
+                    HealthRecordType.DEWORMING -> Res.string.health_record_type_deworming
+                    HealthRecordType.TREATMENT -> Res.string.health_record_type_treatment
+                    HealthRecordType.ROUTINE_CHECKUP -> Res.string.health_record_type_routine_checkup
+                    HealthRecordType.DIAGNOSIS -> Res.string.health_record_type_diagnosis
+                }
+            )
             alerts += HomeAlert(
                 id = "health_${record.id}",
                 type = HomeAlertType.VACCINE,

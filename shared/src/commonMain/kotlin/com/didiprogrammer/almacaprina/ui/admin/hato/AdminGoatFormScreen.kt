@@ -13,7 +13,7 @@ import almacaprina.shared.generated.resources.admin_goat_form_add_breed_button
 import almacaprina.shared.generated.resources.admin_goat_form_birth_date_label
 import almacaprina.shared.generated.resources.admin_goat_form_breed_composition_hint
 import almacaprina.shared.generated.resources.admin_goat_form_breed_composition_label
-import almacaprina.shared.generated.resources.admin_goat_form_breed_name_label
+import almacaprina.shared.generated.resources.admin_goat_form_breed_select_placeholder
 import almacaprina.shared.generated.resources.admin_goat_form_breed_total_label
 import almacaprina.shared.generated.resources.admin_goat_form_change_photo_button
 import almacaprina.shared.generated.resources.admin_goat_form_choose_photo_button
@@ -108,6 +108,7 @@ fun AdminGoatFormScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showMotherPicker by remember { mutableStateOf(false) }
     var showFatherPicker by remember { mutableStateOf(false) }
+    var breedPickerRowId by remember { mutableStateOf<String?>(null) }
     var fatherIsExternal by remember(uiState.isLoading) {
         mutableStateOf(uiState.externalFatherDescription.isNotBlank())
     }
@@ -187,13 +188,12 @@ fun AdminGoatFormScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            OutlinedTextField(
-                                value = row.breedName,
-                                onValueChange = { viewModel.onBreedRowNameChanged(row.rowId, it) },
-                                label = { Text(stringResource(Res.string.admin_goat_form_breed_name_label)) },
-                                modifier = Modifier.weight(1f),
-                                singleLine = true
-                            )
+                            OutlinedButton(
+                                onClick = { breedPickerRowId = row.rowId },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(row.breedName.ifBlank { stringResource(Res.string.admin_goat_form_breed_select_placeholder) })
+                            }
                             OutlinedTextField(
                                 value = row.percentageText,
                                 onValueChange = { viewModel.onBreedRowPercentageChanged(row.rowId, it) },
@@ -399,6 +399,14 @@ fun AdminGoatFormScreen(
             candidates = uiState.availableFathers,
             onDismiss = { showFatherPicker = false },
             onSelect = { goat -> viewModel.onFatherSelected(goat); showFatherPicker = false }
+        )
+    }
+    breedPickerRowId?.let { rowId ->
+        BreedPickerDialog(
+            breeds = uiState.breeds,
+            onDismiss = { breedPickerRowId = null },
+            onSelect = { breed -> viewModel.onBreedRowNameChanged(rowId, breed.name); breedPickerRowId = null },
+            onCreateNew = { name -> viewModel.createAndSelectBreed(rowId, name); breedPickerRowId = null }
         )
     }
 }

@@ -1,5 +1,6 @@
 package com.didiprogrammer.almacaprina.di
 
+import com.didiprogrammer.almacaprina.data.repository.BreedRepositoryImpl
 import com.didiprogrammer.almacaprina.data.repository.BusinessSettingsRepositoryImpl
 import com.didiprogrammer.almacaprina.data.repository.CareTaskLogRepositoryImpl
 import com.didiprogrammer.almacaprina.data.repository.CareTaskRepositoryImpl
@@ -21,6 +22,7 @@ import com.didiprogrammer.almacaprina.data.repository.PurchaseRepositoryImpl
 import com.didiprogrammer.almacaprina.data.repository.ReproductiveEventRepositoryImpl
 import com.didiprogrammer.almacaprina.data.repository.SaleRepositoryImpl
 import com.didiprogrammer.almacaprina.data.repository.WeightRecordRepositoryImpl
+import com.didiprogrammer.almacaprina.domain.repository.BreedRepository
 import com.didiprogrammer.almacaprina.domain.repository.BusinessSettingsRepository
 import com.didiprogrammer.almacaprina.domain.repository.CareTaskLogRepository
 import com.didiprogrammer.almacaprina.domain.repository.CareTaskRepository
@@ -74,6 +76,7 @@ import org.koin.dsl.module
  */
 val appModule = module {
     single<GoatRepository> { GoatRepositoryImpl() }
+    single<BreedRepository> { BreedRepositoryImpl() }
     single<WeightRecordRepository> { WeightRecordRepositoryImpl() }
     single<ReproductiveEventRepository> { ReproductiveEventRepositoryImpl() }
     single<MilkProductionRecordRepository> { MilkProductionRecordRepositoryImpl() }
@@ -133,11 +136,12 @@ val appModule = module {
             reproductiveEventRepository = get(),
             healthRecordRepository = get(),
             milkProductionRecordRepository = get(),
-            insumoRepository = get()
+            insumoRepository = get(),
+            breedRepository = get()
         )
     }
 
-    viewModel { params -> AdminGoatFormViewModel(goatId = params.getOrNull(), goatRepository = get()) }
+    viewModel { params -> AdminGoatFormViewModel(goatId = params.getOrNull(), goatRepository = get(), breedRepository = get()) }
 
     viewModel {
         AdminCatalogoViewModel(
@@ -146,6 +150,7 @@ val appModule = module {
             insumoRepository = get(),
             productRecipeItemRepository = get(),
             productPackagingOptionRepository = get(),
+            breedRepository = get(),
             businessSettingsRepository = get()
         )
     }

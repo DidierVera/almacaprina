@@ -150,6 +150,7 @@
     <string name="campo_checklist_deleted_goat_fallback">cabra eliminada</string>
     <string name="campo_checklist_health_chip_label">SALUD</string>
     <string name="campo_checklist_health_reminder_default_subtitle">Recordatorio individual</string>
+    <string name="campo_checklist_health_reminder_title">%1$s a %2$s</string>
     <string name="campo_checklist_quantity_applied_label">Cantidad aplicada</string>
     <string name="campo_checklist_expected_quantity">esperado %1$s</string>
     <string name="campo_checklist_diff_label">Diferencia con lo esperado: %1$s</string>
@@ -378,7 +379,10 @@
     <string name="admin_goat_form_breed_composition_label">Composición racial (opcional)</string>
     <string name="admin_goat_form_breed_composition_hint">100% de una raza o una mezcla. Si nace en la finca y eliges madre y padre del hato, se calcula sola — igual puedes ajustarla a mano.</string>
     <string name="admin_goat_form_breed_name_label">Raza</string>
+    <string name="admin_goat_form_breed_select_placeholder">Selecciona raza</string>
     <string name="admin_goat_form_remove_breed_content_description">Quitar raza</string>
+    <string name="admin_goat_form_breed_picker_title">Seleccionar raza</string>
+    <string name="admin_goat_form_breed_picker_create_button">Crear raza: %1$s</string>
     <string name="admin_goat_form_add_breed_button">Agregar raza</string>
     <string name="admin_goat_form_breed_total_label">Total: %1$s%%</string>
     <string name="admin_goat_form_birth_date_label">Fecha de nacimiento</string>
@@ -402,6 +406,7 @@
 
     <!-- ==================== Admin · Registrar evento reproductivo ==================== -->
     <string name="admin_repro_event_dialog_title">Registrar evento reproductivo</string>
+    <string name="admin_repro_event_edit_dialog_title">Editar evento reproductivo</string>
     <string name="admin_repro_event_type_label">Tipo de evento</string>
     <string name="repro_event_type_heat_detected">Celo detectado</string>
     <string name="repro_event_type_breeding">Monta</string>
@@ -423,6 +428,8 @@
     <string name="admin_repro_event_kid_sex_male_short">M</string>
     <string name="admin_repro_event_remove_kid_content_description">Quitar</string>
     <string name="admin_repro_event_add_kid_button">Agregar ficha de cabrito</string>
+    <string name="admin_repro_event_kid_number_label">Cabrito %1$d</string>
+    <string name="admin_repro_event_kids_already_registered_note">Las fichas de las crías ya se crearon al registrar este parto. Para editarlas, entra a la ficha técnica de cada cabrito.</string>
 
     <!-- ==================== Admin · Registrar evento de salud ==================== -->
     <string name="admin_health_event_dialog_title">Registrar evento de salud</string>
@@ -496,9 +503,11 @@
     <string name="catalogo_sub_tab_insumos">Insumos</string>
     <string name="catalogo_sub_tab_recetas">Recetas</string>
     <string name="catalogo_sub_tab_empaques">Empaques</string>
+    <string name="catalogo_sub_tab_razas">Razas</string>
     <string name="admin_catalog_new_product_content_description">Nuevo producto</string>
     <string name="admin_catalog_new_packaging_content_description">Nuevo envase</string>
     <string name="admin_catalog_new_insumo_content_description">Nuevo insumo</string>
+    <string name="admin_catalog_new_breed_content_description">Nueva raza</string>
     <string name="admin_catalog_add_recipe_item_content_description">Agregar insumo a la receta</string>
     <string name="admin_catalog_add_product_packaging_content_description">Asociar envase al producto</string>
     <string name="admin_catalog_products_empty">Sin productos registrados todavía.</string>
@@ -517,6 +526,8 @@
     <string name="admin_catalog_active_label">Activo</string>
     <string name="admin_catalog_inactive_label">Inactivo</string>
     <string name="admin_catalog_error_load">No se pudo cargar el catálogo</string>
+    <string name="admin_catalog_breeds_empty">Sin razas registradas todavía.</string>
+    <string name="admin_catalog_breed_no_prefix_fallback">Sin prefijo</string>
     <string name="admin_product_form_new_title">Nuevo producto</string>
     <string name="admin_product_form_edit_title">Editar producto</string>
     <string name="admin_product_form_category_label">Categoría</string>
@@ -529,6 +540,9 @@
     <string name="admin_packaging_form_unit_cost_label">Costo unitario</string>
     <string name="admin_insumo_form_new_title">Nuevo insumo</string>
     <string name="admin_insumo_form_edit_title">Editar insumo</string>
+    <string name="admin_breed_form_new_title">Nueva raza</string>
+    <string name="admin_breed_form_edit_title">Editar raza</string>
+    <string name="admin_breed_form_prefix_label">Prefijo (opcional)</string>
     <string name="admin_insumo_form_unit_of_measure_label">Unidad de medida</string>
     <string name="admin_insumo_form_purchase_package_label">Empaque de compra (opcional)</string>
     <string name="admin_insumo_form_purchase_package_hint">Si este insumo se compra por empaques (ej. una botella de 50 ml de cuajo), define aquí su nombre y contenido para que \"Nueva compra\" calcule solo la cantidad y el costo en %1$s.</string>
@@ -629,5 +643,9 @@
     <string name="deposits_detail_unknown_customer_fallback">Cliente</string>
 
     <string name="admin_care_task_form_error_duplicate_milking">Ya existe una tarea de ordeño activa: "%1$s". Solo puede haber una a la vez — desactívala primero si quieres reemplazarla.</string>
+    <string name="admin_care_task_form_delete_content_description">Eliminar tarea</string>
+    <string name="admin_care_task_form_delete_confirm_title">¿Eliminar esta tarea?</string>
+    <string name="admin_care_task_form_delete_confirm_message">No se puede deshacer. El registro de tareas ya completadas no se borra, solo la tarea del calendario.</string>
+    <string name="admin_care_task_form_error_delete">No se pudo eliminar la tarea</string>
 
 </resources>
