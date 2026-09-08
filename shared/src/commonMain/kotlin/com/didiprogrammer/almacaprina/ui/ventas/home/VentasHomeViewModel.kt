@@ -1,5 +1,7 @@
 package com.didiprogrammer.almacaprina.ui.ventas.home
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.common_error_load_failed
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.business.pendingBalancesByCustomer
@@ -28,6 +30,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.getString
 
 /** Bundle de los datos crudos que necesita Inicio de Ventas — se piden todos en paralelo. */
 private data class VentasHomeRawData(
@@ -107,7 +110,7 @@ class VentasHomeViewModel(
                 }
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: "No se pudo cargar la información") }
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: getString(Res.string.common_error_load_failed)) }
             }
         }
     }

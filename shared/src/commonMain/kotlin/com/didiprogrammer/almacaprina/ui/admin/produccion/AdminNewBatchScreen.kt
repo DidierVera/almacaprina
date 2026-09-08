@@ -37,9 +37,45 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.didiprogrammer.almacaprina.business.formatCurrency
 import com.didiprogrammer.almacaprina.business.roundTo1Decimal
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_home_available_liters_label
+import almacaprina.shared.generated.resources.admin_new_batch_back_button
+import almacaprina.shared.generated.resources.admin_new_batch_batch_cost_title
+import almacaprina.shared.generated.resources.admin_new_batch_date_label
+import almacaprina.shared.generated.resources.admin_new_batch_decrement_content_description
+import almacaprina.shared.generated.resources.admin_new_batch_exceeds_available_warning
+import almacaprina.shared.generated.resources.admin_new_batch_increment_content_description
+import almacaprina.shared.generated.resources.admin_new_batch_insumos_cost_label
+import almacaprina.shared.generated.resources.admin_new_batch_liters_question
+import almacaprina.shared.generated.resources.admin_new_batch_liters_used_label
+import almacaprina.shared.generated.resources.admin_new_batch_milk_cost_label
+import almacaprina.shared.generated.resources.admin_new_batch_next_button
+import almacaprina.shared.generated.resources.admin_new_batch_no_products_message
+import almacaprina.shared.generated.resources.admin_new_batch_no_recipe_message
+import almacaprina.shared.generated.resources.admin_new_batch_output_question
+import almacaprina.shared.generated.resources.admin_new_batch_output_quantity_label
+import almacaprina.shared.generated.resources.admin_new_batch_product_fallback
+import almacaprina.shared.generated.resources.admin_new_batch_product_label
+import almacaprina.shared.generated.resources.admin_new_batch_responsible_label
+import almacaprina.shared.generated.resources.admin_new_batch_save_button
+import almacaprina.shared.generated.resources.admin_new_batch_selected_label
+import almacaprina.shared.generated.resources.admin_new_batch_title
+import almacaprina.shared.generated.resources.admin_new_batch_total_insumos_cost_label
+import almacaprina.shared.generated.resources.admin_new_batch_total_label
+import almacaprina.shared.generated.resources.admin_new_batch_unspecified_fallback
+import almacaprina.shared.generated.resources.admin_new_batch_yield_above_avg
+import almacaprina.shared.generated.resources.admin_new_batch_yield_below_avg
+import almacaprina.shared.generated.resources.admin_new_batch_yield_in_line
+import almacaprina.shared.generated.resources.admin_new_batch_yield_label
+import almacaprina.shared.generated.resources.admin_new_batch_yield_short_label
+import almacaprina.shared.generated.resources.common_cancel
+import almacaprina.shared.generated.resources.weighing_entry_date_label
+import almacaprina.shared.generated.resources.weighing_entry_notes_label
 import com.didiprogrammer.almacaprina.domain.model.Product
+import com.didiprogrammer.almacaprina.ui.components.label
 import com.didiprogrammer.almacaprina.ui.components.AlmacaprinaCard
 import com.didiprogrammer.almacaprina.ui.components.DateField
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Sección 4, pantalla 4.2 — Nuevo lote (flujo de varios pasos). */
@@ -57,7 +93,7 @@ fun AdminNewBatchScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Nuevo lote — ${uiState.step.title}") }) },
+        topBar = { TopAppBar(title = { Text(stringResource(Res.string.admin_new_batch_title, uiState.step.title())) }) },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         if (uiState.isLoading) {
@@ -97,7 +133,7 @@ fun AdminNewBatchScreen(
                     onClick = { if (uiState.step == BatchWizardStep.PRODUCTO) onCancel() else viewModel.goBack() },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(if (uiState.step == BatchWizardStep.PRODUCTO) "Cancelar" else "Atrás")
+                    Text(if (uiState.step == BatchWizardStep.PRODUCTO) stringResource(Res.string.common_cancel) else stringResource(Res.string.admin_new_batch_back_button))
                 }
                 if (uiState.step == BatchWizardStep.CONFIRMAR) {
                     Button(
@@ -105,14 +141,14 @@ fun AdminNewBatchScreen(
                         enabled = !uiState.isSaving,
                         modifier = Modifier.weight(1f)
                     ) {
-                        if (uiState.isSaving) CircularProgressIndicator(modifier = Modifier.height(20.dp)) else Text("Guardar lote")
+                        if (uiState.isSaving) CircularProgressIndicator(modifier = Modifier.height(20.dp)) else Text(stringResource(Res.string.admin_new_batch_save_button))
                     }
                 } else {
                     Button(
                         onClick = viewModel::goNext,
                         enabled = uiState.canGoNext,
                         modifier = Modifier.weight(1f)
-                    ) { Text("Siguiente") }
+                    ) { Text(stringResource(Res.string.admin_new_batch_next_button)) }
                 }
             }
         }
@@ -124,7 +160,7 @@ private fun ProductoStep(products: List<Product>, selected: Product?, onSelect: 
     if (products.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
             Text(
-                "No hay productos derivados activos. Crea uno en Catálogo > Productos.",
+                stringResource(Res.string.admin_new_batch_no_products_message),
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -136,7 +172,7 @@ private fun ProductoStep(products: List<Product>, selected: Product?, onSelect: 
                 Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                     Text(product.name, style = MaterialTheme.typography.titleSmall)
                     if (selected?.id == product.id) {
-                        Text("Seleccionado", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                        Text(stringResource(Res.string.admin_new_batch_selected_label), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -147,10 +183,10 @@ private fun ProductoStep(products: List<Product>, selected: Product?, onSelect: 
 @Composable
 private fun LitrosStep(uiState: AdminNewBatchUiState, onChange: (Double) -> Unit) {
     Column(modifier = Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text("¿Cuántos litros de leche se usarán en este lote?", style = MaterialTheme.typography.titleSmall)
+        Text(stringResource(Res.string.admin_new_batch_liters_question), style = MaterialTheme.typography.titleSmall)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             FilledIconButton(onClick = { onChange((uiState.milkLitersUsed - 1).coerceAtLeast(0.0)) }) {
-                Icon(Icons.Filled.Remove, contentDescription = "Menos")
+                Icon(Icons.Filled.Remove, contentDescription = stringResource(Res.string.admin_new_batch_decrement_content_description))
             }
             Text(
                 text = "${roundTo1Decimal(uiState.milkLitersUsed)} L",
@@ -159,17 +195,17 @@ private fun LitrosStep(uiState: AdminNewBatchUiState, onChange: (Double) -> Unit
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
             FilledIconButton(onClick = { onChange(uiState.milkLitersUsed + 1) }) {
-                Icon(Icons.Filled.Add, contentDescription = "Más")
+                Icon(Icons.Filled.Add, contentDescription = stringResource(Res.string.admin_new_batch_increment_content_description))
             }
         }
         Text(
-            "Litros disponibles: ${roundTo1Decimal(uiState.availableMilkLiters)} L",
+            stringResource(Res.string.admin_home_available_liters_label, roundTo1Decimal(uiState.availableMilkLiters).toString()),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.secondary
         )
         if (uiState.milkExceedsAvailable) {
             Text(
-                "Vas a usar más litros de los que hay disponibles según el balance actual — se puede guardar igual, pero revisa el dato.",
+                stringResource(Res.string.admin_new_batch_exceeds_available_warning),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error
             )
@@ -181,25 +217,28 @@ private fun LitrosStep(uiState: AdminNewBatchUiState, onChange: (Double) -> Unit
 private fun CantidadStep(uiState: AdminNewBatchUiState, onChange: (String) -> Unit) {
     Column(modifier = Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         val unit = uiState.selectedProduct?.saleUnit
-        Text("¿Cuánto se obtuvo de ${uiState.selectedProduct?.name ?: "producto"}?", style = MaterialTheme.typography.titleSmall)
+        Text(
+            stringResource(Res.string.admin_new_batch_output_question, uiState.selectedProduct?.name ?: stringResource(Res.string.admin_new_batch_product_fallback)),
+            style = MaterialTheme.typography.titleSmall
+        )
         OutlinedTextField(
             value = uiState.outputQuantityText,
             onValueChange = onChange,
-            label = { Text("Cantidad obtenida") },
+            label = { Text(stringResource(Res.string.admin_new_batch_output_quantity_label)) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
         val ratio = uiState.currentYieldRatio
         if (ratio != null) {
             Text(
-                "Rendimiento: ${roundTo1Decimal(ratio)} L por unidad",
+                stringResource(Res.string.admin_new_batch_yield_label, roundTo1Decimal(ratio).toString()),
                 style = MaterialTheme.typography.titleMedium
             )
             uiState.historicalAverageYield?.let { avg ->
                 val diffLabel = when {
-                    ratio > avg * 1.05 -> "por encima del promedio histórico (${roundTo1Decimal(avg)} L/unidad)"
-                    ratio < avg * 0.95 -> "por debajo del promedio histórico (${roundTo1Decimal(avg)} L/unidad)"
-                    else -> "en línea con el promedio histórico (${roundTo1Decimal(avg)} L/unidad)"
+                    ratio > avg * 1.05 -> stringResource(Res.string.admin_new_batch_yield_above_avg, roundTo1Decimal(avg).toString())
+                    ratio < avg * 0.95 -> stringResource(Res.string.admin_new_batch_yield_below_avg, roundTo1Decimal(avg).toString())
+                    else -> stringResource(Res.string.admin_new_batch_yield_in_line, roundTo1Decimal(avg).toString())
                 }
                 Text(diffLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
             }
@@ -213,7 +252,7 @@ private fun InsumosStep(uiState: AdminNewBatchUiState, onQuantityChanged: (Strin
         if (uiState.insumoUsages.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
                 Text(
-                    "Este producto no tiene receta configurada en Catálogo > Recetas, así que no hay insumos prellenados.",
+                    stringResource(Res.string.admin_new_batch_no_recipe_message),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -234,7 +273,7 @@ private fun InsumosStep(uiState: AdminNewBatchUiState, onQuantityChanged: (Strin
                             OutlinedTextField(
                                 value = usage.quantityUsed.toString(),
                                 onValueChange = { text -> text.toDoubleOrNull()?.let { onQuantityChanged(usage.insumoId, it) } },
-                                label = { Text(usage.unitOfMeasureLabel) },
+                                label = { Text(usage.unitOfMeasure?.label() ?: "") },
                                 modifier = Modifier.weight(1f),
                                 singleLine = true
                             )
@@ -249,7 +288,7 @@ private fun InsumosStep(uiState: AdminNewBatchUiState, onQuantityChanged: (Strin
         }
         AlmacaprinaCard(modifier = Modifier.padding(16.dp)) {
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                Text("Costo total de insumos", style = MaterialTheme.typography.titleSmall)
+                Text(stringResource(Res.string.admin_new_batch_total_insumos_cost_label), style = MaterialTheme.typography.titleSmall)
                 Text(formatCurrency(uiState.insumosCost, uiState.currency), style = MaterialTheme.typography.titleSmall)
             }
         }
@@ -264,18 +303,18 @@ private fun ResponsableStep(
     onNotesChanged: (String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        DateField(label = "Fecha del lote", date = uiState.date, onDateSelected = onDateChanged)
+        DateField(label = stringResource(Res.string.admin_new_batch_date_label), date = uiState.date, onDateSelected = onDateChanged)
         OutlinedTextField(
             value = uiState.responsible,
             onValueChange = onResponsibleChanged,
-            label = { Text("Responsable") },
+            label = { Text(stringResource(Res.string.admin_new_batch_responsible_label)) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
         OutlinedTextField(
             value = uiState.notes,
             onValueChange = onNotesChanged,
-            label = { Text("Notas (opcional)") },
+            label = { Text(stringResource(Res.string.weighing_entry_notes_label)) },
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -285,18 +324,18 @@ private fun ResponsableStep(
 private fun ConfirmarStep(uiState: AdminNewBatchUiState) {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         AlmacaprinaCard {
-            SummaryRow("Fecha", uiState.date?.toString() ?: "")
-            SummaryRow("Producto", uiState.selectedProduct?.name ?: "")
-            SummaryRow("Litros usados", "${roundTo1Decimal(uiState.milkLitersUsed)} L")
-            SummaryRow("Cantidad obtenida", "${uiState.outputQuantity ?: 0.0} ${uiState.selectedProduct?.saleUnit?.name ?: ""}")
-            uiState.currentYieldRatio?.let { SummaryRow("Rendimiento", "${roundTo1Decimal(it)} L/unidad") }
-            SummaryRow("Responsable", uiState.responsible.ifBlank { "Sin especificar" })
+            SummaryRow(stringResource(Res.string.weighing_entry_date_label), uiState.date?.toString() ?: "")
+            SummaryRow(stringResource(Res.string.admin_new_batch_product_label), uiState.selectedProduct?.name ?: "")
+            SummaryRow(stringResource(Res.string.admin_new_batch_liters_used_label), "${roundTo1Decimal(uiState.milkLitersUsed)} L")
+            SummaryRow(stringResource(Res.string.admin_new_batch_output_quantity_label), "${uiState.outputQuantity ?: 0.0} ${uiState.selectedProduct?.saleUnit?.name ?: ""}")
+            uiState.currentYieldRatio?.let { SummaryRow(stringResource(Res.string.admin_new_batch_yield_short_label), "${roundTo1Decimal(it)} L/unidad") }
+            SummaryRow(stringResource(Res.string.admin_new_batch_responsible_label), uiState.responsible.ifBlank { stringResource(Res.string.admin_new_batch_unspecified_fallback) })
         }
         AlmacaprinaCard {
-            Text("Costo del lote", style = MaterialTheme.typography.titleSmall)
-            SummaryRow("Leche (costo por litro estimado)", formatCurrency(uiState.milkCost, uiState.currency))
-            SummaryRow("Insumos", formatCurrency(uiState.insumosCost, uiState.currency))
-            SummaryRow("Total", formatCurrency(uiState.totalCost, uiState.currency))
+            Text(stringResource(Res.string.admin_new_batch_batch_cost_title), style = MaterialTheme.typography.titleSmall)
+            SummaryRow(stringResource(Res.string.admin_new_batch_milk_cost_label), formatCurrency(uiState.milkCost, uiState.currency))
+            SummaryRow(stringResource(Res.string.admin_new_batch_insumos_cost_label), formatCurrency(uiState.insumosCost, uiState.currency))
+            SummaryRow(stringResource(Res.string.admin_new_batch_total_label), formatCurrency(uiState.totalCost, uiState.currency))
         }
     }
 }

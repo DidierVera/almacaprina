@@ -1,8 +1,16 @@
 package com.didiprogrammer.almacaprina.ui
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.app_icon
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -11,6 +19,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -33,6 +42,7 @@ import com.didiprogrammer.almacaprina.ui.campo.CampoRootScreen
 import com.didiprogrammer.almacaprina.ui.theme.FincaTheme
 import com.didiprogrammer.almacaprina.ui.ventas.VentasRootScreen
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.KoinApplication
 
 private const val ROUTE_SPLASH = "splash"
@@ -88,7 +98,15 @@ fun App() {
                         }
                     }
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Image(
+                                painter = painterResource(Res.drawable.app_icon),
+                                contentDescription = null,
+                                modifier = Modifier.size(96.dp).clip(RoundedCornerShape(24.dp))
+                            )
+                            Spacer(Modifier.height(24.dp))
+                            CircularProgressIndicator()
+                        }
                     }
                 }
 
@@ -163,21 +181,6 @@ fun App() {
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun PlaceholderHome(title: String, subtitle: String) {
-    Box(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        androidx.compose.foundation.layout.Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text("Bienvenido, $title", style = MaterialTheme.typography.headlineLarge)
-            Text(subtitle, style = MaterialTheme.typography.bodyLarge)
         }
     }
 }

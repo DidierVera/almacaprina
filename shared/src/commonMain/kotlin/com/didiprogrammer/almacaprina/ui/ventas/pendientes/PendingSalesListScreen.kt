@@ -1,5 +1,11 @@
 package com.didiprogrammer.almacaprina.ui.ventas.pendientes
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.pending_list_eyebrow
+import almacaprina.shared.generated.resources.pending_list_item_summary_one
+import almacaprina.shared.generated.resources.pending_list_item_summary_other
+import almacaprina.shared.generated.resources.pending_list_subtitle
+import almacaprina.shared.generated.resources.pending_list_title
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +32,7 @@ import com.didiprogrammer.almacaprina.ui.theme.Spacing
 import com.didiprogrammer.almacaprina.ui.theme.Terracota
 import com.didiprogrammer.almacaprina.ui.theme.Tinta
 import com.didiprogrammer.almacaprina.ui.theme.TintaSuave
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Ventas · Cobrar pendientes (lista). Ver mockup Ventas-selection-pending.png. */
@@ -56,10 +63,10 @@ fun PendingSalesListScreen(
             ) {
                 item {
                     ScreenHeaderWithBack(
-                        eyebrow = "Cobrar pendientes",
-                        title = "${formatCurrency(uiState.totalPending, uiState.currency)} por cobrar",
+                        eyebrow = stringResource(Res.string.pending_list_eyebrow),
+                        title = stringResource(Res.string.pending_list_title, formatCurrency(uiState.totalPending, uiState.currency)),
                         onBack = onBack,
-                        subtitle = "Deuda más antigua primero"
+                        subtitle = stringResource(Res.string.pending_list_subtitle)
                     )
                 }
 
@@ -68,7 +75,11 @@ fun PendingSalesListScreen(
                         Text(item.customerName, style = MaterialTheme.typography.titleSmall, color = Tinta)
                         Text(formatCurrency(item.totalPending, uiState.currency), style = MaterialTheme.typography.displaySmall, color = Tinta)
                         Text(
-                            "${item.pendingSalesCount} ${if (item.pendingSalesCount == 1) "venta pendiente" else "ventas pendientes"} · hace ${item.daysSinceOldest} días",
+                            stringResource(
+                                if (item.pendingSalesCount == 1) Res.string.pending_list_item_summary_one else Res.string.pending_list_item_summary_other,
+                                item.pendingSalesCount,
+                                item.daysSinceOldest
+                            ),
                             style = MaterialTheme.typography.bodySmall,
                             color = Terracota
                         )

@@ -1,5 +1,33 @@
 package com.didiprogrammer.almacaprina.ui.admin.hato
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_goat_form_name_label
+import almacaprina.shared.generated.resources.admin_repro_event_add_kid_button
+import almacaprina.shared.generated.resources.admin_repro_event_buck_label
+import almacaprina.shared.generated.resources.admin_repro_event_dialog_title
+import almacaprina.shared.generated.resources.admin_repro_event_kid_records_label
+import almacaprina.shared.generated.resources.admin_repro_event_kid_sex_female_short
+import almacaprina.shared.generated.resources.admin_repro_event_kid_sex_male_short
+import almacaprina.shared.generated.resources.admin_repro_event_kid_tag_label
+import almacaprina.shared.generated.resources.admin_repro_event_kids_alive_label
+import almacaprina.shared.generated.resources.admin_repro_event_kids_born_label
+import almacaprina.shared.generated.resources.admin_repro_event_no_change_option
+import almacaprina.shared.generated.resources.admin_repro_event_remove_kid_content_description
+import almacaprina.shared.generated.resources.admin_repro_event_result_label
+import almacaprina.shared.generated.resources.admin_repro_event_resulting_status_label
+import almacaprina.shared.generated.resources.admin_repro_event_type_label
+import almacaprina.shared.generated.resources.common_cancel
+import almacaprina.shared.generated.resources.common_save_button
+import almacaprina.shared.generated.resources.repro_event_result_failed
+import almacaprina.shared.generated.resources.repro_event_result_pending
+import almacaprina.shared.generated.resources.repro_event_result_successful
+import almacaprina.shared.generated.resources.repro_event_type_abortion
+import almacaprina.shared.generated.resources.repro_event_type_birth
+import almacaprina.shared.generated.resources.repro_event_type_breeding
+import almacaprina.shared.generated.resources.repro_event_type_heat_detected
+import almacaprina.shared.generated.resources.repro_event_type_pregnancy_diagnosis
+import almacaprina.shared.generated.resources.weighing_entry_date_label
+import almacaprina.shared.generated.resources.weighing_entry_notes_label
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,6 +67,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.stringResource
 
 /** Ficha mínima de un cabrito a crear junto con el evento de parto. */
 data class NewKidEntry(val name: String, val tagNumber: String, val sex: GoatSex)
@@ -85,15 +114,15 @@ fun RegisterReproductiveEventDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Registrar evento reproductivo") },
+        title = { Text(stringResource(Res.string.admin_repro_event_dialog_title)) },
         text = {
             Column(
                 modifier = Modifier.heightIn(max = 520.dp).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                DateField(label = "Fecha", date = date, onDateSelected = { date = it })
+                DateField(label = stringResource(Res.string.weighing_entry_date_label), date = date, onDateSelected = { date = it })
 
-                Text("Tipo de evento")
+                Text(stringResource(Res.string.admin_repro_event_type_label))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     items(ReproductiveEventType.entries) { type ->
                         FilterChip(
@@ -105,7 +134,7 @@ fun RegisterReproductiveEventDialog(
                 }
 
                 if (eventType == ReproductiveEventType.BREEDING) {
-                    Text("Semental (opcional)")
+                    Text(stringResource(Res.string.admin_repro_event_buck_label))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         items(bucks) { buck ->
                             FilterChip(
@@ -117,7 +146,7 @@ fun RegisterReproductiveEventDialog(
                     }
                 }
 
-                Text("Resultado")
+                Text(stringResource(Res.string.admin_repro_event_result_label))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     items(ReproductiveEventResult.entries) { r ->
                         FilterChip(
@@ -128,13 +157,13 @@ fun RegisterReproductiveEventDialog(
                     }
                 }
 
-                Text("Estado resultante de la cabra (opcional, tú decides)")
+                Text(stringResource(Res.string.admin_repro_event_resulting_status_label))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     item {
                         FilterChip(
                             selected = resultingDoeStatus == null,
                             onClick = { resultingDoeStatus = null },
-                            label = { Text("Sin cambio") }
+                            label = { Text(stringResource(Res.string.admin_repro_event_no_change_option)) }
                         )
                     }
                     items(
@@ -158,21 +187,21 @@ fun RegisterReproductiveEventDialog(
                     OutlinedTextField(
                         value = kidsBorn,
                         onValueChange = { kidsBorn = it },
-                        label = { Text("Cabritos nacidos") },
+                        label = { Text(stringResource(Res.string.admin_repro_event_kids_born_label)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
                     OutlinedTextField(
                         value = kidsAlive,
                         onValueChange = { kidsAlive = it },
-                        label = { Text("Cabritos vivos") },
+                        label = { Text(stringResource(Res.string.admin_repro_event_kids_alive_label)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
 
                     if (result == ReproductiveEventResult.SUCCESSFUL) {
                         HorizontalDivider()
-                        Text("Fichas de los cabritos (opcional, se crean junto con este evento)")
+                        Text(stringResource(Res.string.admin_repro_event_kid_records_label))
                         newKidNames.indices.forEach { index ->
                             Row(
                                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
@@ -181,14 +210,14 @@ fun RegisterReproductiveEventDialog(
                                 OutlinedTextField(
                                     value = newKidNames[index],
                                     onValueChange = { newKidNames[index] = it },
-                                    label = { Text("Nombre") },
+                                    label = { Text(stringResource(Res.string.admin_goat_form_name_label)) },
                                     modifier = Modifier.weight(1f),
                                     singleLine = true
                                 )
                                 OutlinedTextField(
                                     value = newKidTags[index],
                                     onValueChange = { newKidTags[index] = it },
-                                    label = { Text("Arete") },
+                                    label = { Text(stringResource(Res.string.admin_repro_event_kid_tag_label)) },
                                     modifier = Modifier.weight(1f),
                                     singleLine = true
                                 )
@@ -197,14 +226,14 @@ fun RegisterReproductiveEventDialog(
                                     onClick = {
                                         newKidSexes[index] = if (newKidSexes[index] == GoatSex.FEMALE) GoatSex.MALE else GoatSex.FEMALE
                                     },
-                                    label = { Text(if (newKidSexes[index] == GoatSex.FEMALE) "H" else "M") }
+                                    label = { Text(stringResource(if (newKidSexes[index] == GoatSex.FEMALE) Res.string.admin_repro_event_kid_sex_female_short else Res.string.admin_repro_event_kid_sex_male_short)) }
                                 )
                                 IconButton(onClick = {
                                     newKidNames.removeAt(index)
                                     newKidTags.removeAt(index)
                                     newKidSexes.removeAt(index)
                                 }) {
-                                    Icon(Icons.Outlined.Close, contentDescription = "Quitar")
+                                    Icon(Icons.Outlined.Close, contentDescription = stringResource(Res.string.admin_repro_event_remove_kid_content_description))
                                 }
                             }
                         }
@@ -214,7 +243,7 @@ fun RegisterReproductiveEventDialog(
                             newKidSexes.add(GoatSex.FEMALE)
                         }) {
                             Icon(Icons.Outlined.Add, contentDescription = null)
-                            Text(" Agregar ficha de cabrito")
+                            Text(" " + stringResource(Res.string.admin_repro_event_add_kid_button))
                         }
                     }
                 }
@@ -222,7 +251,7 @@ fun RegisterReproductiveEventDialog(
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
-                    label = { Text("Notas (opcional)") },
+                    label = { Text(stringResource(Res.string.weighing_entry_notes_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -245,22 +274,28 @@ fun RegisterReproductiveEventDialog(
                         resultingDoeStatus = resultingDoeStatus
                     )
                 )
-            }) { Text("Guardar") }
+            }) { Text(stringResource(Res.string.common_save_button)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.common_cancel)) } }
     )
 }
 
-private fun ReproductiveEventType.spanishLabel(): String = when (this) {
-    ReproductiveEventType.HEAT_DETECTED -> "Celo detectado"
-    ReproductiveEventType.BREEDING -> "Monta"
-    ReproductiveEventType.PREGNANCY_DIAGNOSIS -> "Diagnóstico de preñez"
-    ReproductiveEventType.BIRTH -> "Parto"
-    ReproductiveEventType.ABORTION -> "Aborto"
-}
+@Composable
+private fun ReproductiveEventType.spanishLabel(): String = stringResource(
+    when (this) {
+        ReproductiveEventType.HEAT_DETECTED -> Res.string.repro_event_type_heat_detected
+        ReproductiveEventType.BREEDING -> Res.string.repro_event_type_breeding
+        ReproductiveEventType.PREGNANCY_DIAGNOSIS -> Res.string.repro_event_type_pregnancy_diagnosis
+        ReproductiveEventType.BIRTH -> Res.string.repro_event_type_birth
+        ReproductiveEventType.ABORTION -> Res.string.repro_event_type_abortion
+    }
+)
 
-private fun ReproductiveEventResult.spanishLabel(): String = when (this) {
-    ReproductiveEventResult.PENDING -> "Pendiente"
-    ReproductiveEventResult.SUCCESSFUL -> "Exitoso"
-    ReproductiveEventResult.FAILED -> "Fallido"
-}
+@Composable
+private fun ReproductiveEventResult.spanishLabel(): String = stringResource(
+    when (this) {
+        ReproductiveEventResult.PENDING -> Res.string.repro_event_result_pending
+        ReproductiveEventResult.SUCCESSFUL -> Res.string.repro_event_result_successful
+        ReproductiveEventResult.FAILED -> Res.string.repro_event_result_failed
+    }
+)

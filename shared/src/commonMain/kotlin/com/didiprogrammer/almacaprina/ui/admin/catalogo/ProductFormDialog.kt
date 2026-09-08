@@ -1,5 +1,15 @@
 package com.didiprogrammer.almacaprina.ui.admin.catalogo
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_catalog_active_label
+import almacaprina.shared.generated.resources.admin_goat_form_name_label
+import almacaprina.shared.generated.resources.admin_product_form_category_label
+import almacaprina.shared.generated.resources.admin_product_form_edit_title
+import almacaprina.shared.generated.resources.admin_product_form_new_title
+import almacaprina.shared.generated.resources.admin_product_form_price_label
+import almacaprina.shared.generated.resources.admin_product_form_sale_unit_label
+import almacaprina.shared.generated.resources.common_cancel
+import almacaprina.shared.generated.resources.common_save_button
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +34,7 @@ import com.didiprogrammer.almacaprina.domain.model.Product
 import com.didiprogrammer.almacaprina.domain.model.ProductCategory
 import com.didiprogrammer.almacaprina.domain.model.SaleUnit
 import com.didiprogrammer.almacaprina.ui.components.label
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Catálogo > Productos > "+ Nuevo producto" / editar uno existente.
@@ -44,23 +55,23 @@ fun ProductFormDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (existing == null) "Nuevo producto" else "Editar producto") },
+        title = { Text(stringResource(if (existing == null) Res.string.admin_product_form_new_title else Res.string.admin_product_form_edit_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Nombre") },
+                    label = { Text(stringResource(Res.string.admin_goat_form_name_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
-                Text("Categoría")
+                Text(stringResource(Res.string.admin_product_form_category_label))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     items(ProductCategory.entries) { c ->
                         FilterChip(selected = category == c, onClick = { category = c }, label = { Text(c.label()) })
                     }
                 }
-                Text("Unidad de venta")
+                Text(stringResource(Res.string.admin_product_form_sale_unit_label))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     items(SaleUnit.entries) { u ->
                         FilterChip(selected = saleUnit == u, onClick = { saleUnit = u }, label = { Text(u.label()) })
@@ -69,12 +80,12 @@ fun ProductFormDialog(
                 OutlinedTextField(
                     value = priceText,
                     onValueChange = { priceText = it },
-                    label = { Text("Precio por defecto") },
+                    label = { Text(stringResource(Res.string.admin_product_form_price_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Activo")
+                    Text(stringResource(Res.string.admin_catalog_active_label))
                     Switch(checked = active, onCheckedChange = { active = it })
                 }
             }
@@ -83,8 +94,8 @@ fun ProductFormDialog(
             TextButton(
                 enabled = name.isNotBlank() && price != null && price >= 0,
                 onClick = { price?.let { onSave(name.trim(), category, saleUnit, it, active) } }
-            ) { Text("Guardar") }
+            ) { Text(stringResource(Res.string.common_save_button)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.common_cancel)) } }
     )
 }

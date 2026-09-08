@@ -29,6 +29,35 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_mas_ajustes_label
+import almacaprina.shared.generated.resources.admin_settings_change_pin_button
+import almacaprina.shared.generated.resources.admin_settings_cost_per_liter_hint
+import almacaprina.shared.generated.resources.admin_settings_cost_per_liter_label
+import almacaprina.shared.generated.resources.admin_settings_costs_section_title
+import almacaprina.shared.generated.resources.admin_settings_create_pin_button
+import almacaprina.shared.generated.resources.admin_settings_currency_label
+import almacaprina.shared.generated.resources.admin_settings_delete_button
+import almacaprina.shared.generated.resources.admin_settings_deposit_alert_days_label
+import almacaprina.shared.generated.resources.admin_settings_farm_name_label
+import almacaprina.shared.generated.resources.admin_settings_farm_section_title
+import almacaprina.shared.generated.resources.admin_settings_insufficient_data_fallback
+import almacaprina.shared.generated.resources.admin_settings_logout_confirm_message
+import almacaprina.shared.generated.resources.admin_settings_new_pin_label
+import almacaprina.shared.generated.resources.admin_settings_pin_configured
+import almacaprina.shared.generated.resources.admin_settings_pin_not_configured
+import almacaprina.shared.generated.resources.admin_settings_pin_section_title
+import almacaprina.shared.generated.resources.admin_settings_remove_pin_confirm_message
+import almacaprina.shared.generated.resources.admin_settings_remove_pin_confirm_title
+import almacaprina.shared.generated.resources.admin_settings_session_section_title
+import almacaprina.shared.generated.resources.admin_settings_target_liters_label
+import almacaprina.shared.generated.resources.common_cancel
+import almacaprina.shared.generated.resources.common_logout_confirm_button
+import almacaprina.shared.generated.resources.common_logout_confirm_title
+import almacaprina.shared.generated.resources.common_save_button
+import almacaprina.shared.generated.resources.common_saving_button
+import almacaprina.shared.generated.resources.pin_setup_confirm_label
+import almacaprina.shared.generated.resources.pin_setup_error_mismatch
 import com.didiprogrammer.almacaprina.business.formatCurrency
 import com.didiprogrammer.almacaprina.ui.components.AlmacaprinaCard
 import com.didiprogrammer.almacaprina.ui.components.FormField
@@ -37,6 +66,7 @@ import com.didiprogrammer.almacaprina.ui.components.SecondaryButton
 import com.didiprogrammer.almacaprina.ui.components.SectionHeader
 import com.didiprogrammer.almacaprina.ui.theme.Spacing
 import com.didiprogrammer.almacaprina.ui.theme.TintaSuave
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Sección "Más · Ajustes". Ver CLAUDE.md § Configuración. */
@@ -59,7 +89,7 @@ fun AdminSettingsScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Ajustes") }) },
+        topBar = { TopAppBar(title = { Text(stringResource(Res.string.admin_mas_ajustes_label)) }) },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         LazyColumn(
@@ -67,36 +97,36 @@ fun AdminSettingsScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
-            item { SectionHeader(title = "Finca") }
+            item { SectionHeader(title = stringResource(Res.string.admin_settings_farm_section_title)) }
             item {
                 AlmacaprinaCard {
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
                         FormField(
-                            label = "Nombre de la finca",
+                            label = stringResource(Res.string.admin_settings_farm_name_label),
                             value = uiState.farmName,
                             onValueChange = viewModel::onFarmNameChanged,
                             modifier = Modifier.fillMaxWidth()
                         )
                         FormField(
-                            label = "Moneda",
+                            label = stringResource(Res.string.admin_settings_currency_label),
                             value = uiState.currency,
                             onValueChange = viewModel::onCurrencyChanged,
                             modifier = Modifier.fillMaxWidth()
                         )
                         FormField(
-                            label = "Meta de producción (litros/día)",
+                            label = stringResource(Res.string.admin_settings_target_liters_label),
                             value = uiState.targetDailyLitersGoalText,
                             onValueChange = viewModel::onTargetDailyLitersGoalChanged,
                             modifier = Modifier.fillMaxWidth()
                         )
                         FormField(
-                            label = "Días de alerta por depósito de envase sin devolver",
+                            label = stringResource(Res.string.admin_settings_deposit_alert_days_label),
                             value = uiState.depositAlertDaysText,
                             onValueChange = viewModel::onDepositAlertDaysChanged,
                             modifier = Modifier.fillMaxWidth()
                         )
                         PrimaryButton(
-                            text = if (uiState.isSaving) "Guardando…" else "Guardar",
+                            text = stringResource(if (uiState.isSaving) Res.string.common_saving_button else Res.string.common_save_button),
                             enabled = uiState.isValid && !uiState.isSaving,
                             loading = uiState.isSaving,
                             onClick = viewModel::save,
@@ -106,39 +136,39 @@ fun AdminSettingsScreen(
                 }
             }
 
-            item { SectionHeader(title = "Costos") }
+            item { SectionHeader(title = stringResource(Res.string.admin_settings_costs_section_title)) }
             item {
                 AlmacaprinaCard {
-                    Text("Costo por litro (últimos 30 días)", style = MaterialTheme.typography.bodySmall, color = TintaSuave)
+                    Text(stringResource(Res.string.admin_settings_cost_per_liter_label), style = MaterialTheme.typography.bodySmall, color = TintaSuave)
                     Text(
-                        uiState.costPerLiter?.let { formatCurrency(it, uiState.currency) } ?: "Sin datos suficientes",
+                        uiState.costPerLiter?.let { formatCurrency(it, uiState.currency) } ?: stringResource(Res.string.admin_settings_insufficient_data_fallback),
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        "Se calcula solo, a partir de compras, salud y alimentación — no es editable aquí.",
+                        stringResource(Res.string.admin_settings_cost_per_liter_hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = TintaSuave
                     )
                 }
             }
 
-            item { SectionHeader(title = "PIN de acceso rápido") }
+            item { SectionHeader(title = stringResource(Res.string.admin_settings_pin_section_title)) }
             item {
                 AlmacaprinaCard {
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
                         Text(
-                            if (uiState.hasPin) "PIN configurado en este dispositivo" else "Sin PIN configurado",
+                            stringResource(if (uiState.hasPin) Res.string.admin_settings_pin_configured else Res.string.admin_settings_pin_not_configured),
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                             SecondaryButton(
-                                text = if (uiState.hasPin) "Cambiar PIN" else "Crear PIN",
+                                text = stringResource(if (uiState.hasPin) Res.string.admin_settings_change_pin_button else Res.string.admin_settings_create_pin_button),
                                 onClick = { showPinDialog = true },
                                 modifier = Modifier.weight(1f)
                             )
                             if (uiState.hasPin) {
                                 SecondaryButton(
-                                    text = "Eliminar",
+                                    text = stringResource(Res.string.admin_settings_delete_button),
                                     onClick = { showRemovePinConfirm = true },
                                     modifier = Modifier.weight(1f)
                                 )
@@ -148,11 +178,11 @@ fun AdminSettingsScreen(
                 }
             }
 
-            item { SectionHeader(title = "Sesión") }
+            item { SectionHeader(title = stringResource(Res.string.admin_settings_session_section_title)) }
             item {
                 AlmacaprinaCard {
                     TextButton(onClick = { showLogoutConfirm = true }, modifier = Modifier.fillMaxWidth()) {
-                        Text("Cerrar sesión", color = MaterialTheme.colorScheme.error)
+                        Text(stringResource(Res.string.common_logout_confirm_button), color = MaterialTheme.colorScheme.error)
                     }
                 }
             }
@@ -171,29 +201,29 @@ fun AdminSettingsScreen(
     if (showRemovePinConfirm) {
         AlertDialog(
             onDismissRequest = { showRemovePinConfirm = false },
-            title = { Text("¿Eliminar el PIN?") },
-            text = { Text("La próxima vez que abras la app vas a necesitar tu correo y contraseña.") },
+            title = { Text(stringResource(Res.string.admin_settings_remove_pin_confirm_title)) },
+            text = { Text(stringResource(Res.string.admin_settings_remove_pin_confirm_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.onRemovePin()
                     showRemovePinConfirm = false
-                }) { Text("Eliminar") }
+                }) { Text(stringResource(Res.string.admin_settings_delete_button)) }
             },
-            dismissButton = { TextButton(onClick = { showRemovePinConfirm = false }) { Text("Cancelar") } }
+            dismissButton = { TextButton(onClick = { showRemovePinConfirm = false }) { Text(stringResource(Res.string.common_cancel)) } }
         )
     }
     if (showLogoutConfirm) {
         AlertDialog(
             onDismissRequest = { showLogoutConfirm = false },
-            title = { Text("¿Cerrar sesión?") },
-            text = { Text("Vas a necesitar tu correo y contraseña para volver a entrar.") },
+            title = { Text(stringResource(Res.string.common_logout_confirm_title)) },
+            text = { Text(stringResource(Res.string.admin_settings_logout_confirm_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     showLogoutConfirm = false
                     viewModel.logout(onLoggedOut)
-                }) { Text("Cerrar sesión") }
+                }) { Text(stringResource(Res.string.common_logout_confirm_button)) }
             },
-            dismissButton = { TextButton(onClick = { showLogoutConfirm = false } ) { Text("Cancelar") } }
+            dismissButton = { TextButton(onClick = { showLogoutConfirm = false } ) { Text(stringResource(Res.string.common_cancel)) } }
         )
     }
 }
@@ -209,11 +239,11 @@ private fun SetPinDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("PIN de acceso rápido") },
+        title = { Text(stringResource(Res.string.admin_settings_pin_section_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
                 FormField(
-                    label = "PIN nuevo (4 dígitos)",
+                    label = stringResource(Res.string.admin_settings_new_pin_label),
                     value = pin,
                     onValueChange = { if (it.length <= 4 && it.all(Char::isDigit)) { pin = it; errorMessage = null } },
                     modifier = Modifier.fillMaxWidth(),
@@ -221,7 +251,7 @@ private fun SetPinDialog(
                     visualTransformation = PasswordVisualTransformation()
                 )
                 FormField(
-                    label = "Confirma el PIN",
+                    label = stringResource(Res.string.pin_setup_confirm_label),
                     value = confirmPin,
                     onValueChange = { if (it.length <= 4 && it.all(Char::isDigit)) { confirmPin = it; errorMessage = null } },
                     modifier = Modifier.fillMaxWidth(),
@@ -232,13 +262,14 @@ private fun SetPinDialog(
             }
         },
         confirmButton = {
+            val mismatchError = stringResource(Res.string.pin_setup_error_mismatch)
             TextButton(
                 enabled = pin.length == 4 && confirmPin.length == 4,
                 onClick = {
-                    if (pin != confirmPin) errorMessage = "Los PIN no coinciden." else onSave(pin)
+                    if (pin != confirmPin) errorMessage = mismatchError else onSave(pin)
                 }
-            ) { Text("Guardar") }
+            ) { Text(stringResource(Res.string.common_save_button)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.common_cancel)) } }
     )
 }

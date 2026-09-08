@@ -1,5 +1,7 @@
 package com.didiprogrammer.almacaprina.ui.components
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.common_back_content_description
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +25,7 @@ import com.didiprogrammer.almacaprina.ui.theme.Spacing
 import com.didiprogrammer.almacaprina.ui.theme.Superficie
 import com.didiprogrammer.almacaprina.ui.theme.Tinta
 import com.didiprogrammer.almacaprina.ui.theme.TintaSuave
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Encabezado único con botón "volver" circular — mismo patrón visual en todos los flujos
@@ -43,7 +46,7 @@ fun ScreenHeaderWithBack(
             modifier = Modifier.size(44.dp).clickable(onClick = onBack)
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.size(44.dp)) {
-                Icon(Icons.Filled.ChevronLeft, contentDescription = "Volver", tint = Tinta)
+                Icon(Icons.Filled.ChevronLeft, contentDescription = stringResource(Res.string.common_back_content_description), tint = Tinta)
             }
         }
         Column {

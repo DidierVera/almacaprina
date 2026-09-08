@@ -28,10 +28,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_care_task_active_label
+import almacaprina.shared.generated.resources.admin_care_task_group_prefix
+import almacaprina.shared.generated.resources.admin_care_task_inactive_label
+import almacaprina.shared.generated.resources.admin_care_task_insumo_prefix
+import almacaprina.shared.generated.resources.admin_care_task_list_empty_message
+import almacaprina.shared.generated.resources.admin_care_task_list_title
+import almacaprina.shared.generated.resources.admin_home_new_task_action
 import com.didiprogrammer.almacaprina.ui.components.AlmacaprinaCard
 import com.didiprogrammer.almacaprina.ui.components.RefreshableContent
 import com.didiprogrammer.almacaprina.ui.components.StatusChip
 import com.didiprogrammer.almacaprina.ui.components.label
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Sección 6, pantalla 6.1 — Lista de tareas del calendario de cuidado. */
@@ -50,11 +59,11 @@ fun AdminCareTaskListScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Calendario de tareas") }) },
+        topBar = { TopAppBar(title = { Text(stringResource(Res.string.admin_care_task_list_title)) }) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = onNewTaskClick) {
-                Icon(Icons.Filled.Add, contentDescription = "Nueva tarea")
+                Icon(Icons.Filled.Add, contentDescription = stringResource(Res.string.admin_home_new_task_action))
             }
         }
     ) { padding ->
@@ -66,7 +75,7 @@ fun AdminCareTaskListScreen(
         ) {
             if (uiState.items.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-                    Text("Sin tareas configuradas todavía.", style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(Res.string.admin_care_task_list_empty_message), style = MaterialTheme.typography.bodyMedium)
                 }
             } else {
                 LazyColumn(
@@ -95,15 +104,15 @@ private fun CareTaskRow(item: CareTaskListItem, onClick: () -> Unit) {
                     style = MaterialTheme.typography.bodySmall
                 )
                 task.animalGroup?.let {
-                    Text("Grupo: ${it.label()}", style = MaterialTheme.typography.bodySmall)
+                    Text(stringResource(Res.string.admin_care_task_group_prefix, it.label()), style = MaterialTheme.typography.bodySmall)
                 }
                 item.insumoName?.let {
-                    Text("Insumo: $it", style = MaterialTheme.typography.bodySmall)
+                    Text(stringResource(Res.string.admin_care_task_insumo_prefix, it), style = MaterialTheme.typography.bodySmall)
                 }
             }
             val colors = MaterialTheme.colorScheme
             StatusChip(
-                label = if (task.active) "Activa" else "Inactiva",
+                label = stringResource(if (task.active) Res.string.admin_care_task_active_label else Res.string.admin_care_task_inactive_label),
                 containerColor = if (task.active) colors.primaryContainer else colors.surfaceVariant,
                 contentColor = if (task.active) colors.onPrimaryContainer else colors.onSurfaceVariant
             )

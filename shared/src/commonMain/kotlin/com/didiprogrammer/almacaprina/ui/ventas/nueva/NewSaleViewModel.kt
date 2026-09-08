@@ -1,5 +1,9 @@
 package com.didiprogrammer.almacaprina.ui.ventas.nueva
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.common_error_load_failed
+import almacaprina.shared.generated.resources.new_sale_error_create_customer
+import almacaprina.shared.generated.resources.new_sale_error_save
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.domain.model.Customer
@@ -28,6 +32,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.getString
 
 /** Bundle de los datos crudos que necesita el wizard — se piden todos en paralelo. */
 private data class NewSaleRawData(
@@ -94,7 +99,7 @@ class NewSaleViewModel(
                 }
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: "No se pudo cargar la información") }
+                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: getString(Res.string.common_error_load_failed)) }
             }
         }
     }
@@ -133,7 +138,7 @@ class NewSaleViewModel(
                 onDone()
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: "No se pudo crear el cliente") }
+                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: getString(Res.string.new_sale_error_create_customer)) }
             }
         }
     }
@@ -197,7 +202,7 @@ class NewSaleViewModel(
                 onSaved()
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: "No se pudo guardar la venta") }
+                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: getString(Res.string.new_sale_error_save)) }
             }
         }
     }

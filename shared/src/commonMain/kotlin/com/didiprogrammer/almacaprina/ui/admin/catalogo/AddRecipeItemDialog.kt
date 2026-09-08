@@ -1,5 +1,11 @@
 package com.didiprogrammer.almacaprina.ui.admin.catalogo
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_recipe_item_dialog_title
+import almacaprina.shared.generated.resources.admin_recipe_item_insumo_label
+import almacaprina.shared.generated.resources.admin_recipe_item_quantity_label
+import almacaprina.shared.generated.resources.common_cancel
+import almacaprina.shared.generated.resources.common_save_button
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.didiprogrammer.almacaprina.domain.model.Insumo
+import org.jetbrains.compose.resources.stringResource
 
 /** Catálogo > Recetas > "+ Agregar insumo a la receta". */
 @Composable
@@ -32,10 +39,10 @@ fun AddRecipeItemDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Agregar insumo a la receta") },
+        title = { Text(stringResource(Res.string.admin_recipe_item_dialog_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("Insumo")
+                Text(stringResource(Res.string.admin_recipe_item_insumo_label))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     items(insumos) { insumo ->
                         FilterChip(
@@ -48,7 +55,7 @@ fun AddRecipeItemDialog(
                 OutlinedTextField(
                     value = quantityText,
                     onValueChange = { quantityText = it },
-                    label = { Text("Cantidad esperada por unidad de producto") },
+                    label = { Text(stringResource(Res.string.admin_recipe_item_quantity_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -58,8 +65,8 @@ fun AddRecipeItemDialog(
             TextButton(
                 enabled = selectedInsumoId != null && quantity != null && quantity > 0,
                 onClick = { selectedInsumoId?.let { id -> quantity?.let { onSave(id, it) } } }
-            ) { Text("Guardar") }
+            ) { Text(stringResource(Res.string.common_save_button)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.common_cancel)) } }
     )
 }

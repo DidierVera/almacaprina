@@ -1,5 +1,8 @@
 package com.didiprogrammer.almacaprina.ui.components
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.common_accept
+import almacaprina.shared.generated.resources.common_cancel
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -25,6 +28,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Campo de fecha reutilizado en todos los formularios (pesada, eventos, compras, ventas...).
@@ -72,9 +76,9 @@ fun DateField(
                 TextButton(onClick = {
                     state.selectedDateMillis?.let { millis -> onDateSelected(utcMillisToLocalDate(millis)) }
                     showPicker = false
-                }) { Text("Aceptar") }
+                }) { Text(stringResource(Res.string.common_accept)) }
             },
-            dismissButton = { TextButton(onClick = { showPicker = false }) { Text("Cancelar") } }
+            dismissButton = { TextButton(onClick = { showPicker = false }) { Text(stringResource(Res.string.common_cancel)) } }
         ) {
             DatePicker(state = state)
         }

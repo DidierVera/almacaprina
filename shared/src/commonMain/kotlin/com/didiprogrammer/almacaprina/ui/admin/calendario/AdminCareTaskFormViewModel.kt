@@ -1,5 +1,7 @@
 package com.didiprogrammer.almacaprina.ui.admin.calendario
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_care_task_form_error_save
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.domain.model.CareTask
@@ -17,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 
 /** Sección 6, pantalla 6.2 — Nueva/editar tarea. `taskId` nulo = alta. */
 class AdminCareTaskFormViewModel(
@@ -93,7 +96,7 @@ class AdminCareTaskFormViewModel(
                 onSaved()
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: "No se pudo guardar la tarea") }
+                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: getString(Res.string.admin_care_task_form_error_save)) }
             }
         }
     }

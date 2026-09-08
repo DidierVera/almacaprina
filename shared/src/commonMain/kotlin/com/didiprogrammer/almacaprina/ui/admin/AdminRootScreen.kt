@@ -67,8 +67,8 @@ fun AdminRootScreen(onLogout: () -> Unit) {
                                     restoreState = true
                                 }
                             },
-                            icon = { Icon(imageVector = tab.icon, contentDescription = tab.label) },
-                            label = { Text(tab.label) }
+                            icon = { Icon(imageVector = tab.icon, contentDescription = tab.label()) },
+                            label = { Text(tab.label()) }
                         )
                     }
                 }

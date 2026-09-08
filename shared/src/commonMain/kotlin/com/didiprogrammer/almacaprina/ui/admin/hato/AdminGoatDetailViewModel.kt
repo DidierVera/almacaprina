@@ -1,5 +1,10 @@
 package com.didiprogrammer.almacaprina.ui.admin.hato
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_goat_detail_error_load
+import almacaprina.shared.generated.resources.admin_goat_detail_error_save_event
+import almacaprina.shared.generated.resources.admin_goat_detail_error_save_weight
+import almacaprina.shared.generated.resources.admin_hato_error_not_found
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.business.ageLabel
@@ -35,6 +40,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.getString
 
 /** Bundle de los datos crudos de la ficha — se piden todos en paralelo, ver [AdminGoatDetailViewModel.load]. */
 private data class AdminGoatDetailRawData(
@@ -93,7 +99,7 @@ class AdminGoatDetailViewModel(
                 }
 
                 if (goat == null) {
-                    _uiState.update { it.copy(isLoading = false, errorMessage = "No se encontró la cabra") }
+                    _uiState.update { it.copy(isLoading = false, errorMessage = getString(Res.string.admin_hato_error_not_found)) }
                     return@launch
                 }
                 val mother = goat.motherId?.let { id -> allGoats.firstOrNull { it.id == id } }
@@ -146,7 +152,7 @@ class AdminGoatDetailViewModel(
                 }
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: "No se pudo cargar la ficha") }
+                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: getString(Res.string.admin_goat_detail_error_load)) }
             }
         }
     }
@@ -172,7 +178,7 @@ class AdminGoatDetailViewModel(
                 load()
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(savingAction = false, errorMessage = t.message ?: "No se pudo guardar la pesada") }
+                _uiState.update { it.copy(savingAction = false, errorMessage = t.message ?: getString(Res.string.admin_goat_detail_error_save_weight)) }
             }
         }
     }
@@ -243,7 +249,7 @@ class AdminGoatDetailViewModel(
                 load()
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(savingAction = false, errorMessage = t.message ?: "No se pudo guardar el evento") }
+                _uiState.update { it.copy(savingAction = false, errorMessage = t.message ?: getString(Res.string.admin_goat_detail_error_save_event)) }
             }
         }
     }
@@ -271,7 +277,7 @@ class AdminGoatDetailViewModel(
                 load()
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(savingAction = false, errorMessage = t.message ?: "No se pudo guardar el evento") }
+                _uiState.update { it.copy(savingAction = false, errorMessage = t.message ?: getString(Res.string.admin_goat_detail_error_save_event)) }
             }
         }
     }

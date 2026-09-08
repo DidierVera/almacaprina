@@ -1,0 +1,598 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ==================== Auth · Login ==================== -->
+    <string name="login_app_name">Inicio de sesión</string>
+    <string name="login_farm_subtitle_fallback">Finca lechera</string>
+    <string name="login_email_label">Correo</string>
+    <string name="login_password_label">Contraseña</string>
+    <string name="login_password_show">Mostrar</string>
+    <string name="login_password_hide">Ocultar</string>
+    <string name="login_button_default">Iniciar sesión</string>
+    <string name="login_button_loading">Ingresando…</string>
+    <string name="login_error_profile_not_found">No se encontró un perfil configurado para este usuario.</string>
+    <string name="login_error_invalid_credentials">Correo o contraseña incorrectos.</string>
+    <string name="login_first_time_hint">Primera vez requiere conexión a internet.</string>
+
+    <!-- ==================== Auth · Pin Setup ==================== -->
+    <string name="pin_setup_title">Crea un PIN de acceso rápido</string>
+    <string name="pin_setup_subtitle">La próxima vez podrás entrar con este PIN de 4 dígitos en vez de tu contraseña, mientras tu sesión siga activa en este dispositivo. Es opcional.</string>
+    <string name="pin_setup_pin_label">PIN (4 dígitos)</string>
+    <string name="pin_setup_confirm_label">Confirma el PIN</string>
+    <string name="pin_setup_error_mismatch">Los PIN no coinciden.</string>
+    <string name="pin_setup_save_button">Guardar PIN</string>
+    <string name="pin_setup_skip_button">Omitir por ahora</string>
+
+    <!-- ==================== Auth · Pin Unlock ==================== -->
+    <string name="pin_unlock_title">Ingresa tu PIN</string>
+    <string name="pin_unlock_subtitle">Almacaprina · desbloqueo rápido</string>
+    <string name="pin_unlock_pin_label">PIN</string>
+    <string name="pin_unlock_error_incorrect">PIN incorrecto. Te quedan %1$d intento(s).</string>
+    <string name="pin_unlock_error_profile_not_found">No se encontró un perfil configurado para este usuario.</string>
+    <string name="pin_unlock_button">Desbloquear</string>
+    <string name="pin_unlock_forgot_button">Olvidé mi PIN — usar contraseña</string>
+
+    <!-- ==================== Common (reutilizados entre módulos) ==================== -->
+    <string name="common_continue">Continuar</string>
+    <string name="common_cancel">Cancelar</string>
+    <string name="common_accept">Aceptar</string>
+    <string name="common_coming_soon_suffix">%1$s\n(próximamente)</string>
+    <string name="common_back_content_description">Volver</string>
+    <string name="common_saving_button">Guardando…</string>
+    <string name="common_save_button">Guardar</string>
+    <string name="common_error_load_failed">No se pudo cargar la información</string>
+    <string name="common_error_save_failed">No se pudo guardar</string>
+    <string name="common_logout_confirm_title">¿Cerrar sesión?</string>
+    <string name="common_logout_confirm_button">Cerrar sesión</string>
+    <string name="common_confirm">Confirmar</string>
+    <string name="common_close">Cerrar</string>
+
+    <!-- ==================== Ventas · etiquetas de enums (CustomerType/PaymentMethod/PaymentStatus) ==================== -->
+    <string name="customer_type_individual">Individual</string>
+    <string name="customer_type_business">Negocio</string>
+    <string name="payment_method_cash">Efectivo</string>
+    <string name="payment_method_transfer">Transferencia</string>
+    <string name="payment_method_other">Otro</string>
+    <string name="payment_status_paid">Pagado</string>
+    <string name="payment_status_pending">Fiado</string>
+
+    <!-- ==================== Ventas · Home ==================== -->
+    <string name="ventas_home_logout_content_description">Cerrar sesión</string>
+    <string name="ventas_home_title">Ventas</string>
+    <string name="ventas_home_no_active_product">Sin producto activo en el catálogo</string>
+    <string name="ventas_home_new_sale_cta">+ Nueva venta</string>
+    <string name="ventas_home_pending_label">Pendientes por cobrar</string>
+    <string name="ventas_home_pending_customers_one">%1$d cliente con deuda</string>
+    <string name="ventas_home_pending_customers_other">%1$d clientes con deuda</string>
+    <string name="ventas_home_stat_today_label">Hoy</string>
+    <string name="ventas_home_stat_collected_label">Cobrado</string>
+    <string name="ventas_home_stat_packaging_label">Envases</string>
+    <string name="ventas_home_packaging_out_suffix">%1$d fuera</string>
+
+    <!-- ==================== Ventas · Nueva venta ==================== -->
+    <string name="new_sale_step_eyebrow">Nueva venta · %1$d de 4</string>
+    <string name="new_sale_error_create_customer">No se pudo crear el cliente</string>
+    <string name="new_sale_error_save">No se pudo guardar la venta</string>
+
+    <string name="new_sale_cliente_title">¿Para quién?</string>
+    <string name="new_sale_cliente_search_placeholder">Buscar cliente...</string>
+    <string name="new_sale_cliente_last_sale_days">%1$s · última compra hace %2$d días</string>
+    <string name="new_sale_cliente_new_customer_title">Cliente nuevo</string>
+    <string name="new_sale_cliente_new_name_placeholder">Nombre</string>
+    <string name="new_sale_cliente_new_contact_placeholder">Teléfono / contacto</string>
+    <string name="new_sale_cliente_create_button">Crear y continuar</string>
+
+    <string name="new_sale_producto_title">¿Qué vas a vender?</string>
+    <string name="new_sale_producto_sale_unit_suffix">Venta por %1$s</string>
+    <string name="new_sale_producto_catalog_hint">El catálogo lo administra Compras/Admin. Los productos que se activen allí aparecen aquí sin cambiar esta pantalla.</string>
+
+    <string name="new_sale_cantidad_partial_total_label">Total parcial</string>
+    <string name="new_sale_cantidad_default_unit_label">unidades</string>
+    <string name="new_sale_cantidad_default_title">Cantidad</string>
+    <string name="new_sale_cantidad_unit_equivalence">1 unidad = 1 %1$s · %2$s</string>
+    <string name="new_sale_cantidad_packaging_section_title">Envase</string>
+    <string name="new_sale_cantidad_packaging_deposit_suffix">+%1$s depósito c/u</string>
+    <string name="new_sale_cantidad_packaging_no_deposit">Sin depósito</string>
+    <string name="new_sale_cantidad_packaging_hint">Por ahora todos los productos pasan por el mismo selector de envase; no hay lógica distinta por producto en esta iteración.</string>
+
+    <string name="new_sale_confirmar_title">Confirmar</string>
+    <string name="new_sale_confirmar_save_button">Guardar venta</string>
+    <string name="new_sale_confirmar_line_item">%1$s %2$s de %3$s × %4$s</string>
+    <string name="new_sale_confirmar_deposit_label">Depósito de envase</string>
+    <string name="new_sale_confirmar_total_label">Total</string>
+    <string name="new_sale_confirmar_payment_method_title">Forma de pago</string>
+    <string name="new_sale_confirmar_payment_status_title">Estado</string>
+    <string name="new_sale_confirmar_paid_now_title">Pagado ahora</string>
+    <string name="new_sale_confirmar_paid_now_subtitle">Se cierra la venta</string>
+    <string name="new_sale_confirmar_pending_title">Fiado</string>
+    <string name="new_sale_confirmar_pending_subtitle">Queda pendiente</string>
+
+    <!-- ==================== Ventas · Cobrar pendientes ==================== -->
+    <string name="pending_list_eyebrow">Cobrar pendientes</string>
+    <string name="pending_list_title">%1$s por cobrar</string>
+    <string name="pending_list_subtitle">Deuda más antigua primero</string>
+    <string name="pending_list_item_summary_one">%1$d venta pendiente · hace %2$d días</string>
+    <string name="pending_list_item_summary_other">%1$d ventas pendientes · hace %2$d días</string>
+    <string name="pending_list_deleted_customer_fallback">Cliente eliminado</string>
+    <string name="pending_list_error_load">No se pudo cargar la cartera pendiente</string>
+
+    <string name="pending_detail_mark_all_paid_button">Marcar todo como pagado</string>
+    <string name="pending_detail_balance_label">Saldo pendiente</string>
+    <string name="pending_detail_summary_one">%1$d venta · la más antigua hace %2$d días</string>
+    <string name="pending_detail_summary_other">%1$d ventas · la más antigua hace %2$d días</string>
+    <string name="pending_detail_section_title">Ventas pendientes</string>
+    <string name="pending_detail_mark_paid_button">Marcar\npagada</string>
+    <string name="pending_detail_item_deposit_word">%1$d depósitos</string>
+    <string name="pending_detail_unknown_customer_fallback">Cliente</string>
+    <string name="pending_detail_error_load">No se pudo cargar el detalle</string>
+    <string name="pending_detail_error_mark_paid">No se pudo marcar como pagada</string>
+    <string name="pending_detail_error_mark_all_paid">No se pudo marcar todo como pagado</string>
+
+    <!-- ==================== Campo · Checklist ==================== -->
+    <string name="campo_checklist_logout_content_description">Cerrar sesión</string>
+    <string name="campo_checklist_title">Checklist de hoy</string>
+    <string name="campo_checklist_of_total_suffix">de %1$d</string>
+    <string name="campo_checklist_tasks_completed_label">tareas completadas</string>
+    <string name="campo_checklist_now_section_label">AHORA</string>
+    <string name="campo_checklist_milking_chip_label">ORDEÑO</string>
+    <string name="campo_checklist_milking_goats_count">%1$d cabras en ordeño</string>
+    <string name="campo_checklist_open_milking_button">Abrir registro de ordeño</string>
+    <string name="campo_checklist_rest_of_day_section_label">RESTO DEL DÍA</string>
+    <string name="campo_checklist_today_fallback">Hoy</string>
+    <string name="campo_checklist_care_task_reminder_subtitle">Recordatorio · %1$s</string>
+    <string name="campo_checklist_care_task_insumo_subtitle">%1$s · %2$s</string>
+    <string name="campo_checklist_deleted_goat_fallback">cabra eliminada</string>
+    <string name="campo_checklist_health_chip_label">SALUD</string>
+    <string name="campo_checklist_health_reminder_default_subtitle">Recordatorio individual</string>
+    <string name="campo_checklist_quantity_applied_label">Cantidad aplicada</string>
+    <string name="campo_checklist_expected_quantity">esperado %1$s</string>
+    <string name="campo_checklist_diff_label">Diferencia con lo esperado: %1$s</string>
+    <string name="campo_checklist_no_difference">Sin diferencia</string>
+    <string name="campo_checklist_confirm_task_message">¿Confirmar esta tarea como completada?</string>
+    <string name="campo_checklist_error_load">No se pudo cargar el checklist</string>
+    <string name="campo_checklist_error_confirm_task">No se pudo completar la tarea</string>
+    <string name="campo_checklist_error_confirm_reminder">No se pudo confirmar el recordatorio</string>
+    <string name="campo_checklist_success_task_completed">Tarea completada</string>
+    <string name="campo_checklist_success_reminder_confirmed">Recordatorio confirmado</string>
+
+    <!-- ==================== Campo · Ordeño ==================== -->
+    <string name="milking_session_finish_button">Finalizar sesión</string>
+    <string name="milking_session_today_header">HOY · %1$s</string>
+    <string name="milking_session_registered_count">%1$d de %2$d registradas</string>
+    <string name="milking_session_registered_label">registrada</string>
+    <string name="milking_session_pending_label">pendiente</string>
+    <string name="milking_session_unmilked_label">sin ordeñar</string>
+
+    <string name="milking_entry_back_button">‹ Volver</string>
+    <string name="milking_entry_editing_badge">Editando registro</string>
+    <string name="milking_entry_lactation_suffix">%1$dª lactancia</string>
+    <string name="milking_entry_liters_label">LITROS DE ESTA SESIÓN</string>
+    <string name="milking_entry_use_stepper_button">Usar stepper +/-</string>
+    <string name="milking_entry_step_label">paso %1$s L</string>
+    <string name="milking_entry_use_keypad_button">Usar teclado numérico</string>
+    <string name="milking_entry_mark_unmilked_button">Marcar sin ordeñar</string>
+    <string name="milking_entry_save_correction_button">Guardar corrección</string>
+    <string name="milking_entry_save_button">Guardar</string>
+    <string name="milking_entry_reason_dialog_title">Motivo</string>
+    <string name="milking_entry_reason_dialog_message">¿Por qué no se ordeña %1$s?</string>
+    <string name="milking_entry_reason_dialog_goat_fallback">esta cabra</string>
+    <string name="milking_entry_reason_dry">Seca</string>
+    <string name="milking_entry_reason_sick">Enferma</string>
+    <string name="milking_entry_reason_under_treatment">En tratamiento</string>
+    <string name="milking_entry_reason_other">Otra razón</string>
+
+    <string name="milking_summary_title_suffix">%1$s completa</string>
+    <string name="milking_summary_total_label">TOTAL DE LA SESIÓN</string>
+    <string name="milking_summary_registered_goats_label">Cabras registradas</string>
+    <string name="milking_summary_count_ratio">%1$d de %2$d</string>
+    <string name="milking_summary_unmilked_label">Sin ordeñar</string>
+    <string name="milking_summary_back_home_button">Volver al inicio</string>
+
+    <string name="milking_session_error_load">No se pudo cargar la sesión de ordeño</string>
+    <string name="milking_session_error_save">No se pudo guardar el ordeño</string>
+    <string name="milking_session_evening_label">Ordeño de la tarde</string>
+    <string name="milking_session_morning_label">Ordeño de la mañana</string>
+
+    <!-- ==================== Campo · Pesada ==================== -->
+    <string name="weighing_list_eyebrow">Pesadas</string>
+    <string name="weighing_list_title">Pesadas pendientes</string>
+    <string name="weighing_list_empty_message">No hay pesadas vencidas por ahora.</string>
+    <string name="weighing_list_tag_prefix">Arete %1$s</string>
+    <string name="weighing_list_error_load">No se pudo cargar la lista de pesadas</string>
+
+    <string name="weighing_entry_eyebrow">Registrar pesada</string>
+    <string name="weighing_entry_date_label">Fecha</string>
+    <string name="weighing_entry_weight_label">Peso (kg)</string>
+    <string name="weighing_entry_bcs_label">Body Condition Score (1-5, opcional)</string>
+    <string name="weighing_entry_notes_label">Notas (opcional)</string>
+    <string name="weighing_entry_error_load">No se pudo cargar la cabra</string>
+    <string name="weighing_entry_error_save">No se pudo guardar la pesada</string>
+
+    <!-- ==================== Admin/compartidas · Etiquetas de enums (CatalogLabels) ==================== -->
+    <string name="product_category_raw_milk">Leche cruda</string>
+    <string name="product_category_derived_dairy">Derivado</string>
+    <string name="sale_unit_liter">Litro</string>
+    <string name="sale_unit_kilogram">Kilogramo</string>
+    <string name="sale_unit_unit">Unidad</string>
+    <string name="insumo_category_feed">Alimento</string>
+    <string name="insumo_category_veterinary">Veterinario</string>
+    <string name="insumo_category_processing_input">Insumo de proceso</string>
+    <string name="insumo_category_transport">Transporte</string>
+    <string name="insumo_category_labor">Mano de obra</string>
+    <string name="insumo_category_maintenance">Mantenimiento</string>
+    <string name="insumo_category_other">Otro</string>
+    <string name="unit_of_measure_kg">kg</string>
+    <string name="unit_of_measure_g">g</string>
+    <string name="unit_of_measure_liter">L</string>
+    <string name="unit_of_measure_ml">ml</string>
+    <string name="unit_of_measure_unit">unidad</string>
+    <string name="purchase_category_packaging">Envase</string>
+
+    <!-- ==================== Admin/Campo compartidas · Etiquetas de CareTask (CareTaskLabels) ==================== -->
+    <string name="care_task_type_milking">Ordeño</string>
+    <string name="care_task_type_feeding">Alimentación</string>
+    <string name="care_task_type_medication">Medicamento</string>
+    <string name="care_task_type_weighing">Pesada</string>
+    <string name="care_task_type_other">Otro</string>
+    <string name="care_task_frequency_daily">Diaria</string>
+    <string name="care_task_frequency_specific_days">Días específicos</string>
+    <string name="care_task_frequency_weekly">Semanal</string>
+    <string name="care_task_frequency_one_time">Una vez</string>
+    <string name="care_task_animal_group_lactating">En producción</string>
+    <string name="care_task_animal_group_pregnant">Gestantes</string>
+    <string name="care_task_animal_group_young_does">Cabretonas</string>
+    <string name="care_task_animal_group_dry">Secas</string>
+    <string name="care_task_animal_group_breeding_bucks">Sementales</string>
+    <string name="care_task_animal_group_general">General</string>
+    <string name="care_task_animal_group_all">Todas</string>
+    <string name="time_of_day_morning">Mañana</string>
+    <string name="time_of_day_afternoon">Tarde</string>
+    <string name="time_of_day_both">Ambos</string>
+    <string name="time_of_day_any">Cualquiera</string>
+
+    <!-- ==================== Admin · GoatStatus (StatusChip) ==================== -->
+    <string name="goat_status_in_production">En producción</string>
+    <string name="goat_status_pregnant">Gestante</string>
+    <string name="goat_status_dry">Seca</string>
+    <string name="goat_status_young_doe">Cabretona</string>
+    <string name="goat_status_kid">Cabrito</string>
+    <string name="goat_status_breeding_buck">Semental</string>
+    <string name="goat_status_retired">Retirada</string>
+    <string name="goat_status_deceased">Fallecida</string>
+
+    <!-- ==================== Admin · Tabs (bottom navigation) ==================== -->
+    <string name="admin_tab_inicio">Inicio</string>
+    <string name="admin_tab_hato">Hato</string>
+    <string name="admin_tab_catalogo">Catálogo</string>
+    <string name="admin_tab_produccion">Producción</string>
+    <string name="admin_tab_mas">Más</string>
+
+    <!-- ==================== Admin · Inicio ==================== -->
+    <string name="admin_home_partial_error_prefix">No se pudo actualizar todo: %1$s</string>
+    <string name="admin_home_production_vs_goal_title">Producción vs. meta</string>
+    <string name="admin_home_goal_label">Meta: %1$s L/día</string>
+    <string name="admin_home_available_liters_label">Litros disponibles: %1$s L</string>
+    <string name="admin_home_herd_status_title">Estado del hato</string>
+    <string name="admin_home_herd_pregnant_plural">Gestantes</string>
+    <string name="admin_home_herd_dry_plural">Secas</string>
+    <string name="admin_home_herd_young_does_plural">Cabretonas</string>
+    <string name="admin_home_alerts_title">Alertas</string>
+    <string name="admin_home_see_all_action">Ver todas</string>
+    <string name="admin_home_no_alerts_message">Sin alertas pendientes por ahora.</string>
+    <string name="admin_home_financial_summary_title">Resumen financiero</string>
+    <string name="admin_home_revenue_label">Ingresos</string>
+    <string name="admin_home_pending_receivable_label">Cartera pendiente</string>
+    <string name="admin_home_cost_per_liter_label">Costo por litro</string>
+    <string name="admin_home_no_data_fallback">Sin datos</string>
+    <string name="admin_home_quick_actions_title">Accesos rápidos</string>
+    <string name="admin_home_register_purchase_action">Registrar compra</string>
+    <string name="admin_home_new_batch_action">Nuevo lote</string>
+    <string name="admin_home_new_task_action">Nueva tarea</string>
+    <string name="financial_period_today">Hoy</string>
+    <string name="financial_period_week">Semana</string>
+    <string name="financial_period_month">Mes</string>
+    <string name="admin_home_alert_health_upcoming">%1$s próxima el %2$s</string>
+    <string name="admin_home_alert_weighing_overdue">Pesada vencida: %1$s (%2$s)</string>
+    <string name="admin_home_alert_birth_expected">Parto esperado el %1$s</string>
+    <string name="admin_home_alert_insumo_low_stock_one">%1$s: quedan %2$d día</string>
+    <string name="admin_home_alert_insumo_low_stock_other">%1$s: quedan %2$d días</string>
+
+    <!-- ==================== Admin/business · GoatCalculations (goatContextualInfo/ageLabel) ==================== -->
+    <string name="goat_age_years_months">%1$d a %2$d m</string>
+    <string name="goat_age_years_one">%1$d año</string>
+    <string name="goat_age_years_other">%1$d años</string>
+    <string name="goat_age_months_one">%1$d mes</string>
+    <string name="goat_age_months_other">%1$d meses</string>
+    <string name="goat_age_days_one">%1$d día</string>
+    <string name="goat_age_days_other">%1$d días</string>
+    <string name="goat_context_milk_today">%1$s L hoy</string>
+    <string name="goat_context_no_milking_today">Sin ordeño hoy</string>
+    <string name="goat_context_birth_in_days">Parto en %1$d días</string>
+    <string name="goat_context_pregnant_fallback">Gestante</string>
+    <string name="goat_context_last_weighing">Última pesada: hace %1$d días</string>
+    <string name="goat_context_no_weighings">Sin pesadas registradas</string>
+    <string name="goat_context_age_prefix">Edad: %1$s</string>
+    <string name="goat_context_no_exit_reason">Sin motivo registrado</string>
+
+    <!-- ==================== Admin · Hato ==================== -->
+    <string name="admin_hato_new_goat_content_description">Nueva cabra</string>
+    <string name="admin_hato_search_placeholder">Buscar por nombre o arete</string>
+    <string name="admin_hato_status_filter_all">Todas</string>
+    <string name="admin_hato_empty_message">No hay cabras que coincidan con el filtro.</string>
+    <string name="admin_hato_tag_prefix">Arete %1$s</string>
+    <string name="admin_hato_error_load">No se pudo cargar el hato</string>
+    <string name="admin_hato_error_not_found">No se encontró la cabra</string>
+
+    <!-- ==================== Admin · Ficha técnica de cabra ==================== -->
+    <string name="admin_goat_detail_edit_content_description">Editar ficha</string>
+    <string name="admin_goat_detail_fab_register_weight">Registrar pesada</string>
+    <string name="admin_goat_detail_fab_register_event">Registrar evento</string>
+    <string name="admin_goat_detail_tag_age">Arete %1$s · %2$s</string>
+    <string name="admin_goat_detail_sex_label">Sexo</string>
+    <string name="admin_goat_detail_sex_female">Hembra</string>
+    <string name="admin_goat_detail_sex_male">Macho</string>
+    <string name="admin_goat_detail_breed_composition_label">Composición racial</string>
+    <string name="admin_goat_detail_birth_label">Nacimiento</string>
+    <string name="admin_goat_detail_weaning_label">Destete</string>
+    <string name="admin_goat_detail_origin_label">Origen</string>
+    <string name="admin_goat_detail_origin_born">Nacida en la finca</string>
+    <string name="admin_goat_detail_origin_purchased">Comprada</string>
+    <string name="admin_goat_detail_lactation_label">Lactancia</string>
+    <string name="admin_goat_detail_parents_title">Padres</string>
+    <string name="admin_goat_detail_mother_label">Madre</string>
+    <string name="admin_goat_detail_father_label">Padre</string>
+    <string name="goat_no_data_registered">Sin registrar</string>
+    <string name="admin_goat_detail_notes_title">Notas</string>
+    <string name="admin_goat_detail_last_weight_title">Último peso</string>
+    <string name="admin_goat_detail_no_records_fallback">Sin registros</string>
+    <string name="admin_goat_detail_bcs_label">BCS: %1$s</string>
+    <string name="admin_goat_detail_no_data_fallback">sin dato</string>
+    <string name="admin_goat_detail_evolution_title">Evolución</string>
+    <string name="admin_goat_detail_next_birth_title">Próximo parto estimado</string>
+    <string name="admin_goat_detail_no_repro_events">Sin eventos reproductivos registrados.</string>
+    <string name="admin_goat_detail_result_prefix">Resultado: %1$s</string>
+    <string name="admin_goat_detail_no_health_records">Sin historial de salud registrado.</string>
+    <string name="admin_goat_detail_next_suggested_date">Próxima fecha sugerida: %1$s</string>
+    <string name="admin_goat_detail_liters_curve_title">Curva de litros</string>
+    <string name="goat_detail_tab_datos_basicos">Datos básicos</string>
+    <string name="goat_detail_tab_peso">Peso</string>
+    <string name="goat_detail_tab_reproduccion">Reproducción</string>
+    <string name="goat_detail_tab_salud">Salud</string>
+    <string name="goat_detail_tab_produccion_leche">Producción de leche</string>
+    <string name="admin_goat_detail_error_load">No se pudo cargar la ficha</string>
+    <string name="admin_goat_detail_error_save_weight">No se pudo guardar la pesada</string>
+    <string name="admin_goat_detail_error_save_event">No se pudo guardar el evento</string>
+
+    <!-- ==================== Admin · Formulario de cabra ==================== -->
+    <string name="admin_goat_form_edit_title">Editar cabra</string>
+    <string name="admin_goat_form_new_title">Nueva cabra</string>
+    <string name="admin_goat_form_name_label">Nombre</string>
+    <string name="admin_goat_form_tag_number_label">Número de arete</string>
+    <string name="admin_goat_form_breed_composition_label">Composición racial (opcional)</string>
+    <string name="admin_goat_form_breed_composition_hint">100% de una raza o una mezcla. Si nace en la finca y eliges madre y padre del hato, se calcula sola — igual puedes ajustarla a mano.</string>
+    <string name="admin_goat_form_breed_name_label">Raza</string>
+    <string name="admin_goat_form_remove_breed_content_description">Quitar raza</string>
+    <string name="admin_goat_form_add_breed_button">Agregar raza</string>
+    <string name="admin_goat_form_breed_total_label">Total: %1$s%%</string>
+    <string name="admin_goat_form_birth_date_label">Fecha de nacimiento</string>
+    <string name="admin_goat_form_weaning_date_label">Fecha de destete (opcional)</string>
+    <string name="admin_goat_form_goat_with_tag">%1$s (arete %2$s)</string>
+    <string name="admin_goat_form_select_unknown_female">Seleccionar / desconocida</string>
+    <string name="admin_goat_form_select_unknown_male">Seleccionar / desconocido</string>
+    <string name="admin_goat_form_father_internal_label">Del hato</string>
+    <string name="admin_goat_form_father_external_label">Semental externo</string>
+    <string name="admin_goat_form_external_father_description_label">Descripción del semental externo</string>
+    <string name="admin_goat_form_photo_label">Foto (opcional)</string>
+    <string name="admin_goat_form_change_photo_button">Cambiar foto</string>
+    <string name="admin_goat_form_choose_photo_button">Elegir foto</string>
+    <string name="admin_goat_form_remove_photo_button">Quitar</string>
+    <string name="admin_goat_form_initial_status_label">Estado inicial (requerido para compras de cabras adultas)</string>
+    <string name="admin_goat_form_current_status_label">Estado actual</string>
+    <string name="admin_goat_form_pick_mother_title">Seleccionar madre</string>
+    <string name="admin_goat_form_pick_father_title">Seleccionar padre</string>
+    <string name="admin_goat_form_error_save">No se pudo guardar la cabra</string>
+    <string name="admin_goat_picker_none_option">Ninguna / desconocida</string>
+
+    <!-- ==================== Admin · Registrar evento reproductivo ==================== -->
+    <string name="admin_repro_event_dialog_title">Registrar evento reproductivo</string>
+    <string name="admin_repro_event_type_label">Tipo de evento</string>
+    <string name="repro_event_type_heat_detected">Celo detectado</string>
+    <string name="repro_event_type_breeding">Monta</string>
+    <string name="repro_event_type_pregnancy_diagnosis">Diagnóstico de preñez</string>
+    <string name="repro_event_type_birth">Parto</string>
+    <string name="repro_event_type_abortion">Aborto</string>
+    <string name="admin_repro_event_buck_label">Semental (opcional)</string>
+    <string name="admin_repro_event_result_label">Resultado</string>
+    <string name="repro_event_result_pending">Pendiente</string>
+    <string name="repro_event_result_successful">Exitoso</string>
+    <string name="repro_event_result_failed">Fallido</string>
+    <string name="admin_repro_event_resulting_status_label">Estado resultante de la cabra (opcional, tú decides)</string>
+    <string name="admin_repro_event_no_change_option">Sin cambio</string>
+    <string name="admin_repro_event_kids_born_label">Cabritos nacidos</string>
+    <string name="admin_repro_event_kids_alive_label">Cabritos vivos</string>
+    <string name="admin_repro_event_kid_records_label">Fichas de los cabritos (opcional, se crean junto con este evento)</string>
+    <string name="admin_repro_event_kid_tag_label">Arete</string>
+    <string name="admin_repro_event_kid_sex_female_short">H</string>
+    <string name="admin_repro_event_kid_sex_male_short">M</string>
+    <string name="admin_repro_event_remove_kid_content_description">Quitar</string>
+    <string name="admin_repro_event_add_kid_button">Agregar ficha de cabrito</string>
+
+    <!-- ==================== Admin · Registrar evento de salud ==================== -->
+    <string name="admin_health_event_dialog_title">Registrar evento de salud</string>
+    <string name="admin_health_event_type_label">Tipo</string>
+    <string name="health_record_type_vaccine">Vacuna</string>
+    <string name="health_record_type_deworming">Desparasitación</string>
+    <string name="health_record_type_treatment">Tratamiento</string>
+    <string name="health_record_type_routine_checkup">Revisión de rutina</string>
+    <string name="health_record_type_diagnosis">Diagnóstico</string>
+    <string name="admin_health_event_description_label">Descripción</string>
+    <string name="admin_health_event_insumo_label">Insumo aplicado (opcional)</string>
+    <string name="admin_health_event_dosage_label">Dosis (ej. \"5 ml\")</string>
+    <string name="admin_health_event_quantity_label">Cantidad consumida (unidad del insumo)</string>
+    <string name="admin_health_event_withdrawal_days_label">Días de retiro de leche (opcional)</string>
+    <string name="admin_health_event_cost_label">Costo (opcional)</string>
+    <string name="admin_health_event_veterinarian_label">Veterinario (opcional)</string>
+    <string name="admin_health_event_next_date_label">Próxima fecha sugerida (opcional)</string>
+
+    <!-- ==================== Admin · Nuevo lote ==================== -->
+    <string name="admin_new_batch_title">Nuevo lote — %1$s</string>
+    <string name="batch_wizard_step_producto">Producto</string>
+    <string name="batch_wizard_step_litros">Litros de leche</string>
+    <string name="batch_wizard_step_cantidad">Cantidad obtenida</string>
+    <string name="batch_wizard_step_insumos">Insumos usados</string>
+    <string name="batch_wizard_step_responsable">Fecha y responsable</string>
+    <string name="batch_wizard_step_confirmar">Confirmar</string>
+    <string name="admin_new_batch_back_button">Atrás</string>
+    <string name="admin_new_batch_save_button">Guardar lote</string>
+    <string name="admin_new_batch_next_button">Siguiente</string>
+    <string name="admin_new_batch_no_products_message">No hay productos derivados activos. Crea uno en Catálogo &gt; Productos.</string>
+    <string name="admin_new_batch_selected_label">Seleccionado</string>
+    <string name="admin_new_batch_liters_question">¿Cuántos litros de leche se usarán en este lote?</string>
+    <string name="admin_new_batch_decrement_content_description">Menos</string>
+    <string name="admin_new_batch_increment_content_description">Más</string>
+    <string name="admin_new_batch_exceeds_available_warning">Vas a usar más litros de los que hay disponibles según el balance actual — se puede guardar igual, pero revisa el dato.</string>
+    <string name="admin_new_batch_output_question">¿Cuánto se obtuvo de %1$s?</string>
+    <string name="admin_new_batch_product_fallback">producto</string>
+    <string name="admin_new_batch_output_quantity_label">Cantidad obtenida</string>
+    <string name="admin_new_batch_yield_label">Rendimiento: %1$s L por unidad</string>
+    <string name="admin_new_batch_yield_above_avg">por encima del promedio histórico (%1$s L/unidad)</string>
+    <string name="admin_new_batch_yield_below_avg">por debajo del promedio histórico (%1$s L/unidad)</string>
+    <string name="admin_new_batch_yield_in_line">en línea con el promedio histórico (%1$s L/unidad)</string>
+    <string name="admin_new_batch_no_recipe_message">Este producto no tiene receta configurada en Catálogo &gt; Recetas, así que no hay insumos prellenados.</string>
+    <string name="admin_new_batch_total_insumos_cost_label">Costo total de insumos</string>
+    <string name="admin_new_batch_date_label">Fecha del lote</string>
+    <string name="admin_new_batch_responsible_label">Responsable</string>
+    <string name="admin_new_batch_product_label">Producto</string>
+    <string name="admin_new_batch_liters_used_label">Litros usados</string>
+    <string name="admin_new_batch_yield_short_label">Rendimiento</string>
+    <string name="admin_new_batch_unspecified_fallback">Sin especificar</string>
+    <string name="admin_new_batch_batch_cost_title">Costo del lote</string>
+    <string name="admin_new_batch_milk_cost_label">Leche (costo por litro estimado)</string>
+    <string name="admin_new_batch_insumos_cost_label">Insumos</string>
+    <string name="admin_new_batch_total_label">Total</string>
+    <string name="admin_new_batch_error_save">No se pudo guardar el lote</string>
+    <string name="admin_new_batch_deleted_insumo_fallback">Insumo eliminado</string>
+
+    <!-- ==================== Admin · Historial de producción ==================== -->
+    <string name="admin_production_history_new_batch_content_description">Nuevo lote</string>
+    <string name="admin_production_history_all_filter">Todos</string>
+    <string name="admin_production_history_empty_message">Sin lotes de producción registrados todavía.</string>
+    <string name="admin_production_history_yield_label">Rinde %1$s L/unidad</string>
+    <string name="admin_production_history_liters_used_label">%1$s L usados</string>
+    <string name="admin_production_history_responsible_label">Responsable: %1$s</string>
+    <string name="admin_production_history_error_load">No se pudo cargar el historial de producción</string>
+    <string name="admin_production_history_deleted_product_fallback">Producto eliminado</string>
+
+    <!-- ==================== Admin · Catálogo ==================== -->
+    <string name="catalogo_sub_tab_productos">Productos</string>
+    <string name="catalogo_sub_tab_envases">Envases</string>
+    <string name="catalogo_sub_tab_insumos">Insumos</string>
+    <string name="catalogo_sub_tab_recetas">Recetas</string>
+    <string name="admin_catalog_new_product_content_description">Nuevo producto</string>
+    <string name="admin_catalog_new_packaging_content_description">Nuevo envase</string>
+    <string name="admin_catalog_new_insumo_content_description">Nuevo insumo</string>
+    <string name="admin_catalog_add_recipe_item_content_description">Agregar insumo a la receta</string>
+    <string name="admin_catalog_products_empty">Sin productos registrados todavía.</string>
+    <string name="admin_catalog_packagings_empty">Sin envases registrados todavía.</string>
+    <string name="admin_catalog_packaging_returnable_label">Retornable · depósito %1$s</string>
+    <string name="admin_catalog_packaging_not_returnable_label">No retornable</string>
+    <string name="admin_catalog_insumos_empty">Sin insumos registrados todavía.</string>
+    <string name="admin_catalog_no_cost_fallback">Sin costo</string>
+    <string name="admin_catalog_no_derived_products_message">Primero crea un producto derivado en la pestaña Productos.</string>
+    <string name="admin_catalog_empty_recipe_message">Este producto todavía no tiene insumos en su receta.</string>
+    <string name="admin_catalog_active_label">Activo</string>
+    <string name="admin_catalog_inactive_label">Inactivo</string>
+    <string name="admin_catalog_error_load">No se pudo cargar el catálogo</string>
+    <string name="admin_product_form_new_title">Nuevo producto</string>
+    <string name="admin_product_form_edit_title">Editar producto</string>
+    <string name="admin_product_form_category_label">Categoría</string>
+    <string name="admin_product_form_sale_unit_label">Unidad de venta</string>
+    <string name="admin_product_form_price_label">Precio por defecto</string>
+    <string name="admin_packaging_form_new_title">Nuevo envase</string>
+    <string name="admin_packaging_form_edit_title">Editar envase</string>
+    <string name="admin_packaging_form_returnable_label">Retornable</string>
+    <string name="admin_packaging_form_deposit_label">Depósito</string>
+    <string name="admin_packaging_form_unit_cost_label">Costo unitario</string>
+    <string name="admin_insumo_form_new_title">Nuevo insumo</string>
+    <string name="admin_insumo_form_edit_title">Editar insumo</string>
+    <string name="admin_insumo_form_unit_of_measure_label">Unidad de medida</string>
+    <string name="admin_insumo_form_purchase_package_label">Empaque de compra (opcional)</string>
+    <string name="admin_insumo_form_purchase_package_hint">Si este insumo se compra por empaques (ej. una botella de 50 ml de cuajo), define aquí su nombre y contenido para que \"Nueva compra\" calcule solo la cantidad y el costo en %1$s.</string>
+    <string name="admin_insumo_form_package_name_label">Nombre del empaque (ej. Botella, Bulto, Saco)</string>
+    <string name="admin_insumo_form_package_size_label">Contenido por empaque (en %1$s)</string>
+    <string name="admin_insumo_form_notes_label">Observaciones (opcional)</string>
+    <string name="admin_recipe_item_dialog_title">Agregar insumo a la receta</string>
+    <string name="admin_recipe_item_insumo_label">Insumo</string>
+    <string name="admin_recipe_item_quantity_label">Cantidad esperada por unidad de producto</string>
+
+    <!-- ==================== Admin · Nueva compra ==================== -->
+    <string name="admin_new_purchase_title">Nueva compra</string>
+    <string name="admin_new_purchase_packaging_catalog_label">Envase del catálogo</string>
+    <string name="admin_new_purchase_insumo_catalog_label">Insumo del catálogo</string>
+    <string name="admin_new_purchase_no_insumos_message">Sin insumos de esta categoría. Crea uno en Catálogo &gt; Insumos.</string>
+    <string name="admin_new_purchase_supplier_label">Proveedor (opcional)</string>
+    <string name="admin_new_purchase_package_singular_fallback">empaque</string>
+    <string name="admin_new_purchase_package_plural_fallback">empaques</string>
+    <string name="admin_new_purchase_buy_by_package_label">Comprar por %1$s (%2$s %3$s c/u)</string>
+    <string name="admin_new_purchase_package_count_label">N° de %1$s</string>
+    <string name="admin_new_purchase_cost_per_package_label">Costo por %1$s</string>
+    <string name="admin_new_purchase_computed_summary_label">= %1$s %2$s a %3$s c/u</string>
+    <string name="admin_new_purchase_quantity_label">Cantidad</string>
+    <string name="admin_new_purchase_error_save">No se pudo guardar la compra</string>
+    <string name="admin_purchase_history_title">Compras</string>
+    <string name="admin_purchase_history_from_label">Desde</string>
+    <string name="admin_purchase_history_to_label">Hasta</string>
+    <string name="admin_purchase_history_clear_dates_button">Limpiar fechas</string>
+    <string name="admin_purchase_history_empty_message">Sin compras registradas para este filtro.</string>
+    <string name="admin_purchase_history_total_label">Total del filtro</string>
+    <string name="admin_purchase_history_supplier_prefix">Proveedor: %1$s</string>
+    <string name="admin_purchase_history_error_load">No se pudo cargar el historial de compras</string>
+
+    <!-- ==================== Admin · Calendario de tareas ==================== -->
+    <string name="admin_care_task_list_title">Calendario de tareas</string>
+    <string name="admin_care_task_list_empty_message">Sin tareas configuradas todavía.</string>
+    <string name="admin_care_task_group_prefix">Grupo: %1$s</string>
+    <string name="admin_care_task_insumo_prefix">Insumo: %1$s</string>
+    <string name="admin_care_task_active_label">Activa</string>
+    <string name="admin_care_task_inactive_label">Inactiva</string>
+    <string name="admin_care_task_list_error_load">No se pudo cargar el calendario</string>
+    <string name="admin_care_task_form_edit_title">Editar tarea</string>
+    <string name="admin_care_task_form_no_insumos_message">Sin insumos en el catálogo. Crea uno en Catálogo &gt; Insumos.</string>
+    <string name="admin_care_task_form_quantity_label">Cantidad esperada por ocurrencia</string>
+    <string name="admin_care_task_form_frequency_label">Frecuencia</string>
+    <string name="admin_care_task_form_animal_group_label">Grupo de animales (opcional)</string>
+    <string name="admin_care_task_form_time_of_day_label">Momento del día (opcional)</string>
+    <string name="admin_care_task_form_error_save">No se pudo guardar la tarea</string>
+
+    <!-- ==================== Admin · Más (menú) ==================== -->
+    <string name="admin_mas_compras_label">Compras</string>
+    <string name="admin_mas_ajustes_label">Ajustes</string>
+
+    <!-- ==================== Admin · Ajustes ==================== -->
+    <string name="admin_settings_farm_section_title">Finca</string>
+    <string name="admin_settings_farm_name_label">Nombre de la finca</string>
+    <string name="admin_settings_currency_label">Moneda</string>
+    <string name="admin_settings_target_liters_label">Meta de producción (litros/día)</string>
+    <string name="admin_settings_deposit_alert_days_label">Días de alerta por depósito de envase sin devolver</string>
+    <string name="admin_settings_costs_section_title">Costos</string>
+    <string name="admin_settings_cost_per_liter_label">Costo por litro (últimos 30 días)</string>
+    <string name="admin_settings_insufficient_data_fallback">Sin datos suficientes</string>
+    <string name="admin_settings_cost_per_liter_hint">Se calcula solo, a partir de compras, salud y alimentación — no es editable aquí.</string>
+    <string name="admin_settings_pin_section_title">PIN de acceso rápido</string>
+    <string name="admin_settings_pin_configured">PIN configurado en este dispositivo</string>
+    <string name="admin_settings_pin_not_configured">Sin PIN configurado</string>
+    <string name="admin_settings_change_pin_button">Cambiar PIN</string>
+    <string name="admin_settings_create_pin_button">Crear PIN</string>
+    <string name="admin_settings_delete_button">Eliminar</string>
+    <string name="admin_settings_session_section_title">Sesión</string>
+    <string name="admin_settings_remove_pin_confirm_title">¿Eliminar el PIN?</string>
+    <string name="admin_settings_remove_pin_confirm_message">La próxima vez que abras la app vas a necesitar tu correo y contraseña.</string>
+    <string name="admin_settings_logout_confirm_message">Vas a necesitar tu correo y contraseña para volver a entrar.</string>
+    <string name="admin_settings_new_pin_label">PIN nuevo (4 dígitos)</string>
+    <string name="admin_settings_error_load">No se pudo cargar la configuración</string>
+    <string name="admin_settings_error_save">No se pudo guardar la configuración</string>
+    <string name="admin_settings_success_save">Configuración guardada</string>
+    <string name="admin_settings_success_pin_updated">PIN actualizado</string>
+    <string name="admin_settings_success_pin_deleted">PIN eliminado</string>
+
+</resources>

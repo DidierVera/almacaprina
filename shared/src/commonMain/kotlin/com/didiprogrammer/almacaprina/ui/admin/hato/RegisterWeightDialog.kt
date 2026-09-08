@@ -1,5 +1,13 @@
 package com.didiprogrammer.almacaprina.ui.admin.hato
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.common_cancel
+import almacaprina.shared.generated.resources.common_save_button
+import almacaprina.shared.generated.resources.weighing_entry_bcs_label
+import almacaprina.shared.generated.resources.weighing_entry_date_label
+import almacaprina.shared.generated.resources.weighing_entry_eyebrow
+import almacaprina.shared.generated.resources.weighing_entry_notes_label
+import almacaprina.shared.generated.resources.weighing_entry_weight_label
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.didiprogrammer.almacaprina.ui.components.DateField
+import org.jetbrains.compose.resources.stringResource
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
@@ -36,18 +45,18 @@ fun RegisterWeightDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Registrar pesada") },
+        title = { Text(stringResource(Res.string.weighing_entry_eyebrow)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                DateField(label = "Fecha", date = date, onDateSelected = { date = it })
+                DateField(label = stringResource(Res.string.weighing_entry_date_label), date = date, onDateSelected = { date = it })
                 OutlinedTextField(
                     value = weightText,
                     onValueChange = { weightText = it },
-                    label = { Text("Peso (kg)") },
+                    label = { Text(stringResource(Res.string.weighing_entry_weight_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
-                Text("Body Condition Score (1-5, opcional)")
+                Text(stringResource(Res.string.weighing_entry_bcs_label))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     (1..5).forEach { score ->
                         FilterChip(
@@ -60,7 +69,7 @@ fun RegisterWeightDialog(
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
-                    label = { Text("Notas (opcional)") },
+                    label = { Text(stringResource(Res.string.weighing_entry_notes_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -69,8 +78,8 @@ fun RegisterWeightDialog(
             TextButton(
                 enabled = weight != null && weight > 0,
                 onClick = { weight?.let { onSave(date, it, bcs, notes.ifBlank { null }) } }
-            ) { Text("Guardar") }
+            ) { Text(stringResource(Res.string.common_save_button)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.common_cancel)) } }
     )
 }

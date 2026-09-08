@@ -1,5 +1,11 @@
 package com.didiprogrammer.almacaprina.ui.admin.hato
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_hato_empty_message
+import almacaprina.shared.generated.resources.admin_hato_new_goat_content_description
+import almacaprina.shared.generated.resources.admin_hato_search_placeholder
+import almacaprina.shared.generated.resources.admin_hato_status_filter_all
+import almacaprina.shared.generated.resources.admin_hato_tag_prefix
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +46,7 @@ import com.didiprogrammer.almacaprina.ui.components.GoatStatusChip
 import com.didiprogrammer.almacaprina.ui.components.RefreshOnResume
 import com.didiprogrammer.almacaprina.ui.components.RefreshableContent
 import com.didiprogrammer.almacaprina.ui.components.label
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -66,7 +73,7 @@ fun AdminHatoListScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = onNewGoatClick) {
-                Icon(Icons.Filled.Add, contentDescription = "Nueva cabra")
+                Icon(Icons.Filled.Add, contentDescription = stringResource(Res.string.admin_hato_new_goat_content_description))
             }
         }
     ) { padding ->
@@ -75,7 +82,7 @@ fun AdminHatoListScreen(
                 value = uiState.searchQuery,
                 onValueChange = viewModel::onSearchQueryChanged,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                placeholder = { Text("Buscar por nombre o arete") },
+                placeholder = { Text(stringResource(Res.string.admin_hato_search_placeholder)) },
                 leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
                 singleLine = true
             )
@@ -88,7 +95,7 @@ fun AdminHatoListScreen(
                     FilterChip(
                         selected = uiState.selectedStatus == null,
                         onClick = { viewModel.onStatusFilterSelected(null) },
-                        label = { Text("Todas") }
+                        label = { Text(stringResource(Res.string.admin_hato_status_filter_all)) }
                     )
                 }
                 items(GoatStatus.entries) { status ->
@@ -107,7 +114,7 @@ fun AdminHatoListScreen(
             ) {
                 if (uiState.items.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("No hay cabras que coincidan con el filtro.", style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(Res.string.admin_hato_empty_message), style = MaterialTheme.typography.bodyMedium)
                     }
                 } else {
                     LazyColumn(
@@ -131,7 +138,7 @@ private fun GoatRow(item: GoatListItem, onClick: () -> Unit) {
             GoatAvatar(name = item.goat.name, photoUrl = item.goat.photoUrl)
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.goat.name, style = MaterialTheme.typography.titleSmall)
-                Text("Arete ${item.goat.tagNumber}", style = MaterialTheme.typography.bodySmall)
+                Text(stringResource(Res.string.admin_hato_tag_prefix, item.goat.tagNumber), style = MaterialTheme.typography.bodySmall)
                 Text(
                     text = item.contextualInfo,
                     style = MaterialTheme.typography.bodySmall,

@@ -1,5 +1,18 @@
 package com.didiprogrammer.almacaprina.ui.ventas.nueva
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.common_saving_button
+import almacaprina.shared.generated.resources.new_sale_confirmar_deposit_label
+import almacaprina.shared.generated.resources.new_sale_confirmar_line_item
+import almacaprina.shared.generated.resources.new_sale_confirmar_paid_now_subtitle
+import almacaprina.shared.generated.resources.new_sale_confirmar_paid_now_title
+import almacaprina.shared.generated.resources.new_sale_confirmar_payment_method_title
+import almacaprina.shared.generated.resources.new_sale_confirmar_payment_status_title
+import almacaprina.shared.generated.resources.new_sale_confirmar_pending_subtitle
+import almacaprina.shared.generated.resources.new_sale_confirmar_pending_title
+import almacaprina.shared.generated.resources.new_sale_confirmar_save_button
+import almacaprina.shared.generated.resources.new_sale_confirmar_title
+import almacaprina.shared.generated.resources.new_sale_confirmar_total_label
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +55,7 @@ import com.didiprogrammer.almacaprina.ui.theme.Superficie
 import com.didiprogrammer.almacaprina.ui.theme.Tinta
 import com.didiprogrammer.almacaprina.ui.theme.TintaSuave
 import com.didiprogrammer.almacaprina.ui.theme.Verde
+import org.jetbrains.compose.resources.stringResource
 
 /** Nueva venta · Paso 4 — Confirmar. Ver mockup Ventas-selection-confirm.png. */
 @Composable
@@ -64,7 +78,7 @@ fun NewSaleConfirmarScreen(
         bottomBar = {
             Surface(color = com.didiprogrammer.almacaprina.ui.theme.Fondo) {
                 PrimaryButton(
-                    text = if (uiState.isSaving) "Guardando…" else "Guardar venta",
+                    text = if (uiState.isSaving) stringResource(Res.string.common_saving_button) else stringResource(Res.string.new_sale_confirmar_save_button),
                     enabled = !uiState.isSaving,
                     loading = uiState.isSaving,
                     onClick = { viewModel.save(onSaved) },
@@ -84,7 +98,7 @@ fun NewSaleConfirmarScreen(
                 contentPadding = PaddingValues(Spacing.xxl),
                 verticalArrangement = Arrangement.spacedBy(Spacing.lg)
             ) {
-                item { NewSaleStepHeader(step = 4, title = "Confirmar", onBack = onBack) }
+                item { NewSaleStepHeader(step = 4, title = stringResource(Res.string.new_sale_confirmar_title), onBack = onBack) }
 
                 item {
                     Surface(modifier = Modifier.fillMaxWidth(), shape = ShapeExtraLarge, color = Superficie, border = BorderStroke(1.dp, Borde)) {
@@ -93,7 +107,13 @@ fun NewSaleConfirmarScreen(
                             HorizontalDivider(color = Borde)
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text(
-                                    "${formatQuantity(quantity)} ${product?.saleUnit?.label()?.lowercase() ?: ""} de ${product?.name ?: ""} × ${formatCurrency(product?.defaultUnitPrice ?: 0.0, uiState.currency)}",
+                                    stringResource(
+                                        Res.string.new_sale_confirmar_line_item,
+                                        formatQuantity(quantity),
+                                        product?.saleUnit?.label()?.lowercase() ?: "",
+                                        product?.name ?: "",
+                                        formatCurrency(product?.defaultUnitPrice ?: 0.0, uiState.currency)
+                                    ),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = TintaSuave,
                                     modifier = Modifier.weight(1f)
@@ -102,20 +122,20 @@ fun NewSaleConfirmarScreen(
                             }
                             if (uiState.depositCharged > 0.0) {
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Text("Depósito de envase", style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
+                                    Text(stringResource(Res.string.new_sale_confirmar_deposit_label), style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
                                     Text(formatCurrency(uiState.depositCharged, uiState.currency), style = MaterialTheme.typography.titleSmall, color = Tinta)
                                 }
                             }
                             HorizontalDivider(color = Borde)
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text("Total", style = MaterialTheme.typography.titleSmall, color = Tinta)
+                                Text(stringResource(Res.string.new_sale_confirmar_total_label), style = MaterialTheme.typography.titleSmall, color = Tinta)
                                 Text(formatCurrency(uiState.total, uiState.currency), style = MaterialTheme.typography.headlineSmall, color = Tinta)
                             }
                         }
                     }
                 }
 
-                item { Text("Forma de pago", style = MaterialTheme.typography.titleSmall, color = Tinta) }
+                item { Text(stringResource(Res.string.new_sale_confirmar_payment_method_title), style = MaterialTheme.typography.titleSmall, color = Tinta) }
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                         PaymentMethod.entries.forEach { method ->
@@ -138,7 +158,7 @@ fun NewSaleConfirmarScreen(
                     }
                 }
 
-                item { Text("Estado", style = MaterialTheme.typography.titleSmall, color = Tinta) }
+                item { Text(stringResource(Res.string.new_sale_confirmar_payment_status_title), style = MaterialTheme.typography.titleSmall, color = Tinta) }
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                         val paidSelected = uiState.paymentStatus == PaymentStatus.PAID
@@ -149,8 +169,8 @@ fun NewSaleConfirmarScreen(
                             border = BorderStroke(1.dp, if (paidSelected) Verde else Borde)
                         ) {
                             Column(modifier = Modifier.padding(Spacing.lg)) {
-                                Text("Pagado ahora", style = MaterialTheme.typography.titleSmall, color = if (paidSelected) Verde else Tinta)
-                                Text("Se cierra la venta", style = MaterialTheme.typography.bodySmall, color = TintaSuave)
+                                Text(stringResource(Res.string.new_sale_confirmar_paid_now_title), style = MaterialTheme.typography.titleSmall, color = if (paidSelected) Verde else Tinta)
+                                Text(stringResource(Res.string.new_sale_confirmar_paid_now_subtitle), style = MaterialTheme.typography.bodySmall, color = TintaSuave)
                             }
                         }
                         val pendingSelected = uiState.paymentStatus == PaymentStatus.PENDING
@@ -161,8 +181,8 @@ fun NewSaleConfirmarScreen(
                             border = BorderStroke(1.dp, if (pendingSelected) AmbarTexto else Borde)
                         ) {
                             Column(modifier = Modifier.padding(Spacing.lg)) {
-                                Text("Fiado", style = MaterialTheme.typography.titleSmall, color = if (pendingSelected) AmbarTexto else Tinta)
-                                Text("Queda pendiente", style = MaterialTheme.typography.bodySmall, color = TintaSuave)
+                                Text(stringResource(Res.string.new_sale_confirmar_pending_title), style = MaterialTheme.typography.titleSmall, color = if (pendingSelected) AmbarTexto else Tinta)
+                                Text(stringResource(Res.string.new_sale_confirmar_pending_subtitle), style = MaterialTheme.typography.bodySmall, color = TintaSuave)
                             }
                         }
                     }

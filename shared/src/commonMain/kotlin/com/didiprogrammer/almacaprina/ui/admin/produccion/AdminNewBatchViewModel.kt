@@ -1,5 +1,9 @@
 package com.didiprogrammer.almacaprina.ui.admin.produccion
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_new_batch_deleted_insumo_fallback
+import almacaprina.shared.generated.resources.admin_new_batch_error_save
+import almacaprina.shared.generated.resources.common_error_load_failed
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.business.averageYieldRatio
@@ -28,7 +32,6 @@ import com.didiprogrammer.almacaprina.domain.model.MilkProductionRecord
 import com.didiprogrammer.almacaprina.domain.model.ProductRecipeItem
 import com.didiprogrammer.almacaprina.domain.model.Purchase
 import com.didiprogrammer.almacaprina.domain.model.Sale
-import com.didiprogrammer.almacaprina.ui.components.label
 import com.didiprogrammer.almacaprina.util.newId
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -42,6 +45,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.getString
 
 /** Bundle de los datos crudos que necesita el wizard — se piden todos en paralelo, ver [AdminNewBatchViewModel.load]. */
 private data class AdminNewBatchRawData(
@@ -159,7 +163,7 @@ class AdminNewBatchViewModel(
                 }
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: "No se pudo cargar la información") }
+                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: getString(Res.string.common_error_load_failed)) }
             }
         }
     }
@@ -188,11 +192,13 @@ class AdminNewBatchViewModel(
     fun goNext() {
         val state = _uiState.value
         if (!state.canGoNext) return
-        if (state.step == BatchWizardStep.CANTIDAD && state.insumoUsages.isEmpty()) {
-            prefillInsumoUsages()
+        viewModelScope.launch {
+            if (state.step == BatchWizardStep.CANTIDAD && state.insumoUsages.isEmpty()) {
+                prefillInsumoUsages()
+            }
+            val nextIndex = (state.step.ordinal + 1).coerceAtMost(BatchWizardStep.entries.lastIndex)
+            _uiState.update { it.copy(step = BatchWizardStep.entries[nextIndex]) }
         }
-        val nextIndex = (state.step.ordinal + 1).coerceAtMost(BatchWizardStep.entries.lastIndex)
-        _uiState.update { it.copy(step = BatchWizardStep.entries[nextIndex]) }
     }
 
     fun goBack() {
@@ -200,17 +206,18 @@ class AdminNewBatchViewModel(
         _uiState.update { it.copy(step = BatchWizardStep.entries[previousIndex]) }
     }
 
-    private fun prefillInsumoUsages() {
+    private suspend fun prefillInsumoUsages() {
         val state = _uiState.value
         val product = state.selectedProduct ?: return
         val outputQty = state.outputQuantity ?: return
         val recipe = recipeItemsByProduct[product.id].orEmpty()
+        val deletedInsumoFallback = getString(Res.string.admin_new_batch_deleted_insumo_fallback)
         val usages = recipe.map { (insumoId, qtyPerUnit) ->
             val insumo = insumosById[insumoId]
             BatchInsumoUsageEntry(
                 insumoId = insumoId,
-                insumoName = insumo?.name ?: "Insumo eliminado",
-                unitOfMeasureLabel = insumo?.unitOfMeasure?.label() ?: "",
+                insumoName = insumo?.name ?: deletedInsumoFallback,
+                unitOfMeasure = insumo?.unitOfMeasure,
                 quantityUsed = qtyPerUnit * outputQty,
                 unitCostAtTime = insumo?.lastUnitCost ?: 0.0
             )
@@ -252,7 +259,7 @@ class AdminNewBatchViewModel(
                 onSaved()
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: "No se pudo guardar el lote") }
+                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: getString(Res.string.admin_new_batch_error_save)) }
             }
         }
     }

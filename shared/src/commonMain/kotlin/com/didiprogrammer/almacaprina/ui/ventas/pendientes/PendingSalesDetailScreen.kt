@@ -1,5 +1,13 @@
 package com.didiprogrammer.almacaprina.ui.ventas.pendientes
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.common_saving_button
+import almacaprina.shared.generated.resources.pending_detail_balance_label
+import almacaprina.shared.generated.resources.pending_detail_mark_all_paid_button
+import almacaprina.shared.generated.resources.pending_detail_mark_paid_button
+import almacaprina.shared.generated.resources.pending_detail_section_title
+import almacaprina.shared.generated.resources.pending_detail_summary_one
+import almacaprina.shared.generated.resources.pending_detail_summary_other
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -45,6 +53,7 @@ import com.didiprogrammer.almacaprina.ui.theme.Spacing
 import com.didiprogrammer.almacaprina.ui.theme.Tinta
 import com.didiprogrammer.almacaprina.ui.theme.TintaSuave
 import com.didiprogrammer.almacaprina.ui.theme.Verde
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -88,7 +97,7 @@ fun PendingSalesDetailScreen(
                             }
                         }
                         PrimaryButton(
-                            text = if (uiState.isSaving) "Guardando…" else "Marcar todo como pagado",
+                            text = if (uiState.isSaving) stringResource(Res.string.common_saving_button) else stringResource(Res.string.pending_detail_mark_all_paid_button),
                             enabled = !uiState.isSaving,
                             loading = uiState.isSaving,
                             onClick = viewModel::markAllPaid,
@@ -115,10 +124,14 @@ fun PendingSalesDetailScreen(
                 item {
                     Surface(modifier = Modifier.fillMaxWidth(), shape = ShapeExtraLarge, color = AmbarFondo, border = BorderStroke(1.dp, AmbarBorde)) {
                         Column(modifier = Modifier.padding(Spacing.xl)) {
-                            Text("Saldo pendiente", style = MaterialTheme.typography.labelLarge, color = AmbarTexto)
+                            Text(stringResource(Res.string.pending_detail_balance_label), style = MaterialTheme.typography.labelLarge, color = AmbarTexto)
                             Text(formatCurrency(uiState.totalPending, uiState.currency), style = MaterialTheme.typography.displaySmall, color = Tinta)
                             Text(
-                                "${uiState.items.size} ${if (uiState.items.size == 1) "venta" else "ventas"} · la más antigua hace ${uiState.daysSinceOldest} días",
+                                stringResource(
+                                    if (uiState.items.size == 1) Res.string.pending_detail_summary_one else Res.string.pending_detail_summary_other,
+                                    uiState.items.size,
+                                    uiState.daysSinceOldest
+                                ),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = AmbarTexto
                             )
@@ -126,7 +139,7 @@ fun PendingSalesDetailScreen(
                     }
                 }
 
-                item { Text("Ventas pendientes", style = MaterialTheme.typography.titleSmall, color = Tinta) }
+                item { Text(stringResource(Res.string.pending_detail_section_title), style = MaterialTheme.typography.titleSmall, color = Tinta) }
 
                 items(uiState.items, key = { it.saleId }) { item ->
                     AlmacaprinaCard {
@@ -142,7 +155,7 @@ fun PendingSalesDetailScreen(
                                 modifier = Modifier.padding(horizontal = Spacing.md)
                             )
                             OutlinedButton(onClick = { viewModel.markSalePaid(item.saleId) }, enabled = !uiState.isSaving) {
-                                Text("Marcar\npagada", style = MaterialTheme.typography.labelMedium, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                                Text(stringResource(Res.string.pending_detail_mark_paid_button), style = MaterialTheme.typography.labelMedium, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                             }
                         }
                     }

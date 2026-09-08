@@ -38,10 +38,27 @@ import com.didiprogrammer.almacaprina.domain.model.Insumo
 import com.didiprogrammer.almacaprina.domain.model.Packaging
 import com.didiprogrammer.almacaprina.domain.model.Product
 import com.didiprogrammer.almacaprina.domain.model.ProductRecipeItem
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_catalog_active_label
+import almacaprina.shared.generated.resources.admin_catalog_add_recipe_item_content_description
+import almacaprina.shared.generated.resources.admin_catalog_empty_recipe_message
+import almacaprina.shared.generated.resources.admin_catalog_inactive_label
+import almacaprina.shared.generated.resources.admin_catalog_insumos_empty
+import almacaprina.shared.generated.resources.admin_catalog_new_insumo_content_description
+import almacaprina.shared.generated.resources.admin_catalog_new_packaging_content_description
+import almacaprina.shared.generated.resources.admin_catalog_new_product_content_description
+import almacaprina.shared.generated.resources.admin_catalog_no_cost_fallback
+import almacaprina.shared.generated.resources.admin_catalog_no_derived_products_message
+import almacaprina.shared.generated.resources.admin_catalog_packaging_not_returnable_label
+import almacaprina.shared.generated.resources.admin_catalog_packaging_returnable_label
+import almacaprina.shared.generated.resources.admin_catalog_packagings_empty
+import almacaprina.shared.generated.resources.admin_catalog_products_empty
+import almacaprina.shared.generated.resources.admin_new_batch_deleted_insumo_fallback
 import com.didiprogrammer.almacaprina.ui.components.AlmacaprinaCard
 import com.didiprogrammer.almacaprina.ui.components.RefreshableContent
 import com.didiprogrammer.almacaprina.ui.components.StatusChip
 import com.didiprogrammer.almacaprina.ui.components.label
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Sección 3 — Catálogo (Productos / Envases / Insumos / Recetas). */
@@ -67,17 +84,17 @@ fun AdminCatalogoScreen(viewModel: AdminCatalogoViewModel = koinViewModel()) {
         floatingActionButton = {
             when (uiState.selectedTab) {
                 CatalogoSubTab.PRODUCTOS -> FloatingActionButton(onClick = { showNewProductDialog = true }) {
-                    Icon(Icons.Filled.Add, contentDescription = "Nuevo producto")
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(Res.string.admin_catalog_new_product_content_description))
                 }
                 CatalogoSubTab.ENVASES -> FloatingActionButton(onClick = { showNewPackagingDialog = true }) {
-                    Icon(Icons.Filled.Add, contentDescription = "Nuevo envase")
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(Res.string.admin_catalog_new_packaging_content_description))
                 }
                 CatalogoSubTab.INSUMOS -> FloatingActionButton(onClick = { showNewInsumoDialog = true }) {
-                    Icon(Icons.Filled.Add, contentDescription = "Nuevo insumo")
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(Res.string.admin_catalog_new_insumo_content_description))
                 }
                 CatalogoSubTab.RECETAS -> if (uiState.selectedRecipeProductId != null) {
                     FloatingActionButton(onClick = { showAddRecipeItemDialog = true }) {
-                        Icon(Icons.Filled.Add, contentDescription = "Agregar insumo a la receta")
+                        Icon(Icons.Filled.Add, contentDescription = stringResource(Res.string.admin_catalog_add_recipe_item_content_description))
                     }
                 }
             }
@@ -89,7 +106,7 @@ fun AdminCatalogoScreen(viewModel: AdminCatalogoViewModel = koinViewModel()) {
                     Tab(
                         selected = uiState.selectedTab == tab,
                         onClick = { viewModel.onTabSelected(tab) },
-                        text = { Text(tab.label) }
+                        text = { Text(tab.label()) }
                     )
                 }
             }
@@ -190,7 +207,7 @@ fun AdminCatalogoScreen(viewModel: AdminCatalogoViewModel = koinViewModel()) {
 @Composable
 private fun ProductosList(products: List<Product>, currency: String, onProductClick: (Product) -> Unit) {
     if (products.isEmpty()) {
-        EmptyState("Sin productos registrados todavía.")
+        EmptyState(stringResource(Res.string.admin_catalog_products_empty))
         return
     }
     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -217,7 +234,7 @@ private fun ProductosList(products: List<Product>, currency: String, onProductCl
 @Composable
 private fun EnvasesList(packagings: List<Packaging>, currency: String, onPackagingClick: (Packaging) -> Unit) {
     if (packagings.isEmpty()) {
-        EmptyState("Sin envases registrados todavía.")
+        EmptyState(stringResource(Res.string.admin_catalog_packagings_empty))
         return
     }
     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -228,9 +245,9 @@ private fun EnvasesList(packagings: List<Packaging>, currency: String, onPackagi
                         Text(packaging.name, style = MaterialTheme.typography.titleSmall)
                         Text(
                             if (packaging.isReturnable) {
-                                "Retornable · depósito ${formatCurrency(packaging.depositAmount ?: 0.0, currency)}"
+                                stringResource(Res.string.admin_catalog_packaging_returnable_label, formatCurrency(packaging.depositAmount ?: 0.0, currency))
                             } else {
-                                "No retornable"
+                                stringResource(Res.string.admin_catalog_packaging_not_returnable_label)
                             },
                             style = MaterialTheme.typography.bodySmall
                         )
@@ -245,7 +262,7 @@ private fun EnvasesList(packagings: List<Packaging>, currency: String, onPackagi
 @Composable
 private fun InsumosList(insumos: List<Insumo>, currency: String, onInsumoClick: (Insumo) -> Unit) {
     if (insumos.isEmpty()) {
-        EmptyState("Sin insumos registrados todavía.")
+        EmptyState(stringResource(Res.string.admin_catalog_insumos_empty))
         return
     }
     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -261,7 +278,7 @@ private fun InsumosList(insumos: List<Insumo>, currency: String, onInsumoClick: 
                     }
                     Column(horizontalAlignment = Alignment.End) {
                         Text(
-                            insumo.lastUnitCost?.let { formatCurrency(it, currency) } ?: "Sin costo",
+                            insumo.lastUnitCost?.let { formatCurrency(it, currency) } ?: stringResource(Res.string.admin_catalog_no_cost_fallback),
                             style = MaterialTheme.typography.titleSmall
                         )
                         ActiveChip(insumo.active)
@@ -282,7 +299,7 @@ private fun RecetasContent(
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         if (derivedProducts.isEmpty()) {
-            EmptyState("Primero crea un producto derivado en la pestaña Productos.")
+            EmptyState(stringResource(Res.string.admin_catalog_no_derived_products_message))
             return
         }
         LazyRow(
@@ -298,14 +315,14 @@ private fun RecetasContent(
             }
         }
         if (recipeItems.isEmpty()) {
-            EmptyState("Este producto todavía no tiene insumos en su receta.")
+            EmptyState(stringResource(Res.string.admin_catalog_empty_recipe_message))
         } else {
             LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 items(recipeItems, key = { it.id }) { item ->
                     val insumo = insumosById[item.insumoId]
                     AlmacaprinaCard {
                         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                            Text(insumo?.name ?: "Insumo eliminado", style = MaterialTheme.typography.titleSmall)
+                            Text(insumo?.name ?: stringResource(Res.string.admin_new_batch_deleted_insumo_fallback), style = MaterialTheme.typography.titleSmall)
                             Text(
                                 "${item.quantityPerOutputUnit} ${insumo?.unitOfMeasure?.label() ?: ""}",
                                 style = MaterialTheme.typography.bodyMedium
@@ -322,7 +339,7 @@ private fun RecetasContent(
 private fun ActiveChip(active: Boolean) {
     val colors = MaterialTheme.colorScheme
     StatusChip(
-        label = if (active) "Activo" else "Inactivo",
+        label = stringResource(if (active) Res.string.admin_catalog_active_label else Res.string.admin_catalog_inactive_label),
         containerColor = if (active) colors.primaryContainer else colors.surfaceVariant,
         contentColor = if (active) colors.onPrimaryContainer else colors.onSurfaceVariant
     )

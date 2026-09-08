@@ -1,5 +1,19 @@
 package com.didiprogrammer.almacaprina.ui.admin.catalogo
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_catalog_active_label
+import almacaprina.shared.generated.resources.admin_goat_form_name_label
+import almacaprina.shared.generated.resources.admin_insumo_form_edit_title
+import almacaprina.shared.generated.resources.admin_insumo_form_new_title
+import almacaprina.shared.generated.resources.admin_insumo_form_notes_label
+import almacaprina.shared.generated.resources.admin_insumo_form_package_name_label
+import almacaprina.shared.generated.resources.admin_insumo_form_package_size_label
+import almacaprina.shared.generated.resources.admin_insumo_form_purchase_package_hint
+import almacaprina.shared.generated.resources.admin_insumo_form_purchase_package_label
+import almacaprina.shared.generated.resources.admin_insumo_form_unit_of_measure_label
+import almacaprina.shared.generated.resources.admin_product_form_category_label
+import almacaprina.shared.generated.resources.common_cancel
+import almacaprina.shared.generated.resources.common_save_button
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,6 +39,7 @@ import com.didiprogrammer.almacaprina.domain.model.Insumo
 import com.didiprogrammer.almacaprina.domain.model.InsumoCategory
 import com.didiprogrammer.almacaprina.domain.model.UnitOfMeasure
 import com.didiprogrammer.almacaprina.ui.components.label
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Catálogo > Insumos > "+ Nuevo insumo" / editar uno existente.
@@ -54,57 +69,55 @@ fun InsumoFormDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (existing == null) "Nuevo insumo" else "Editar insumo") },
+        title = { Text(stringResource(if (existing == null) Res.string.admin_insumo_form_new_title else Res.string.admin_insumo_form_edit_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Nombre") },
+                    label = { Text(stringResource(Res.string.admin_goat_form_name_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
-                Text("Categoría")
+                Text(stringResource(Res.string.admin_product_form_category_label))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     items(InsumoCategory.entries) { c ->
                         FilterChip(selected = category == c, onClick = { category = c }, label = { Text(c.label()) })
                     }
                 }
-                Text("Unidad de medida")
+                Text(stringResource(Res.string.admin_insumo_form_unit_of_measure_label))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     items(UnitOfMeasure.entries) { u ->
                         FilterChip(selected = unitOfMeasure == u, onClick = { unitOfMeasure = u }, label = { Text(u.label()) })
                     }
                 }
-                Text("Empaque de compra (opcional)")
+                Text(stringResource(Res.string.admin_insumo_form_purchase_package_label))
                 Text(
-                    "Si este insumo se compra por empaques (ej. una botella de 50 ml de cuajo), " +
-                        "define aquí su nombre y contenido para que \"Nueva compra\" calcule solo la cantidad " +
-                        "y el costo en ${unitOfMeasure.label()}.",
+                    stringResource(Res.string.admin_insumo_form_purchase_package_hint, unitOfMeasure.label()),
                     style = MaterialTheme.typography.bodySmall
                 )
                 OutlinedTextField(
                     value = purchasePackageLabel,
                     onValueChange = { purchasePackageLabel = it },
-                    label = { Text("Nombre del empaque (ej. Botella, Bulto, Saco)") },
+                    label = { Text(stringResource(Res.string.admin_insumo_form_package_name_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = purchasePackageSizeText,
                     onValueChange = { purchasePackageSizeText = it },
-                    label = { Text("Contenido por empaque (en ${unitOfMeasure.label()})") },
+                    label = { Text(stringResource(Res.string.admin_insumo_form_package_size_label, unitOfMeasure.label())) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
-                    label = { Text("Observaciones (opcional)") },
+                    label = { Text(stringResource(Res.string.admin_insumo_form_notes_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Activo")
+                    Text(stringResource(Res.string.admin_catalog_active_label))
                     Switch(checked = active, onCheckedChange = { active = it })
                 }
             }
@@ -123,8 +136,8 @@ fun InsumoFormDialog(
                         notes.trim().ifBlank { null }
                     )
                 }
-            ) { Text("Guardar") }
+            ) { Text(stringResource(Res.string.common_save_button)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.common_cancel)) } }
     )
 }

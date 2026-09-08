@@ -1,5 +1,10 @@
 package com.didiprogrammer.almacaprina.ui.ventas.nueva
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.common_continue
+import almacaprina.shared.generated.resources.new_sale_producto_catalog_hint
+import almacaprina.shared.generated.resources.new_sale_producto_sale_unit_suffix
+import almacaprina.shared.generated.resources.new_sale_producto_title
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +44,7 @@ import com.didiprogrammer.almacaprina.ui.theme.Superficie
 import com.didiprogrammer.almacaprina.ui.theme.Tinta
 import com.didiprogrammer.almacaprina.ui.theme.TintaSuave
 import com.didiprogrammer.almacaprina.ui.theme.Verde
+import org.jetbrains.compose.resources.stringResource
 
 /** Nueva venta · Paso 2 — ¿Qué vas a vender? Ver mockup Ventas-selection-product.png. */
 @Composable
@@ -64,7 +70,7 @@ fun NewSaleProductoScreen(
                 item {
                     NewSaleStepHeader(
                         step = 2,
-                        title = "¿Qué vas a vender?",
+                        title = stringResource(Res.string.new_sale_producto_title),
                         onBack = onBack,
                         subtitle = uiState.selectedCustomer?.name
                     )
@@ -93,7 +99,7 @@ fun NewSaleProductoScreen(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(product.name, style = MaterialTheme.typography.titleSmall, color = Tinta)
                                 Text(
-                                    "Venta por ${product.saleUnit.label().lowercase()}",
+                                    stringResource(Res.string.new_sale_producto_sale_unit_suffix, product.saleUnit.label().lowercase()),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = TintaSuave
                                 )
@@ -109,8 +115,7 @@ fun NewSaleProductoScreen(
 
                 item {
                     Text(
-                        "El catálogo lo administra Compras/Admin. Los productos que se activen allí " +
-                            "aparecen aquí sin cambiar esta pantalla.",
+                        stringResource(Res.string.new_sale_producto_catalog_hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = TintaSuave
                     )
@@ -118,7 +123,7 @@ fun NewSaleProductoScreen(
 
                 item {
                     PrimaryButton(
-                        text = "Continuar",
+                        text = stringResource(Res.string.common_continue),
                         enabled = uiState.canContinueFromProducto,
                         onClick = onContinue,
                         modifier = Modifier.fillMaxWidth()

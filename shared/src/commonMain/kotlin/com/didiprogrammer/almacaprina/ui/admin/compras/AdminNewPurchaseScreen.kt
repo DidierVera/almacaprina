@@ -33,9 +33,30 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.didiprogrammer.almacaprina.business.formatCurrency
 import com.didiprogrammer.almacaprina.business.formatQuantity
 import com.didiprogrammer.almacaprina.domain.model.PurchaseCategory
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_new_batch_total_label
+import almacaprina.shared.generated.resources.admin_new_purchase_buy_by_package_label
+import almacaprina.shared.generated.resources.admin_new_purchase_computed_summary_label
+import almacaprina.shared.generated.resources.admin_new_purchase_cost_per_package_label
+import almacaprina.shared.generated.resources.admin_new_purchase_insumo_catalog_label
+import almacaprina.shared.generated.resources.admin_new_purchase_no_insumos_message
+import almacaprina.shared.generated.resources.admin_new_purchase_package_count_label
+import almacaprina.shared.generated.resources.admin_new_purchase_package_plural_fallback
+import almacaprina.shared.generated.resources.admin_new_purchase_package_singular_fallback
+import almacaprina.shared.generated.resources.admin_new_purchase_packaging_catalog_label
+import almacaprina.shared.generated.resources.admin_new_purchase_quantity_label
+import almacaprina.shared.generated.resources.admin_new_purchase_supplier_label
+import almacaprina.shared.generated.resources.admin_new_purchase_title
+import almacaprina.shared.generated.resources.admin_packaging_form_unit_cost_label
+import almacaprina.shared.generated.resources.admin_product_form_category_label
+import almacaprina.shared.generated.resources.common_cancel
+import almacaprina.shared.generated.resources.common_save_button
+import almacaprina.shared.generated.resources.weighing_entry_date_label
+import almacaprina.shared.generated.resources.weighing_entry_notes_label
 import com.didiprogrammer.almacaprina.ui.components.AlmacaprinaCard
 import com.didiprogrammer.almacaprina.ui.components.DateField
 import com.didiprogrammer.almacaprina.ui.components.label
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Sección 5, pantalla 5.2 — Nueva compra. */
@@ -53,7 +74,7 @@ fun AdminNewPurchaseScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Nueva compra") }) },
+        topBar = { TopAppBar(title = { Text(stringResource(Res.string.admin_new_purchase_title)) }) },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         LazyColumn(
@@ -63,7 +84,7 @@ fun AdminNewPurchaseScreen(
         ) {
             item {
                 Column {
-                    Text("Categoría")
+                    Text(stringResource(Res.string.admin_product_form_category_label))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         items(PurchaseCategory.entries) { category ->
                             FilterChip(
@@ -78,7 +99,7 @@ fun AdminNewPurchaseScreen(
             item {
                 if (uiState.category == PurchaseCategory.PACKAGING) {
                     Column {
-                        Text("Envase del catálogo")
+                        Text(stringResource(Res.string.admin_new_purchase_packaging_catalog_label))
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             items(uiState.packagings, key = { it.id }) { packaging ->
                                 FilterChip(
@@ -91,10 +112,10 @@ fun AdminNewPurchaseScreen(
                     }
                 } else {
                     Column {
-                        Text("Insumo del catálogo")
+                        Text(stringResource(Res.string.admin_new_purchase_insumo_catalog_label))
                         if (uiState.filteredInsumos.isEmpty()) {
                             Text(
-                                "Sin insumos de esta categoría. Crea uno en Catálogo > Insumos.",
+                                stringResource(Res.string.admin_new_purchase_no_insumos_message),
                                 style = MaterialTheme.typography.bodySmall
                             )
                         } else {
@@ -111,12 +132,12 @@ fun AdminNewPurchaseScreen(
                     }
                 }
             }
-            item { DateField(label = "Fecha", date = uiState.date, onDateSelected = viewModel::onDateChanged) }
+            item { DateField(label = stringResource(Res.string.weighing_entry_date_label), date = uiState.date, onDateSelected = viewModel::onDateChanged) }
             item {
                 OutlinedTextField(
                     value = uiState.supplier,
                     onValueChange = viewModel::onSupplierChanged,
-                    label = { Text("Proveedor (opcional)") },
+                    label = { Text(stringResource(Res.string.admin_new_purchase_supplier_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -125,10 +146,10 @@ fun AdminNewPurchaseScreen(
                 item {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Switch(checked = uiState.purchaseByPackage, onCheckedChange = viewModel::onPurchaseByPackageToggled)
-                        val packageLabel = uiState.selectedInsumo?.purchasePackageLabel?.ifBlank { null } ?: "empaque"
+                        val packageLabel = uiState.selectedInsumo?.purchasePackageLabel?.ifBlank { null } ?: stringResource(Res.string.admin_new_purchase_package_singular_fallback)
                         val size = uiState.packageSize ?: 0.0
                         val unit = uiState.selectedInsumo?.unitOfMeasure?.label().orEmpty()
-                        Text("Comprar por $packageLabel (${formatQuantity(size)} $unit c/u)")
+                        Text(stringResource(Res.string.admin_new_purchase_buy_by_package_label, packageLabel, formatQuantity(size), unit))
                     }
                 }
             }
@@ -137,7 +158,10 @@ fun AdminNewPurchaseScreen(
                     OutlinedTextField(
                         value = uiState.packageCountText,
                         onValueChange = viewModel::onPackageCountChanged,
-                        label = { Text("N° de ${(uiState.selectedInsumo?.purchasePackageLabel?.ifBlank { null } ?: "empaques").lowercase()}s") },
+                        label = {
+                            val label = (uiState.selectedInsumo?.purchasePackageLabel?.ifBlank { null } ?: stringResource(Res.string.admin_new_purchase_package_plural_fallback)).lowercase()
+                            Text(stringResource(Res.string.admin_new_purchase_package_count_label, label) + "s")
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -146,7 +170,10 @@ fun AdminNewPurchaseScreen(
                     OutlinedTextField(
                         value = uiState.packageCostText,
                         onValueChange = viewModel::onPackageCostChanged,
-                        label = { Text("Costo por ${(uiState.selectedInsumo?.purchasePackageLabel?.ifBlank { null } ?: "empaque").lowercase()}") },
+                        label = {
+                            val label = (uiState.selectedInsumo?.purchasePackageLabel?.ifBlank { null } ?: stringResource(Res.string.admin_new_purchase_package_singular_fallback)).lowercase()
+                            Text(stringResource(Res.string.admin_new_purchase_cost_per_package_label, label))
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -154,8 +181,12 @@ fun AdminNewPurchaseScreen(
                 if (uiState.quantity != null && uiState.unitCost != null) {
                     item {
                         Text(
-                            "= ${formatQuantity(uiState.quantity!!)} ${uiState.selectedInsumo?.unitOfMeasure?.label().orEmpty()} " +
-                                "a ${formatCurrency(uiState.unitCost!!, uiState.currency)} c/u",
+                            stringResource(
+                                Res.string.admin_new_purchase_computed_summary_label,
+                                formatQuantity(uiState.quantity!!),
+                                uiState.selectedInsumo?.unitOfMeasure?.label().orEmpty(),
+                                formatCurrency(uiState.unitCost!!, uiState.currency)
+                            ),
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -165,7 +196,7 @@ fun AdminNewPurchaseScreen(
                     OutlinedTextField(
                         value = uiState.quantityText,
                         onValueChange = viewModel::onQuantityChanged,
-                        label = { Text("Cantidad") },
+                        label = { Text(stringResource(Res.string.admin_new_purchase_quantity_label)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -174,7 +205,7 @@ fun AdminNewPurchaseScreen(
                     OutlinedTextField(
                         value = uiState.unitCostText,
                         onValueChange = viewModel::onUnitCostChanged,
-                        label = { Text("Costo unitario") },
+                        label = { Text(stringResource(Res.string.admin_packaging_form_unit_cost_label)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -183,7 +214,7 @@ fun AdminNewPurchaseScreen(
             item {
                 AlmacaprinaCard {
                     Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                        Text("Total", style = MaterialTheme.typography.titleSmall)
+                        Text(stringResource(Res.string.admin_new_batch_total_label), style = MaterialTheme.typography.titleSmall)
                         Text(formatCurrency(uiState.totalCost, uiState.currency), style = MaterialTheme.typography.titleSmall)
                     }
                 }
@@ -192,21 +223,21 @@ fun AdminNewPurchaseScreen(
                 OutlinedTextField(
                     value = uiState.notes,
                     onValueChange = viewModel::onNotesChanged,
-                    label = { Text("Notas (opcional)") },
+                    label = { Text(stringResource(Res.string.weighing_entry_notes_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedButton(onClick = onCancel, modifier = Modifier.fillMaxWidth().weight(1f)) {
-                        Text("Cancelar")
+                        Text(stringResource(Res.string.common_cancel))
                     }
                     Button(
                         onClick = { viewModel.save(onSaved) },
                         enabled = uiState.isValid && !uiState.isSaving,
                         modifier = Modifier.fillMaxWidth().weight(1f)
                     ) {
-                        if (uiState.isSaving) CircularProgressIndicator(modifier = Modifier.fillMaxWidth()) else Text("Guardar")
+                        if (uiState.isSaving) CircularProgressIndicator(modifier = Modifier.fillMaxWidth()) else Text(stringResource(Res.string.common_save_button))
                     }
                 }
             }

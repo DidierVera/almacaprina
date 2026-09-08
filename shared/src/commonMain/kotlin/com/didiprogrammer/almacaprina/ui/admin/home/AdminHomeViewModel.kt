@@ -1,5 +1,12 @@
 package com.didiprogrammer.almacaprina.ui.admin.home
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_home_alert_birth_expected
+import almacaprina.shared.generated.resources.admin_home_alert_health_upcoming
+import almacaprina.shared.generated.resources.admin_home_alert_insumo_low_stock_one
+import almacaprina.shared.generated.resources.admin_home_alert_insumo_low_stock_other
+import almacaprina.shared.generated.resources.admin_home_alert_weighing_overdue
+import almacaprina.shared.generated.resources.common_error_load_failed
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.business.costPerLiter
@@ -58,6 +65,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.getString
 
 /** Bundle de los datos crudos que necesita "Inicio" — se piden todos en paralelo, ver [AdminHomeViewModel.load]. */
 private data class AdminHomeRawData(
@@ -211,7 +219,7 @@ class AdminHomeViewModel(
                 recomputeFinancialSummary(_uiState.value.financialPeriod)
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: "No se pudo cargar la información") }
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: getString(Res.string.common_error_load_failed)) }
             }
         }
     }
@@ -256,7 +264,7 @@ class AdminHomeViewModel(
         )
     }
 
-    private fun buildAlerts(
+    private suspend fun buildAlerts(
         healthRecords: List<HealthRecord>,
         weightRecords: List<WeightRecord>,
         goats: List<Goat>,
@@ -274,7 +282,7 @@ class AdminHomeViewModel(
             alerts += HomeAlert(
                 id = "health_${record.id}",
                 type = HomeAlertType.VACCINE,
-                message = "$label próxima el ${record.nextSuggestedDate}"
+                message = getString(Res.string.admin_home_alert_health_upcoming, label, record.nextSuggestedDate.toString())
             )
         }
 
@@ -282,7 +290,7 @@ class AdminHomeViewModel(
             alerts += HomeAlert(
                 id = "weighing_${goat.id}",
                 type = HomeAlertType.WEIGHING,
-                message = "Pesada vencida: ${goat.name} (${goat.tagNumber})"
+                message = getString(Res.string.admin_home_alert_weighing_overdue, goat.name, goat.tagNumber)
             )
         }
 
@@ -291,16 +299,17 @@ class AdminHomeViewModel(
             alerts += HomeAlert(
                 id = "birth_${event.id}",
                 type = HomeAlertType.BIRTH,
-                message = "Parto esperado el $expectedDate"
+                message = getString(Res.string.admin_home_alert_birth_expected, expectedDate.toString())
             )
         }
 
         insumoLowStockAlerts(insumos, purchases, feedingRecords, healthRecords, batchUsages, careTasks).forEach { alert ->
             val days = alert.daysRemaining.toInt()
+            val template = if (days == 1) Res.string.admin_home_alert_insumo_low_stock_one else Res.string.admin_home_alert_insumo_low_stock_other
             alerts += HomeAlert(
                 id = "insumo_${alert.insumo.id}",
                 type = HomeAlertType.INSUMO,
-                message = "${alert.insumo.name}: quedan $days ${if (days == 1) "día" else "días"}"
+                message = getString(template, alert.insumo.name, days)
             )
         }
 

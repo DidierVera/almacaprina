@@ -1,5 +1,8 @@
 package com.didiprogrammer.almacaprina.ui.admin.compras
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_new_batch_unspecified_fallback
+import almacaprina.shared.generated.resources.admin_purchase_history_error_load
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.domain.model.Insumo
@@ -18,6 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
+import org.jetbrains.compose.resources.getString
 
 /** Bundle de los datos crudos del historial — se piden todos en paralelo, ver [AdminPurchaseHistoryViewModel.load]. */
 private data class AdminPurchaseHistoryRawData(
@@ -63,16 +67,17 @@ class AdminPurchaseHistoryViewModel(
                         currency = currencyDeferred.await()
                     )
                 }
+                val unspecifiedFallback = getString(Res.string.admin_new_batch_unspecified_fallback)
                 val items = purchases.map { purchase ->
                     val name = purchase.insumoId?.let { insumosById[it]?.name }
                         ?: purchase.packagingId?.let { packagingsById[it]?.name }
-                        ?: "Sin especificar"
+                        ?: unspecifiedFallback
                     PurchaseHistoryItem(purchase = purchase, itemName = name)
                 }
                 _uiState.update { it.copy(isLoading = false, isRefreshing = false, allItems = items, currency = currency) }
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: "No se pudo cargar el historial de compras") }
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: getString(Res.string.admin_purchase_history_error_load)) }
             }
         }
     }

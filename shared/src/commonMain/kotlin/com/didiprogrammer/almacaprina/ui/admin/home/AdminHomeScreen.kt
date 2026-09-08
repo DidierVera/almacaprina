@@ -1,5 +1,28 @@
 package com.didiprogrammer.almacaprina.ui.admin.home
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_home_alerts_title
+import almacaprina.shared.generated.resources.admin_home_available_liters_label
+import almacaprina.shared.generated.resources.admin_home_cost_per_liter_label
+import almacaprina.shared.generated.resources.admin_home_financial_summary_title
+import almacaprina.shared.generated.resources.admin_home_goal_label
+import almacaprina.shared.generated.resources.admin_home_herd_dry_plural
+import almacaprina.shared.generated.resources.admin_home_herd_pregnant_plural
+import almacaprina.shared.generated.resources.admin_home_herd_status_title
+import almacaprina.shared.generated.resources.admin_home_herd_young_does_plural
+import almacaprina.shared.generated.resources.admin_home_new_batch_action
+import almacaprina.shared.generated.resources.admin_home_new_task_action
+import almacaprina.shared.generated.resources.admin_home_no_alerts_message
+import almacaprina.shared.generated.resources.admin_home_no_data_fallback
+import almacaprina.shared.generated.resources.admin_home_partial_error_prefix
+import almacaprina.shared.generated.resources.admin_home_pending_receivable_label
+import almacaprina.shared.generated.resources.admin_home_production_vs_goal_title
+import almacaprina.shared.generated.resources.admin_home_quick_actions_title
+import almacaprina.shared.generated.resources.admin_home_register_purchase_action
+import almacaprina.shared.generated.resources.admin_home_revenue_label
+import almacaprina.shared.generated.resources.admin_home_see_all_action
+import almacaprina.shared.generated.resources.goat_status_in_production
+import almacaprina.shared.generated.resources.login_app_name
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,6 +60,7 @@ import com.didiprogrammer.almacaprina.ui.theme.Spacing
 import com.didiprogrammer.almacaprina.ui.theme.Terracota
 import com.didiprogrammer.almacaprina.ui.theme.Tinta
 import com.didiprogrammer.almacaprina.ui.theme.Verde
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -67,14 +91,14 @@ fun AdminHomeScreen(
         ) {
             item {
                 Text(
-                    text = uiState.farmName.ifBlank { "Almacaprina" },
+                    text = uiState.farmName.ifBlank { stringResource(Res.string.login_app_name) },
                     style = MaterialTheme.typography.headlineMedium,
                     color = Tinta
                 )
             }
 
             uiState.errorMessage?.let { message ->
-                item { AlertRow(message = "No se pudo actualizar todo: $message") }
+                item { AlertRow(message = stringResource(Res.string.admin_home_partial_error_prefix, message)) }
             }
 
             item { ProductionVsGoalSection(uiState) }
@@ -104,7 +128,7 @@ fun AdminHomeScreen(
 @Composable
 private fun ProductionVsGoalSection(uiState: AdminHomeUiState) {
     StatCard(
-        title = "Producción vs. meta",
+        title = stringResource(Res.string.admin_home_production_vs_goal_title),
         value = "${formatLiters(uiState.todayLiters)} L"
     ) {
         LinearProgressIndicator(
@@ -114,12 +138,12 @@ private fun ProductionVsGoalSection(uiState: AdminHomeUiState) {
             trackColor = Riel
         )
         Text(
-            text = "Meta: ${formatLiters(uiState.targetLiters)} L/día",
+            text = stringResource(Res.string.admin_home_goal_label, formatLiters(uiState.targetLiters)),
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.padding(top = Spacing.sm)
         )
         Text(
-            text = "Litros disponibles: ${formatLiters(uiState.availableLiters)} L",
+            text = stringResource(Res.string.admin_home_available_liters_label, formatLiters(uiState.availableLiters)),
             style = MaterialTheme.typography.bodyMedium,
             color = Terracota,
             modifier = Modifier.padding(top = Spacing.xs)
@@ -132,12 +156,12 @@ private data class HerdStatusItem(val label: String, val count: Int, val filterK
 @Composable
 private fun HerdStatusSection(counts: HerdStatusCounts, onClick: (String) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-        SectionHeader(title = "Estado del hato")
+        SectionHeader(title = stringResource(Res.string.admin_home_herd_status_title))
         val items = listOf(
-            HerdStatusItem("En producción", counts.inProduction, "in_production"),
-            HerdStatusItem("Gestantes", counts.pregnant, "pregnant"),
-            HerdStatusItem("Secas", counts.dry, "dry"),
-            HerdStatusItem("Cabretonas", counts.youngDoes, "young_doe")
+            HerdStatusItem(stringResource(Res.string.goat_status_in_production), counts.inProduction, "in_production"),
+            HerdStatusItem(stringResource(Res.string.admin_home_herd_pregnant_plural), counts.pregnant, "pregnant"),
+            HerdStatusItem(stringResource(Res.string.admin_home_herd_dry_plural), counts.dry, "dry"),
+            HerdStatusItem(stringResource(Res.string.admin_home_herd_young_does_plural), counts.youngDoes, "young_doe")
         )
         // Grid manual de 2 columnas — items fijos y pocos, no hace falta LazyVerticalGrid
         // (que además no anida bien dentro del LazyColumn de esta pantalla).
@@ -160,13 +184,13 @@ private fun HerdStatusSection(counts: HerdStatusCounts, onClick: (String) -> Uni
 private fun AlertsSection(alerts: List<HomeAlert>, onSeeAllClick: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
         SectionHeader(
-            title = "Alertas",
-            actionLabel = if (alerts.size > 4) "Ver todas" else null,
+            title = stringResource(Res.string.admin_home_alerts_title),
+            actionLabel = if (alerts.size > 4) stringResource(Res.string.admin_home_see_all_action) else null,
             onActionClick = if (alerts.size > 4) onSeeAllClick else null
         )
         if (alerts.isEmpty()) {
             AlmacaprinaCard {
-                Text("Sin alertas pendientes por ahora.", style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(Res.string.admin_home_no_alerts_message), style = MaterialTheme.typography.bodyMedium)
             }
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
@@ -182,19 +206,19 @@ private fun FinancialSummarySection(
     onPeriodSelected: (FinancialPeriod) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-        SectionHeader(title = "Resumen financiero")
+        SectionHeader(title = stringResource(Res.string.admin_home_financial_summary_title))
         SegmentedRow(
             options = FinancialPeriod.entries,
             selected = uiState.financialPeriod,
             onSelect = onPeriodSelected,
-            label = { it.label }
+            label = { it.label() }
         )
         AlmacaprinaCard {
-            FinancialRow("Ingresos", formatCurrency(uiState.revenue, uiState.currency))
-            FinancialRow("Cartera pendiente", formatCurrency(uiState.pendingReceivable, uiState.currency))
+            FinancialRow(stringResource(Res.string.admin_home_revenue_label), formatCurrency(uiState.revenue, uiState.currency))
+            FinancialRow(stringResource(Res.string.admin_home_pending_receivable_label), formatCurrency(uiState.pendingReceivable, uiState.currency))
             FinancialRow(
-                "Costo por litro",
-                uiState.costPerLiter?.let { formatCurrency(it, uiState.currency) } ?: "Sin datos"
+                stringResource(Res.string.admin_home_cost_per_liter_label),
+                uiState.costPerLiter?.let { formatCurrency(it, uiState.currency) } ?: stringResource(Res.string.admin_home_no_data_fallback)
             )
         }
     }
@@ -218,11 +242,11 @@ private fun QuickActionsSection(
     onNuevaTareaClick: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-        SectionHeader(title = "Accesos rápidos")
+        SectionHeader(title = stringResource(Res.string.admin_home_quick_actions_title))
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            QuickActionButton("Registrar compra", Icons.Outlined.ShoppingCart, onRegistrarCompraClick)
-            QuickActionButton("Nuevo lote", Icons.Outlined.PrecisionManufacturing, onNuevoLoteClick)
-            QuickActionButton("Nueva tarea", Icons.Outlined.Event, onNuevaTareaClick)
+            QuickActionButton(stringResource(Res.string.admin_home_register_purchase_action), Icons.Outlined.ShoppingCart, onRegistrarCompraClick)
+            QuickActionButton(stringResource(Res.string.admin_home_new_batch_action), Icons.Outlined.PrecisionManufacturing, onNuevoLoteClick)
+            QuickActionButton(stringResource(Res.string.admin_home_new_task_action), Icons.Outlined.Event, onNuevaTareaClick)
         }
     }
 }

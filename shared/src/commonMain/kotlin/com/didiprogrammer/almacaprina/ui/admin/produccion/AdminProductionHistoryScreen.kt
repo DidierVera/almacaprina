@@ -31,8 +31,17 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.didiprogrammer.almacaprina.business.roundTo1Decimal
 import com.didiprogrammer.almacaprina.business.yieldRatio
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_production_history_all_filter
+import almacaprina.shared.generated.resources.admin_production_history_empty_message
+import almacaprina.shared.generated.resources.admin_production_history_liters_used_label
+import almacaprina.shared.generated.resources.admin_production_history_new_batch_content_description
+import almacaprina.shared.generated.resources.admin_production_history_responsible_label
+import almacaprina.shared.generated.resources.admin_production_history_yield_label
 import com.didiprogrammer.almacaprina.ui.components.AlmacaprinaCard
 import com.didiprogrammer.almacaprina.ui.components.RefreshableContent
+import com.didiprogrammer.almacaprina.ui.components.label
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Sección 4, pantalla 4.1 — Historial de lotes de producción. */
@@ -53,7 +62,7 @@ fun AdminProductionHistoryScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = onNewBatchClick) {
-                Icon(Icons.Filled.Add, contentDescription = "Nuevo lote")
+                Icon(Icons.Filled.Add, contentDescription = stringResource(Res.string.admin_production_history_new_batch_content_description))
             }
         }
     ) { padding ->
@@ -66,7 +75,7 @@ fun AdminProductionHistoryScreen(
                     FilterChip(
                         selected = uiState.selectedProductId == null,
                         onClick = { viewModel.onProductFilterSelected(null) },
-                        label = { Text("Todos") }
+                        label = { Text(stringResource(Res.string.admin_production_history_all_filter)) }
                     )
                 }
                 items(uiState.derivedProducts, key = { it.id }) { product ->
@@ -85,7 +94,7 @@ fun AdminProductionHistoryScreen(
             ) {
                 if (uiState.filteredItems.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-                        Text("Sin lotes de producción registrados todavía.", style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(Res.string.admin_production_history_empty_message), style = MaterialTheme.typography.bodyMedium)
                     }
                 } else {
                     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -109,7 +118,7 @@ private fun BatchRow(item: BatchHistoryItem) {
             }
             val ratio = item.batch.yieldRatio()
             Text(
-                text = "Rinde ${ratio?.let { roundTo1Decimal(it) } ?: "—"} L/unidad",
+                text = stringResource(Res.string.admin_production_history_yield_label, ratio?.let { roundTo1Decimal(it).toString() } ?: "—"),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -118,11 +127,11 @@ private fun BatchRow(item: BatchHistoryItem) {
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth().padding(top = 6.dp)
         ) {
-            Text("${roundTo1Decimal(item.batch.milkLitersUsed)} L usados", style = MaterialTheme.typography.bodyMedium)
-            Text("${item.batch.outputQuantity} ${item.productUnitLabel}", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(Res.string.admin_production_history_liters_used_label, roundTo1Decimal(item.batch.milkLitersUsed).toString()), style = MaterialTheme.typography.bodyMedium)
+            Text("${item.batch.outputQuantity} ${item.productUnit?.label() ?: ""}", style = MaterialTheme.typography.bodyMedium)
         }
         item.batch.responsible?.let {
-            Text("Responsable: $it", style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
+            Text(stringResource(Res.string.admin_production_history_responsible_label, it), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
         }
     }
 }

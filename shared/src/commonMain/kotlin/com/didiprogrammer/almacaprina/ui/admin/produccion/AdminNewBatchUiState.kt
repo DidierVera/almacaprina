@@ -1,23 +1,45 @@
 package com.didiprogrammer.almacaprina.ui.admin.produccion
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.batch_wizard_step_cantidad
+import almacaprina.shared.generated.resources.batch_wizard_step_confirmar
+import almacaprina.shared.generated.resources.batch_wizard_step_insumos
+import almacaprina.shared.generated.resources.batch_wizard_step_litros
+import almacaprina.shared.generated.resources.batch_wizard_step_producto
+import almacaprina.shared.generated.resources.batch_wizard_step_responsable
+import androidx.compose.runtime.Composable
 import com.didiprogrammer.almacaprina.domain.model.Insumo
 import com.didiprogrammer.almacaprina.domain.model.Product
+import com.didiprogrammer.almacaprina.domain.model.UnitOfMeasure
 import kotlinx.datetime.LocalDate
+import org.jetbrains.compose.resources.stringResource
 
-enum class BatchWizardStep(val title: String) {
-    PRODUCTO("Producto"),
-    LITROS("Litros de leche"),
-    CANTIDAD("Cantidad obtenida"),
-    INSUMOS("Insumos usados"),
-    RESPONSABLE("Fecha y responsable"),
-    CONFIRMAR("Confirmar")
+enum class BatchWizardStep {
+    PRODUCTO,
+    LITROS,
+    CANTIDAD,
+    INSUMOS,
+    RESPONSABLE,
+    CONFIRMAR
 }
+
+@Composable
+fun BatchWizardStep.title(): String = stringResource(
+    when (this) {
+        BatchWizardStep.PRODUCTO -> Res.string.batch_wizard_step_producto
+        BatchWizardStep.LITROS -> Res.string.batch_wizard_step_litros
+        BatchWizardStep.CANTIDAD -> Res.string.batch_wizard_step_cantidad
+        BatchWizardStep.INSUMOS -> Res.string.batch_wizard_step_insumos
+        BatchWizardStep.RESPONSABLE -> Res.string.batch_wizard_step_responsable
+        BatchWizardStep.CONFIRMAR -> Res.string.batch_wizard_step_confirmar
+    }
+)
 
 /** Una fila editable de insumo usado en el lote — prellenada desde ProductRecipeItem. */
 data class BatchInsumoUsageEntry(
     val insumoId: String,
     val insumoName: String,
-    val unitOfMeasureLabel: String,
+    val unitOfMeasure: UnitOfMeasure?,
     val quantityUsed: Double,
     val unitCostAtTime: Double
 ) {

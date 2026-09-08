@@ -1,5 +1,15 @@
 package com.didiprogrammer.almacaprina.ui.ventas.nueva
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.common_continue
+import almacaprina.shared.generated.resources.new_sale_cantidad_default_title
+import almacaprina.shared.generated.resources.new_sale_cantidad_default_unit_label
+import almacaprina.shared.generated.resources.new_sale_cantidad_packaging_deposit_suffix
+import almacaprina.shared.generated.resources.new_sale_cantidad_packaging_hint
+import almacaprina.shared.generated.resources.new_sale_cantidad_packaging_no_deposit
+import almacaprina.shared.generated.resources.new_sale_cantidad_packaging_section_title
+import almacaprina.shared.generated.resources.new_sale_cantidad_partial_total_label
+import almacaprina.shared.generated.resources.new_sale_cantidad_unit_equivalence
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +50,7 @@ import com.didiprogrammer.almacaprina.ui.theme.Superficie
 import com.didiprogrammer.almacaprina.ui.theme.Tinta
 import com.didiprogrammer.almacaprina.ui.theme.TintaSuave
 import com.didiprogrammer.almacaprina.ui.theme.Verde
+import org.jetbrains.compose.resources.stringResource
 
 private const val QUANTITY_STEP = 1.0
 
@@ -58,12 +69,12 @@ fun NewSaleCantidadScreen(
             Surface(color = Fondo) {
                 Column(modifier = Modifier.fillMaxWidth().padding(Spacing.xxl)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Total parcial", style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
+                        Text(stringResource(Res.string.new_sale_cantidad_partial_total_label), style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
                         Text(formatCurrency(uiState.total, uiState.currency), style = MaterialTheme.typography.headlineSmall, color = Tinta)
                     }
                     androidx.compose.foundation.layout.Spacer(Modifier.size(Spacing.md))
                     PrimaryButton(
-                        text = "Continuar",
+                        text = stringResource(Res.string.common_continue),
                         enabled = uiState.canContinueFromCantidad,
                         onClick = onContinue,
                         modifier = Modifier.fillMaxWidth()
@@ -88,14 +99,14 @@ fun NewSaleCantidadScreen(
                 }
 
                 item {
-                    val unitLabel = product?.saleUnit?.label()?.lowercase() ?: "unidades"
+                    val unitLabel = product?.saleUnit?.label()?.lowercase() ?: stringResource(Res.string.new_sale_cantidad_default_unit_label)
                     Surface(modifier = Modifier.fillMaxWidth(), shape = ShapeExtraLarge, color = Superficie, border = BorderStroke(1.dp, Borde)) {
                         Column(modifier = Modifier.fillMaxWidth().padding(Spacing.xl)) {
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text(product?.saleUnit?.label() ?: "Cantidad", style = MaterialTheme.typography.titleSmall, color = Tinta)
+                                Text(product?.saleUnit?.label() ?: stringResource(Res.string.new_sale_cantidad_default_title), style = MaterialTheme.typography.titleSmall, color = Tinta)
                                 if (product != null) {
                                     Text(
-                                        "1 unidad = 1 $unitLabel · ${formatCurrency(product.defaultUnitPrice, uiState.currency)}",
+                                        stringResource(Res.string.new_sale_cantidad_unit_equivalence, unitLabel, formatCurrency(product.defaultUnitPrice, uiState.currency)),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = TintaSuave
                                     )
@@ -139,7 +150,7 @@ fun NewSaleCantidadScreen(
                     }
                 }
 
-                item { Text("Envase", style = MaterialTheme.typography.titleSmall, color = Tinta) }
+                item { Text(stringResource(Res.string.new_sale_cantidad_packaging_section_title), style = MaterialTheme.typography.titleSmall, color = Tinta) }
 
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
@@ -157,9 +168,9 @@ fun NewSaleCantidadScreen(
                                     Text(packaging.name, style = MaterialTheme.typography.titleSmall, color = if (selected) Verde else Tinta)
                                     Text(
                                         if (packaging.isReturnable) {
-                                            "+${formatCurrency(packaging.depositAmount ?: 0.0, uiState.currency)} depósito c/u"
+                                            stringResource(Res.string.new_sale_cantidad_packaging_deposit_suffix, formatCurrency(packaging.depositAmount ?: 0.0, uiState.currency))
                                         } else {
-                                            "Sin depósito"
+                                            stringResource(Res.string.new_sale_cantidad_packaging_no_deposit)
                                         },
                                         style = MaterialTheme.typography.bodySmall,
                                         color = TintaSuave
@@ -172,8 +183,7 @@ fun NewSaleCantidadScreen(
 
                 item {
                     Text(
-                        "Por ahora todos los productos pasan por el mismo selector de envase; " +
-                            "no hay lógica distinta por producto en esta iteración.",
+                        stringResource(Res.string.new_sale_cantidad_packaging_hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = TintaSuave
                     )

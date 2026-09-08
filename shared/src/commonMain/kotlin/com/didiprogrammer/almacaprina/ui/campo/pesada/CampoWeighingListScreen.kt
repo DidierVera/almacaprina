@@ -1,5 +1,10 @@
 package com.didiprogrammer.almacaprina.ui.campo.pesada
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.weighing_list_empty_message
+import almacaprina.shared.generated.resources.weighing_list_eyebrow
+import almacaprina.shared.generated.resources.weighing_list_tag_prefix
+import almacaprina.shared.generated.resources.weighing_list_title
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,6 +30,7 @@ import com.didiprogrammer.almacaprina.ui.components.ScreenHeaderWithBack
 import com.didiprogrammer.almacaprina.ui.theme.Spacing
 import com.didiprogrammer.almacaprina.ui.theme.Tinta
 import com.didiprogrammer.almacaprina.ui.theme.TintaSuave
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Campo · Pesada — lista de cabras con pesada vencida. */
@@ -53,19 +59,25 @@ fun CampoWeighingListScreen(
                 contentPadding = PaddingValues(Spacing.xxl),
                 verticalArrangement = Arrangement.spacedBy(Spacing.md)
             ) {
-                item { ScreenHeaderWithBack(eyebrow = "Pesadas", title = "Pesadas pendientes", onBack = onBack) }
+                item {
+                    ScreenHeaderWithBack(
+                        eyebrow = stringResource(Res.string.weighing_list_eyebrow),
+                        title = stringResource(Res.string.weighing_list_title),
+                        onBack = onBack
+                    )
+                }
 
                 if (uiState.overdueGoats.isEmpty()) {
                     item {
                         Box(modifier = Modifier.fillMaxWidth().padding(Spacing.xl)) {
-                            Text("No hay pesadas vencidas por ahora.", style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
+                            Text(stringResource(Res.string.weighing_list_empty_message), style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
                         }
                     }
                 } else {
                     items(uiState.overdueGoats, key = { it.id }) { goat ->
                         AlmacaprinaCard(onClick = { onGoatClick(goat.id) }) {
                             Text(goat.name, style = MaterialTheme.typography.titleSmall, color = Tinta)
-                            Text("Arete ${goat.tagNumber}", style = MaterialTheme.typography.bodySmall, color = TintaSuave)
+                            Text(stringResource(Res.string.weighing_list_tag_prefix, goat.tagNumber), style = MaterialTheme.typography.bodySmall, color = TintaSuave)
                         }
                     }
                 }

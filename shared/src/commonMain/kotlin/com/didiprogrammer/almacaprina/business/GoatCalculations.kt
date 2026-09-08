@@ -1,5 +1,23 @@
 package com.didiprogrammer.almacaprina.business
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.goat_age_days_one
+import almacaprina.shared.generated.resources.goat_age_days_other
+import almacaprina.shared.generated.resources.goat_age_months_one
+import almacaprina.shared.generated.resources.goat_age_months_other
+import almacaprina.shared.generated.resources.goat_age_years_months
+import almacaprina.shared.generated.resources.goat_age_years_one
+import almacaprina.shared.generated.resources.goat_age_years_other
+import almacaprina.shared.generated.resources.goat_context_age_prefix
+import almacaprina.shared.generated.resources.goat_context_birth_in_days
+import almacaprina.shared.generated.resources.goat_context_last_weighing
+import almacaprina.shared.generated.resources.goat_context_milk_today
+import almacaprina.shared.generated.resources.goat_context_no_exit_reason
+import almacaprina.shared.generated.resources.goat_context_no_milking_today
+import almacaprina.shared.generated.resources.goat_context_no_weighings
+import almacaprina.shared.generated.resources.goat_context_pregnant_fallback
+import almacaprina.shared.generated.resources.goat_no_data_registered
+import androidx.compose.runtime.Composable
 import com.didiprogrammer.almacaprina.domain.model.BreedPercentage
 import com.didiprogrammer.almacaprina.domain.model.Goat
 import com.didiprogrammer.almacaprina.domain.model.GoatStatus
@@ -10,6 +28,8 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.monthsUntil
 import kotlinx.datetime.periodUntil
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Edad mínima (en meses) a partir de la cual una cabra recién dada de alta se considera
@@ -32,13 +52,13 @@ fun isLikelyAdult(birthDate: LocalDate?, today: LocalDate): Boolean =
     birthDate == null || ageInMonths(birthDate, today) >= GOAT_ADULT_AGE_MONTHS
 
 /** Etiqueta legible de edad para el header de la ficha técnica (ej. "1 año 3 m", "5 meses"). */
-fun ageLabel(birthDate: LocalDate, today: LocalDate): String {
+suspend fun ageLabel(birthDate: LocalDate, today: LocalDate): String {
     val period = birthDate.periodUntil(today)
     return when {
-        period.years > 0 && period.months > 0 -> "${period.years} a ${period.months} m"
-        period.years > 0 -> "${period.years} ${if (period.years == 1) "año" else "años"}"
-        period.months > 0 -> "${period.months} ${if (period.months == 1) "mes" else "meses"}"
-        else -> "${period.days} ${if (period.days == 1) "día" else "días"}"
+        period.years > 0 && period.months > 0 -> getString(Res.string.goat_age_years_months, period.years, period.months)
+        period.years > 0 -> getString(if (period.years == 1) Res.string.goat_age_years_one else Res.string.goat_age_years_other, period.years)
+        period.months > 0 -> getString(if (period.months == 1) Res.string.goat_age_months_one else Res.string.goat_age_months_other, period.months)
+        else -> getString(if (period.days == 1) Res.string.goat_age_days_one else Res.string.goat_age_days_other, period.days)
     }
 }
 
@@ -54,18 +74,21 @@ fun lactationNumber(goatId: String, reproductiveEvents: List<ReproductiveEvent>)
  * Dato contextual rápido que se muestra en la fila de la lista de Hato — varía según
  * el estado actual de la cabra (spec: "dato contextual rápido según estado").
  */
-fun goatContextualInfo(
+suspend fun goatContextualInfo(
     goat: Goat,
     today: LocalDate,
     milkLitersToday: Double?,
     nextExpectedBirth: LocalDate?,
     lastWeightDate: LocalDate?
 ): String = when (goat.currentStatus) {
-    GoatStatus.IN_PRODUCTION -> milkLitersToday?.let { "${roundTo1Decimal(it)} L hoy" } ?: "Sin ordeño hoy"
-    GoatStatus.PREGNANT -> nextExpectedBirth?.let { "Parto en ${today.daysUntil(it)} días" } ?: "Gestante"
-    GoatStatus.DRY -> lastWeightDate?.let { "Última pesada: hace ${it.daysUntil(today)} días" } ?: "Sin pesadas registradas"
-    GoatStatus.YOUNG_DOE, GoatStatus.KID, GoatStatus.BREEDING_BUCK -> "Edad: ${ageLabel(goat.birthDate, today)}"
-    GoatStatus.RETIRED, GoatStatus.DECEASED -> goat.exitReason ?: "Sin motivo registrado"
+    GoatStatus.IN_PRODUCTION -> milkLitersToday?.let { getString(Res.string.goat_context_milk_today, roundTo1Decimal(it).toString()) }
+        ?: getString(Res.string.goat_context_no_milking_today)
+    GoatStatus.PREGNANT -> nextExpectedBirth?.let { getString(Res.string.goat_context_birth_in_days, today.daysUntil(it)) }
+        ?: getString(Res.string.goat_context_pregnant_fallback)
+    GoatStatus.DRY -> lastWeightDate?.let { getString(Res.string.goat_context_last_weighing, it.daysUntil(today)) }
+        ?: getString(Res.string.goat_context_no_weighings)
+    GoatStatus.YOUNG_DOE, GoatStatus.KID, GoatStatus.BREEDING_BUCK -> getString(Res.string.goat_context_age_prefix, ageLabel(goat.birthDate, today))
+    GoatStatus.RETIRED, GoatStatus.DECEASED -> goat.exitReason ?: getString(Res.string.goat_context_no_exit_reason)
 }
 
 /**
@@ -90,9 +113,10 @@ fun averageBreedComposition(
 fun breedCompositionTotal(composition: List<BreedPercentage>): Double = composition.sumOf { it.percentage }
 
 /** Etiqueta legible para la ficha técnica (ej. "100% Alpina", "50% Alpina · 50% Nubia"). */
+@Composable
 fun breedCompositionLabel(composition: List<BreedPercentage>): String =
     if (composition.isEmpty()) {
-        "Sin registrar"
+        stringResource(Res.string.goat_no_data_registered)
     } else {
         composition.joinToString(" · ") { "${roundTo1Decimal(it.percentage)}% ${it.breedName}" }
     }

@@ -1,5 +1,42 @@
 package com.didiprogrammer.almacaprina.ui.admin.hato
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_goat_detail_father_label
+import almacaprina.shared.generated.resources.admin_goat_detail_mother_label
+import almacaprina.shared.generated.resources.admin_goat_detail_origin_born
+import almacaprina.shared.generated.resources.admin_goat_detail_origin_label
+import almacaprina.shared.generated.resources.admin_goat_detail_origin_purchased
+import almacaprina.shared.generated.resources.admin_goat_detail_sex_female
+import almacaprina.shared.generated.resources.admin_goat_detail_sex_label
+import almacaprina.shared.generated.resources.admin_goat_detail_sex_male
+import almacaprina.shared.generated.resources.admin_goat_form_add_breed_button
+import almacaprina.shared.generated.resources.admin_goat_form_birth_date_label
+import almacaprina.shared.generated.resources.admin_goat_form_breed_composition_hint
+import almacaprina.shared.generated.resources.admin_goat_form_breed_composition_label
+import almacaprina.shared.generated.resources.admin_goat_form_breed_name_label
+import almacaprina.shared.generated.resources.admin_goat_form_breed_total_label
+import almacaprina.shared.generated.resources.admin_goat_form_change_photo_button
+import almacaprina.shared.generated.resources.admin_goat_form_choose_photo_button
+import almacaprina.shared.generated.resources.admin_goat_form_current_status_label
+import almacaprina.shared.generated.resources.admin_goat_form_edit_title
+import almacaprina.shared.generated.resources.admin_goat_form_external_father_description_label
+import almacaprina.shared.generated.resources.admin_goat_form_father_external_label
+import almacaprina.shared.generated.resources.admin_goat_form_father_internal_label
+import almacaprina.shared.generated.resources.admin_goat_form_goat_with_tag
+import almacaprina.shared.generated.resources.admin_goat_form_initial_status_label
+import almacaprina.shared.generated.resources.admin_goat_form_name_label
+import almacaprina.shared.generated.resources.admin_goat_form_new_title
+import almacaprina.shared.generated.resources.admin_goat_form_photo_label
+import almacaprina.shared.generated.resources.admin_goat_form_pick_father_title
+import almacaprina.shared.generated.resources.admin_goat_form_pick_mother_title
+import almacaprina.shared.generated.resources.admin_goat_form_remove_breed_content_description
+import almacaprina.shared.generated.resources.admin_goat_form_remove_photo_button
+import almacaprina.shared.generated.resources.admin_goat_form_select_unknown_female
+import almacaprina.shared.generated.resources.admin_goat_form_select_unknown_male
+import almacaprina.shared.generated.resources.admin_goat_form_tag_number_label
+import almacaprina.shared.generated.resources.admin_goat_form_weaning_date_label
+import almacaprina.shared.generated.resources.common_cancel
+import almacaprina.shared.generated.resources.common_save_button
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -56,6 +93,7 @@ import com.didiprogrammer.almacaprina.ui.components.label
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import com.preat.peekaboo.image.picker.toImageBitmap
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -87,7 +125,7 @@ fun AdminGoatFormScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(if (uiState.isEditing) "Editar cabra" else "Nueva cabra") }) },
+        topBar = { TopAppBar(title = { Text(stringResource(if (uiState.isEditing) Res.string.admin_goat_form_edit_title else Res.string.admin_goat_form_new_title)) }) },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         if (uiState.isLoading) {
@@ -106,7 +144,7 @@ fun AdminGoatFormScreen(
                 OutlinedTextField(
                     value = uiState.name,
                     onValueChange = viewModel::onNameChanged,
-                    label = { Text("Nombre") },
+                    label = { Text(stringResource(Res.string.admin_goat_form_name_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -115,34 +153,33 @@ fun AdminGoatFormScreen(
                 OutlinedTextField(
                     value = uiState.tagNumber,
                     onValueChange = viewModel::onTagNumberChanged,
-                    label = { Text("Número de arete") },
+                    label = { Text(stringResource(Res.string.admin_goat_form_tag_number_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
             }
             item {
                 Column {
-                    Text("Sexo")
+                    Text(stringResource(Res.string.admin_goat_detail_sex_label))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         FilterChip(
                             selected = uiState.sex == GoatSex.FEMALE,
                             onClick = { viewModel.onSexChanged(GoatSex.FEMALE) },
-                            label = { Text("Hembra") }
+                            label = { Text(stringResource(Res.string.admin_goat_detail_sex_female)) }
                         )
                         FilterChip(
                             selected = uiState.sex == GoatSex.MALE,
                             onClick = { viewModel.onSexChanged(GoatSex.MALE) },
-                            label = { Text("Macho") }
+                            label = { Text(stringResource(Res.string.admin_goat_detail_sex_male)) }
                         )
                     }
                 }
             }
             item {
                 Column {
-                    Text("Composición racial (opcional)")
+                    Text(stringResource(Res.string.admin_goat_form_breed_composition_label))
                     Text(
-                        "100% de una raza o una mezcla. Si nace en la finca y eliges madre y padre " +
-                            "del hato, se calcula sola — igual puedes ajustarla a mano.",
+                        stringResource(Res.string.admin_goat_form_breed_composition_hint),
                         style = MaterialTheme.typography.bodySmall
                     )
                     uiState.breedRows.forEach { row ->
@@ -153,7 +190,7 @@ fun AdminGoatFormScreen(
                             OutlinedTextField(
                                 value = row.breedName,
                                 onValueChange = { viewModel.onBreedRowNameChanged(row.rowId, it) },
-                                label = { Text("Raza") },
+                                label = { Text(stringResource(Res.string.admin_goat_form_breed_name_label)) },
                                 modifier = Modifier.weight(1f),
                                 singleLine = true
                             )
@@ -165,17 +202,17 @@ fun AdminGoatFormScreen(
                                 singleLine = true
                             )
                             IconButton(onClick = { viewModel.onRemoveBreedRow(row.rowId) }) {
-                                Icon(Icons.Outlined.Close, contentDescription = "Quitar raza")
+                                Icon(Icons.Outlined.Close, contentDescription = stringResource(Res.string.admin_goat_form_remove_breed_content_description))
                             }
                         }
                     }
                     TextButton(onClick = viewModel::onAddBreedRow) {
                         Icon(Icons.Outlined.Add, contentDescription = null)
-                        Text(" Agregar raza")
+                        Text(" " + stringResource(Res.string.admin_goat_form_add_breed_button))
                     }
                     if (uiState.breedRows.isNotEmpty()) {
                         Text(
-                            "Total: ${formatQuantity(uiState.breedCompositionTotal)}%",
+                            stringResource(Res.string.admin_goat_form_breed_total_label, formatQuantity(uiState.breedCompositionTotal)),
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -183,75 +220,75 @@ fun AdminGoatFormScreen(
             }
             item {
                 DateField(
-                    label = "Fecha de nacimiento",
+                    label = stringResource(Res.string.admin_goat_form_birth_date_label),
                     date = uiState.birthDate,
                     onDateSelected = viewModel::onBirthDateChanged
                 )
             }
             item {
                 DateField(
-                    label = "Fecha de destete (opcional)",
+                    label = stringResource(Res.string.admin_goat_form_weaning_date_label),
                     date = uiState.weaningDate,
                     onDateSelected = viewModel::onWeaningDateChanged
                 )
             }
             item {
                 Column {
-                    Text("Madre")
+                    Text(stringResource(Res.string.admin_goat_detail_mother_label))
                     OutlinedButton(onClick = { showMotherPicker = true }, modifier = Modifier.fillMaxWidth()) {
-                        Text(uiState.mother?.let { "${it.name} (arete ${it.tagNumber})" } ?: "Seleccionar / desconocida")
+                        Text(uiState.mother?.let { stringResource(Res.string.admin_goat_form_goat_with_tag, it.name, it.tagNumber) } ?: stringResource(Res.string.admin_goat_form_select_unknown_female))
                     }
                 }
             }
             item {
                 Column {
-                    Text("Padre")
+                    Text(stringResource(Res.string.admin_goat_detail_father_label))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         FilterChip(
                             selected = !fatherIsExternal,
                             onClick = { fatherIsExternal = false; viewModel.onExternalFatherDescriptionChanged("") },
-                            label = { Text("Del hato") }
+                            label = { Text(stringResource(Res.string.admin_goat_form_father_internal_label)) }
                         )
                         FilterChip(
                             selected = fatherIsExternal,
                             onClick = { fatherIsExternal = true; viewModel.onFatherSelected(null) },
-                            label = { Text("Semental externo") }
+                            label = { Text(stringResource(Res.string.admin_goat_form_father_external_label)) }
                         )
                     }
                     if (fatherIsExternal) {
                         OutlinedTextField(
                             value = uiState.externalFatherDescription,
                             onValueChange = viewModel::onExternalFatherDescriptionChanged,
-                            label = { Text("Descripción del semental externo") },
+                            label = { Text(stringResource(Res.string.admin_goat_form_external_father_description_label)) },
                             modifier = Modifier.fillMaxWidth()
                         )
                     } else {
                         OutlinedButton(onClick = { showFatherPicker = true }, modifier = Modifier.fillMaxWidth()) {
-                            Text(uiState.father?.let { "${it.name} (arete ${it.tagNumber})" } ?: "Seleccionar / desconocido")
+                            Text(uiState.father?.let { stringResource(Res.string.admin_goat_form_goat_with_tag, it.name, it.tagNumber) } ?: stringResource(Res.string.admin_goat_form_select_unknown_male))
                         }
                     }
                 }
             }
             item {
                 Column {
-                    Text("Origen")
+                    Text(stringResource(Res.string.admin_goat_detail_origin_label))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         FilterChip(
                             selected = uiState.origin == GoatOrigin.BORN_ON_FARM,
                             onClick = { viewModel.onOriginChanged(GoatOrigin.BORN_ON_FARM) },
-                            label = { Text("Nacida en la finca") }
+                            label = { Text(stringResource(Res.string.admin_goat_detail_origin_born)) }
                         )
                         FilterChip(
                             selected = uiState.origin == GoatOrigin.PURCHASED,
                             onClick = { viewModel.onOriginChanged(GoatOrigin.PURCHASED) },
-                            label = { Text("Comprada") }
+                            label = { Text(stringResource(Res.string.admin_goat_detail_origin_purchased)) }
                         )
                     }
                 }
             }
             item {
                 Column {
-                    Text("Foto (opcional)")
+                    Text(stringResource(Res.string.admin_goat_form_photo_label))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -285,10 +322,10 @@ fun AdminGoatFormScreen(
                             }
                         }
                         OutlinedButton(onClick = { imagePickerLauncher.launch() }) {
-                            Text(if (uiState.hasPhoto) "Cambiar foto" else "Elegir foto")
+                            Text(stringResource(if (uiState.hasPhoto) Res.string.admin_goat_form_change_photo_button else Res.string.admin_goat_form_choose_photo_button))
                         }
                         if (uiState.hasPhoto) {
-                            TextButton(onClick = viewModel::onPhotoCleared) { Text("Quitar") }
+                            TextButton(onClick = viewModel::onPhotoCleared) { Text(stringResource(Res.string.admin_goat_form_remove_photo_button)) }
                         }
                     }
                 }
@@ -296,7 +333,7 @@ fun AdminGoatFormScreen(
             if (uiState.requiresInitialStatus) {
                 item {
                     Column {
-                        Text("Estado inicial (requerido para compras de cabras adultas)")
+                        Text(stringResource(Res.string.admin_goat_form_initial_status_label))
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(
                                 listOf(GoatStatus.IN_PRODUCTION, GoatStatus.PREGNANT, GoatStatus.DRY, GoatStatus.BREEDING_BUCK)
@@ -314,7 +351,7 @@ fun AdminGoatFormScreen(
             if (uiState.isEditing) {
                 item {
                     Column {
-                        Text("Estado actual")
+                        Text(stringResource(Res.string.admin_goat_form_current_status_label))
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(GoatStatus.entries) { status ->
                                 FilterChip(
@@ -330,7 +367,7 @@ fun AdminGoatFormScreen(
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedButton(onClick = onCancel, modifier = Modifier.fillMaxWidth().weight(1f)) {
-                        Text("Cancelar")
+                        Text(stringResource(Res.string.common_cancel))
                     }
                     Button(
                         onClick = { viewModel.save(onSaved) },
@@ -340,7 +377,7 @@ fun AdminGoatFormScreen(
                         if (uiState.isSaving) {
                             CircularProgressIndicator(modifier = Modifier.fillMaxWidth())
                         } else {
-                            Text("Guardar")
+                            Text(stringResource(Res.string.common_save_button))
                         }
                     }
                 }
@@ -350,7 +387,7 @@ fun AdminGoatFormScreen(
 
     if (showMotherPicker) {
         GoatPickerDialog(
-            title = "Seleccionar madre",
+            title = stringResource(Res.string.admin_goat_form_pick_mother_title),
             candidates = uiState.availableMothers,
             onDismiss = { showMotherPicker = false },
             onSelect = { goat -> viewModel.onMotherSelected(goat); showMotherPicker = false }
@@ -358,7 +395,7 @@ fun AdminGoatFormScreen(
     }
     if (showFatherPicker) {
         GoatPickerDialog(
-            title = "Seleccionar padre",
+            title = stringResource(Res.string.admin_goat_form_pick_father_title),
             candidates = uiState.availableFathers,
             onDismiss = { showFatherPicker = false },
             onSelect = { goat -> viewModel.onFatherSelected(goat); showFatherPicker = false }

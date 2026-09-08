@@ -33,7 +33,22 @@ import com.didiprogrammer.almacaprina.domain.model.CareTaskAnimalGroup
 import com.didiprogrammer.almacaprina.domain.model.CareTaskFrequency
 import com.didiprogrammer.almacaprina.domain.model.CareTaskType
 import com.didiprogrammer.almacaprina.domain.model.TimeOfDay
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_care_task_active_label
+import almacaprina.shared.generated.resources.admin_care_task_form_animal_group_label
+import almacaprina.shared.generated.resources.admin_care_task_form_edit_title
+import almacaprina.shared.generated.resources.admin_care_task_form_frequency_label
+import almacaprina.shared.generated.resources.admin_care_task_form_no_insumos_message
+import almacaprina.shared.generated.resources.admin_care_task_form_quantity_label
+import almacaprina.shared.generated.resources.admin_care_task_form_time_of_day_label
+import almacaprina.shared.generated.resources.admin_goat_form_name_label
+import almacaprina.shared.generated.resources.admin_health_event_type_label
+import almacaprina.shared.generated.resources.admin_home_new_task_action
+import almacaprina.shared.generated.resources.admin_recipe_item_insumo_label
+import almacaprina.shared.generated.resources.common_cancel
+import almacaprina.shared.generated.resources.common_save_button
 import com.didiprogrammer.almacaprina.ui.components.label
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -53,7 +68,7 @@ fun AdminCareTaskFormScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(if (uiState.isEditing) "Editar tarea" else "Nueva tarea") }) },
+        topBar = { TopAppBar(title = { Text(stringResource(if (uiState.isEditing) Res.string.admin_care_task_form_edit_title else Res.string.admin_home_new_task_action)) }) },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         LazyColumn(
@@ -65,14 +80,14 @@ fun AdminCareTaskFormScreen(
                 OutlinedTextField(
                     value = uiState.name,
                     onValueChange = viewModel::onNameChanged,
-                    label = { Text("Nombre") },
+                    label = { Text(stringResource(Res.string.admin_goat_form_name_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
             }
             item {
                 Column {
-                    Text("Tipo")
+                    Text(stringResource(Res.string.admin_health_event_type_label))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         items(CareTaskType.entries) { type ->
                             FilterChip(
@@ -87,9 +102,9 @@ fun AdminCareTaskFormScreen(
             if (uiState.needsInsumo) {
                 item {
                     Column {
-                        Text("Insumo")
+                        Text(stringResource(Res.string.admin_recipe_item_insumo_label))
                         if (uiState.insumos.isEmpty()) {
-                            Text("Sin insumos en el catálogo. Crea uno en Catálogo > Insumos.")
+                            Text(stringResource(Res.string.admin_care_task_form_no_insumos_message))
                         } else {
                             LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 items(uiState.insumos, key = { it.id }) { insumo ->
@@ -109,7 +124,7 @@ fun AdminCareTaskFormScreen(
                     OutlinedTextField(
                         value = uiState.quantityPerOccurrenceText,
                         onValueChange = viewModel::onQuantityChanged,
-                        label = { Text("Cantidad esperada por ocurrencia") },
+                        label = { Text(stringResource(Res.string.admin_care_task_form_quantity_label)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -117,7 +132,7 @@ fun AdminCareTaskFormScreen(
             }
             item {
                 Column {
-                    Text("Frecuencia")
+                    Text(stringResource(Res.string.admin_care_task_form_frequency_label))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         items(CareTaskFrequency.entries) { freq ->
                             FilterChip(
@@ -131,7 +146,7 @@ fun AdminCareTaskFormScreen(
             }
             item {
                 Column {
-                    Text("Grupo de animales (opcional)")
+                    Text(stringResource(Res.string.admin_care_task_form_animal_group_label))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         items(CareTaskAnimalGroup.entries) { group ->
                             FilterChip(
@@ -147,7 +162,7 @@ fun AdminCareTaskFormScreen(
             }
             item {
                 Column {
-                    Text("Momento del día (opcional)")
+                    Text(stringResource(Res.string.admin_care_task_form_time_of_day_label))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         items(TimeOfDay.entries) { time ->
                             FilterChip(
@@ -161,21 +176,21 @@ fun AdminCareTaskFormScreen(
             }
             item {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Activa")
+                    Text(stringResource(Res.string.admin_care_task_active_label))
                     Switch(checked = uiState.active, onCheckedChange = viewModel::onActiveChanged)
                 }
             }
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedButton(onClick = onCancel, modifier = Modifier.fillMaxWidth().weight(1f)) {
-                        Text("Cancelar")
+                        Text(stringResource(Res.string.common_cancel))
                     }
                     Button(
                         onClick = { viewModel.save(onSaved) },
                         enabled = uiState.isValid && !uiState.isSaving,
                         modifier = Modifier.fillMaxWidth().weight(1f)
                     ) {
-                        if (uiState.isSaving) CircularProgressIndicator(modifier = Modifier.fillMaxWidth()) else Text("Guardar")
+                        if (uiState.isSaving) CircularProgressIndicator(modifier = Modifier.fillMaxWidth()) else Text(stringResource(Res.string.common_save_button))
                     }
                 }
             }

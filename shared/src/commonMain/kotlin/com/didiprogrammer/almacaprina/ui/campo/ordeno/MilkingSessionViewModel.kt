@@ -1,5 +1,8 @@
 package com.didiprogrammer.almacaprina.ui.campo.ordeno
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.milking_session_error_load
+import almacaprina.shared.generated.resources.milking_session_error_save
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.business.lactationNumber
@@ -24,6 +27,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.getString
 
 private data class MilkingRawData(
     val goats: List<Goat>,
@@ -87,7 +91,7 @@ class MilkingSessionViewModel(
                 _uiState.update { it.copy(isLoading = false, isEveningSession = isEvening, entries = entries) }
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: "No se pudo cargar la sesión de ordeño") }
+                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: getString(Res.string.milking_session_error_load)) }
             }
         }
     }
@@ -127,7 +131,7 @@ class MilkingSessionViewModel(
                 onSaved()
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: "No se pudo guardar el ordeño") }
+                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: getString(Res.string.milking_session_error_save)) }
             }
         }
     }
@@ -149,7 +153,7 @@ class MilkingSessionViewModel(
                 onSaved()
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: "No se pudo guardar el ordeño") }
+                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: getString(Res.string.milking_session_error_save)) }
             }
         }
     }

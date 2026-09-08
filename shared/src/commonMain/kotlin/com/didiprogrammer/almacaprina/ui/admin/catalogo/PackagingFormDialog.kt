@@ -1,5 +1,14 @@
 package com.didiprogrammer.almacaprina.ui.admin.catalogo
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_goat_form_name_label
+import almacaprina.shared.generated.resources.admin_packaging_form_deposit_label
+import almacaprina.shared.generated.resources.admin_packaging_form_edit_title
+import almacaprina.shared.generated.resources.admin_packaging_form_new_title
+import almacaprina.shared.generated.resources.admin_packaging_form_returnable_label
+import almacaprina.shared.generated.resources.admin_packaging_form_unit_cost_label
+import almacaprina.shared.generated.resources.common_cancel
+import almacaprina.shared.generated.resources.common_save_button
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.didiprogrammer.almacaprina.domain.model.Packaging
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Catálogo > Envases > "+ Nuevo envase" / editar uno existente.
@@ -43,25 +53,25 @@ fun PackagingFormDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (existing == null) "Nuevo envase" else "Editar envase") },
+        title = { Text(stringResource(if (existing == null) Res.string.admin_packaging_form_new_title else Res.string.admin_packaging_form_edit_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Nombre") },
+                    label = { Text(stringResource(Res.string.admin_goat_form_name_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Retornable")
+                    Text(stringResource(Res.string.admin_packaging_form_returnable_label))
                     Switch(checked = isReturnable, onCheckedChange = { isReturnable = it })
                 }
                 if (isReturnable) {
                     OutlinedTextField(
                         value = depositText,
                         onValueChange = { depositText = it },
-                        label = { Text("Depósito") },
+                        label = { Text(stringResource(Res.string.admin_packaging_form_deposit_label)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -69,7 +79,7 @@ fun PackagingFormDialog(
                 OutlinedTextField(
                     value = unitCostText,
                     onValueChange = { unitCostText = it },
-                    label = { Text("Costo unitario") },
+                    label = { Text(stringResource(Res.string.admin_packaging_form_unit_cost_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -81,8 +91,8 @@ fun PackagingFormDialog(
                 onClick = {
                     unitCost?.let { onSave(name.trim(), isReturnable, if (isReturnable) deposit else null, it) }
                 }
-            ) { Text("Guardar") }
+            ) { Text(stringResource(Res.string.common_save_button)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.common_cancel)) } }
     )
 }

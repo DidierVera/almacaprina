@@ -1,5 +1,7 @@
 package com.didiprogrammer.almacaprina.ui.admin.hato
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_goat_form_error_save
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.business.averageBreedComposition
@@ -21,6 +23,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.getString
 
 /**
  * Sección 2, pantalla 2.3 — Alta y edición de una cabra en un mismo formulario.
@@ -192,7 +195,7 @@ class AdminGoatFormViewModel(
                 onSaved()
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isSaving = false, isUploadingPhoto = false, errorMessage = t.message ?: "No se pudo guardar la cabra") }
+                _uiState.update { it.copy(isSaving = false, isUploadingPhoto = false, errorMessage = t.message ?: getString(Res.string.admin_goat_form_error_save)) }
             }
         }
     }

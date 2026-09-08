@@ -1,5 +1,11 @@
 package com.didiprogrammer.almacaprina.ui.ventas.pendientes
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.pending_detail_error_load
+import almacaprina.shared.generated.resources.pending_detail_error_mark_all_paid
+import almacaprina.shared.generated.resources.pending_detail_error_mark_paid
+import almacaprina.shared.generated.resources.pending_detail_item_deposit_word
+import almacaprina.shared.generated.resources.pending_detail_unknown_customer_fallback
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.business.formatQuantity
@@ -26,6 +32,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.getString
 
 private data class PendingDetailRawData(
     val customer: Customer?,
@@ -80,7 +87,11 @@ class PendingSalesDetailViewModel(
                 val items = pendingSales.map { sale ->
                     val product = productsById[sale.productId]
                     val packaging = sale.packagingId?.let { packagingsById[it] }
-                    val depositSuffix = if ((sale.newPackagingUnitsCount ?: 0) > 0) " + ${sale.newPackagingUnitsCount} depósitos" else ""
+                    val depositSuffix = if ((sale.newPackagingUnitsCount ?: 0) > 0) {
+                        " + " + getString(Res.string.pending_detail_item_deposit_word, sale.newPackagingUnitsCount ?: 0)
+                    } else {
+                        ""
+                    }
                     val packagingSuffix = packaging?.let { " · ${it.name.lowercase()}" } ?: ""
                     PendingSaleItem(
                         saleId = sale.id,
@@ -94,7 +105,7 @@ class PendingSalesDetailViewModel(
                     it.copy(
                         isLoading = false,
                         currency = raw.currency,
-                        customerName = raw.customer?.name ?: "Cliente",
+                        customerName = raw.customer?.name ?: getString(Res.string.pending_detail_unknown_customer_fallback),
                         totalPending = items.sumOf { item -> item.amount },
                         daysSinceOldest = pendingSales.minOfOrNull { it.date }?.daysUntil(today) ?: 0,
                         items = items
@@ -102,7 +113,7 @@ class PendingSalesDetailViewModel(
                 }
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: "No se pudo cargar el detalle") }
+                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: getString(Res.string.pending_detail_error_load)) }
             }
         }
     }
@@ -117,7 +128,7 @@ class PendingSalesDetailViewModel(
                 load()
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: "No se pudo marcar como pagada") }
+                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: getString(Res.string.pending_detail_error_mark_paid)) }
             }
         }
     }
@@ -132,7 +143,7 @@ class PendingSalesDetailViewModel(
                 load()
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: "No se pudo marcar todo como pagado") }
+                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: getString(Res.string.pending_detail_error_mark_all_paid)) }
             }
         }
     }

@@ -1,5 +1,7 @@
 package com.didiprogrammer.almacaprina.ui.admin.compras
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_new_purchase_error_save
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.domain.model.PackagingInventory
@@ -23,6 +25,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.getString
 
 /**
  * Sección 5, pantalla 5.2 — Nueva compra. Implementa las dos reglas de negocio
@@ -127,7 +130,7 @@ class AdminNewPurchaseViewModel(
                 onSaved()
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: "No se pudo guardar la compra") }
+                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: getString(Res.string.admin_new_purchase_error_save)) }
             }
         }
     }

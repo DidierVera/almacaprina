@@ -1,5 +1,24 @@
 package com.didiprogrammer.almacaprina.ui.admin.hato
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_health_event_cost_label
+import almacaprina.shared.generated.resources.admin_health_event_description_label
+import almacaprina.shared.generated.resources.admin_health_event_dialog_title
+import almacaprina.shared.generated.resources.admin_health_event_dosage_label
+import almacaprina.shared.generated.resources.admin_health_event_insumo_label
+import almacaprina.shared.generated.resources.admin_health_event_next_date_label
+import almacaprina.shared.generated.resources.admin_health_event_quantity_label
+import almacaprina.shared.generated.resources.admin_health_event_type_label
+import almacaprina.shared.generated.resources.admin_health_event_veterinarian_label
+import almacaprina.shared.generated.resources.admin_health_event_withdrawal_days_label
+import almacaprina.shared.generated.resources.common_cancel
+import almacaprina.shared.generated.resources.common_save_button
+import almacaprina.shared.generated.resources.health_record_type_deworming
+import almacaprina.shared.generated.resources.health_record_type_diagnosis
+import almacaprina.shared.generated.resources.health_record_type_routine_checkup
+import almacaprina.shared.generated.resources.health_record_type_treatment
+import almacaprina.shared.generated.resources.health_record_type_vaccine
+import almacaprina.shared.generated.resources.weighing_entry_date_label
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +46,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.stringResource
 
 data class HealthEventFormResult(
     val date: LocalDate,
@@ -61,15 +81,15 @@ fun RegisterHealthEventDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Registrar evento de salud") },
+        title = { Text(stringResource(Res.string.admin_health_event_dialog_title)) },
         text = {
             Column(
                 modifier = Modifier.heightIn(max = 480.dp).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                DateField(label = "Fecha", date = date, onDateSelected = { date = it })
+                DateField(label = stringResource(Res.string.weighing_entry_date_label), date = date, onDateSelected = { date = it })
 
-                Text("Tipo")
+                Text(stringResource(Res.string.admin_health_event_type_label))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     items(HealthRecordType.entries) { t ->
                         FilterChip(
@@ -83,12 +103,12 @@ fun RegisterHealthEventDialog(
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Descripción") },
+                    label = { Text(stringResource(Res.string.admin_health_event_description_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 if (veterinaryInsumos.isNotEmpty()) {
-                    Text("Insumo aplicado (opcional)")
+                    Text(stringResource(Res.string.admin_health_event_insumo_label))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         items(veterinaryInsumos) { insumo ->
                             FilterChip(
@@ -103,40 +123,40 @@ fun RegisterHealthEventDialog(
                 OutlinedTextField(
                     value = dosage,
                     onValueChange = { dosage = it },
-                    label = { Text("Dosis (ej. \"5 ml\")") },
+                    label = { Text(stringResource(Res.string.admin_health_event_dosage_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = quantityUsed,
                     onValueChange = { quantityUsed = it },
-                    label = { Text("Cantidad consumida (unidad del insumo)") },
+                    label = { Text(stringResource(Res.string.admin_health_event_quantity_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = milkWithdrawalDays,
                     onValueChange = { milkWithdrawalDays = it },
-                    label = { Text("Días de retiro de leche (opcional)") },
+                    label = { Text(stringResource(Res.string.admin_health_event_withdrawal_days_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = cost,
                     onValueChange = { cost = it },
-                    label = { Text("Costo (opcional)") },
+                    label = { Text(stringResource(Res.string.admin_health_event_cost_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = veterinarian,
                     onValueChange = { veterinarian = it },
-                    label = { Text("Veterinario (opcional)") },
+                    label = { Text(stringResource(Res.string.admin_health_event_veterinarian_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 DateField(
-                    label = "Próxima fecha sugerida (opcional)",
+                    label = stringResource(Res.string.admin_health_event_next_date_label),
                     date = nextSuggestedDate,
                     onDateSelected = { nextSuggestedDate = it }
                 )
@@ -158,16 +178,19 @@ fun RegisterHealthEventDialog(
                         nextSuggestedDate = nextSuggestedDate
                     )
                 )
-            }) { Text("Guardar") }
+            }) { Text(stringResource(Res.string.common_save_button)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.common_cancel)) } }
     )
 }
 
-private fun HealthRecordType.spanishLabel(): String = when (this) {
-    HealthRecordType.VACCINE -> "Vacuna"
-    HealthRecordType.DEWORMING -> "Desparasitación"
-    HealthRecordType.TREATMENT -> "Tratamiento"
-    HealthRecordType.ROUTINE_CHECKUP -> "Revisión de rutina"
-    HealthRecordType.DIAGNOSIS -> "Diagnóstico"
-}
+@Composable
+private fun HealthRecordType.spanishLabel(): String = stringResource(
+    when (this) {
+        HealthRecordType.VACCINE -> Res.string.health_record_type_vaccine
+        HealthRecordType.DEWORMING -> Res.string.health_record_type_deworming
+        HealthRecordType.TREATMENT -> Res.string.health_record_type_treatment
+        HealthRecordType.ROUTINE_CHECKUP -> Res.string.health_record_type_routine_checkup
+        HealthRecordType.DIAGNOSIS -> Res.string.health_record_type_diagnosis
+    }
+)

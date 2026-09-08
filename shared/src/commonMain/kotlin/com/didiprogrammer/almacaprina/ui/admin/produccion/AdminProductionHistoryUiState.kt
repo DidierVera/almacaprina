@@ -2,11 +2,12 @@ package com.didiprogrammer.almacaprina.ui.admin.produccion
 
 import com.didiprogrammer.almacaprina.domain.model.Product
 import com.didiprogrammer.almacaprina.domain.model.ProductionBatch
+import com.didiprogrammer.almacaprina.domain.model.SaleUnit
 
 data class BatchHistoryItem(
     val batch: ProductionBatch,
     val productName: String,
-    val productUnitLabel: String
+    val productUnit: SaleUnit?
 )
 
 data class AdminProductionHistoryUiState(

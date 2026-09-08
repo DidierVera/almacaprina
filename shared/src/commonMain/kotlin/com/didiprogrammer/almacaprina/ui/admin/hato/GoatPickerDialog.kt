@@ -1,5 +1,10 @@
 package com.didiprogrammer.almacaprina.ui.admin.hato
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_goat_form_goat_with_tag
+import almacaprina.shared.generated.resources.admin_goat_picker_none_option
+import almacaprina.shared.generated.resources.admin_hato_search_placeholder
+import almacaprina.shared.generated.resources.common_close
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.didiprogrammer.almacaprina.domain.model.Goat
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Selector con buscador interno para elegir madre/padre entre las cabras ya
@@ -48,7 +54,7 @@ fun GoatPickerDialog(
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
-                    placeholder = { Text("Buscar por nombre o arete") },
+                    placeholder = { Text(stringResource(Res.string.admin_hato_search_placeholder)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -58,18 +64,18 @@ fun GoatPickerDialog(
                 ) {
                     item {
                         TextButton(onClick = { onSelect(null) }) {
-                            Text("Ninguna / desconocida")
+                            Text(stringResource(Res.string.admin_goat_picker_none_option))
                         }
                     }
                     items(filtered, key = { it.id }) { goat ->
                         TextButton(onClick = { onSelect(goat) }) {
-                            Text("${goat.name} (arete ${goat.tagNumber})")
+                            Text(stringResource(Res.string.admin_goat_form_goat_with_tag, goat.name, goat.tagNumber))
                         }
                     }
                 }
             }
         },
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cerrar") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.common_close)) } }
     )
 }

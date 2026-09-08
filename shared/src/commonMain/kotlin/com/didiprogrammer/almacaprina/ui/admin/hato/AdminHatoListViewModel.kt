@@ -1,5 +1,7 @@
 package com.didiprogrammer.almacaprina.ui.admin.hato
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_hato_error_load
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.business.expectedBirthDateOrNull
@@ -27,6 +29,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.getString
 
 /** Bundle de los datos crudos de la lista — se piden todos en paralelo, ver [AdminHatoListViewModel.load]. */
 private data class AdminHatoListRawData(
@@ -98,22 +101,22 @@ class AdminHatoListViewModel(
                 applyFilters(today)
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: "No se pudo cargar el hato") }
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: getString(Res.string.admin_hato_error_load)) }
             }
         }
     }
 
     fun onSearchQueryChanged(query: String) {
         _uiState.update { it.copy(searchQuery = query) }
-        applyFilters(Clock.System.todayIn(TimeZone.currentSystemDefault()))
+        viewModelScope.launch { applyFilters(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
     }
 
     fun onStatusFilterSelected(status: GoatStatus?) {
         _uiState.update { it.copy(selectedStatus = status) }
-        applyFilters(Clock.System.todayIn(TimeZone.currentSystemDefault()))
+        viewModelScope.launch { applyFilters(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
     }
 
-    private fun applyFilters(today: LocalDate) {
+    private suspend fun applyFilters(today: LocalDate) {
         val query = _uiState.value.searchQuery.trim().lowercase()
         val status = _uiState.value.selectedStatus
 

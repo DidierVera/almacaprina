@@ -1,5 +1,8 @@
 package com.didiprogrammer.almacaprina.ui.ventas.pendientes
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.pending_list_deleted_customer_fallback
+import almacaprina.shared.generated.resources.pending_list_error_load
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.business.pendingBalancesByCustomer
@@ -21,6 +24,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.getString
 
 private data class PendingListRawData(
     val sales: List<Sale>,
@@ -67,6 +71,7 @@ class PendingSalesListViewModel(
                 val customersById = raw.customers.associateBy { it.id }
                 val packagingsById = raw.packagings.associateBy { it.id }
                 val balances = pendingBalancesByCustomer(raw.sales, packagingsById)
+                val deletedCustomerFallback = getString(Res.string.pending_list_deleted_customer_fallback)
 
                 _uiState.update {
                     it.copy(
@@ -78,7 +83,7 @@ class PendingSalesListViewModel(
                         items = balances.map { balance ->
                             PendingCustomerItem(
                                 customerId = balance.customerId,
-                                customerName = customersById[balance.customerId]?.name ?: "Cliente eliminado",
+                                customerName = customersById[balance.customerId]?.name ?: deletedCustomerFallback,
                                 totalPending = balance.totalPending,
                                 pendingSalesCount = balance.pendingSalesCount,
                                 daysSinceOldest = balance.oldestPendingDate.daysUntil(today)
@@ -88,7 +93,7 @@ class PendingSalesListViewModel(
                 }
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: "No se pudo cargar la cartera pendiente") }
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: getString(Res.string.pending_list_error_load)) }
             }
         }
     }

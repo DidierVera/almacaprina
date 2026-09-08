@@ -1,5 +1,14 @@
 package com.didiprogrammer.almacaprina.ui.campo.ordeno
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.milking_session_evening_label
+import almacaprina.shared.generated.resources.milking_session_finish_button
+import almacaprina.shared.generated.resources.milking_session_morning_label
+import almacaprina.shared.generated.resources.milking_session_pending_label
+import almacaprina.shared.generated.resources.milking_session_registered_count
+import almacaprina.shared.generated.resources.milking_session_registered_label
+import almacaprina.shared.generated.resources.milking_session_today_header
+import almacaprina.shared.generated.resources.milking_session_unmilked_label
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -38,6 +47,7 @@ import com.didiprogrammer.almacaprina.ui.theme.Verde
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.stringResource
 
 /** Campo · Ordeño — lista de la sesión. Ver mockups campo-Registrar ordeño-selection-session*.png. */
 @Composable
@@ -61,7 +71,7 @@ fun MilkingSessionScreen(
             if (uiState.allHandled) {
                 Surface(color = Fondo) {
                     PrimaryButton(
-                        text = "Finalizar sesión",
+                        text = stringResource(Res.string.milking_session_finish_button),
                         onClick = onFinishSession,
                         modifier = Modifier.fillMaxWidth().padding(24.dp)
                     )
@@ -82,10 +92,18 @@ fun MilkingSessionScreen(
             ) {
                 item {
                     Column {
-                        Text("HOY · ${formatLongSpanishDate(today)}".uppercase(), style = MaterialTheme.typography.labelSmall, color = TintaSuave)
-                        Text(uiState.sessionLabel, style = MaterialTheme.typography.displaySmall, color = Tinta)
                         Text(
-                            "${uiState.registeredCount} de ${uiState.totalCount} registradas",
+                            stringResource(Res.string.milking_session_today_header, formatLongSpanishDate(today)).uppercase(),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = TintaSuave
+                        )
+                        Text(
+                            stringResource(if (uiState.isEveningSession) Res.string.milking_session_evening_label else Res.string.milking_session_morning_label),
+                            style = MaterialTheme.typography.displaySmall,
+                            color = Tinta
+                        )
+                        Text(
+                            stringResource(Res.string.milking_session_registered_count, uiState.registeredCount, uiState.totalCount),
                             style = MaterialTheme.typography.titleLarge,
                             color = Tinta
                         )
@@ -104,7 +122,7 @@ fun MilkingSessionScreen(
                             Column {
                                 Text(entry.goat.name, style = MaterialTheme.typography.titleSmall, color = Tinta)
                                 Text(
-                                    "${entry.goat.tagNumber} · ${if (entry.registered) "registrada" else "pendiente"}",
+                                    "${entry.goat.tagNumber} · ${stringResource(if (entry.registered) Res.string.milking_session_registered_label else Res.string.milking_session_pending_label)}",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = TintaSuave
                                 )
@@ -112,7 +130,7 @@ fun MilkingSessionScreen(
                             if (entry.sessionLiters != null) {
                                 Text("${formatQuantity(entry.sessionLiters)} L", style = MaterialTheme.typography.titleMedium, color = Verde)
                             } else if (entry.noMilkingReason != null) {
-                                Text("sin ordeñar", style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
+                                Text(stringResource(Res.string.milking_session_unmilked_label), style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
                             }
                         }
                     }

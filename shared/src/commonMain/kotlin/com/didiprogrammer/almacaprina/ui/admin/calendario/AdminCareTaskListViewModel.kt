@@ -1,5 +1,7 @@
 package com.didiprogrammer.almacaprina.ui.admin.calendario
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_care_task_list_error_load
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.domain.repository.CareTaskRepository
@@ -11,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 
 /** Sección 6, pantalla 6.1 — Lista de tareas del calendario de cuidado. */
 class AdminCareTaskListViewModel(
@@ -45,7 +48,7 @@ class AdminCareTaskListViewModel(
                 _uiState.update { it.copy(isLoading = false, isRefreshing = false, items = items) }
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: "No se pudo cargar el calendario") }
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: getString(Res.string.admin_care_task_list_error_load)) }
             }
         }
     }

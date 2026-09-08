@@ -23,7 +23,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_care_task_list_title
+import almacaprina.shared.generated.resources.admin_mas_ajustes_label
+import almacaprina.shared.generated.resources.admin_mas_compras_label
+import almacaprina.shared.generated.resources.admin_tab_mas
 import com.didiprogrammer.almacaprina.ui.components.AlmacaprinaCard
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Sección "Más" del bottom navigation: despliega Compras, Calendario de tareas y
@@ -35,20 +41,20 @@ fun AdminMasMenuScreen(
     onCalendarioClick: () -> Unit,
     onAjustesClick: () -> Unit
 ) {
-    Scaffold(topBar = { TopAppBar(title = { Text("Más") }) }) { padding ->
+    Scaffold(topBar = { TopAppBar(title = { Text(stringResource(Res.string.admin_tab_mas)) }) }) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item {
-                MasMenuRow(icon = Icons.Outlined.ShoppingCart, label = "Compras", onClick = onComprasClick)
+                MasMenuRow(icon = Icons.Outlined.ShoppingCart, label = stringResource(Res.string.admin_mas_compras_label), onClick = onComprasClick)
             }
             item {
-                MasMenuRow(icon = Icons.AutoMirrored.Outlined.EventNote, label = "Calendario de tareas", onClick = onCalendarioClick)
+                MasMenuRow(icon = Icons.AutoMirrored.Outlined.EventNote, label = stringResource(Res.string.admin_care_task_list_title), onClick = onCalendarioClick)
             }
             item {
-                MasMenuRow(icon = Icons.Outlined.Settings, label = "Ajustes", onClick = onAjustesClick)
+                MasMenuRow(icon = Icons.Outlined.Settings, label = stringResource(Res.string.admin_mas_ajustes_label), onClick = onAjustesClick)
             }
         }
     }

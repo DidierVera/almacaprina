@@ -1,17 +1,34 @@
 package com.didiprogrammer.almacaprina.ui.admin.catalogo
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.catalogo_sub_tab_envases
+import almacaprina.shared.generated.resources.catalogo_sub_tab_insumos
+import almacaprina.shared.generated.resources.catalogo_sub_tab_productos
+import almacaprina.shared.generated.resources.catalogo_sub_tab_recetas
+import androidx.compose.runtime.Composable
 import com.didiprogrammer.almacaprina.domain.model.Insumo
 import com.didiprogrammer.almacaprina.domain.model.Packaging
 import com.didiprogrammer.almacaprina.domain.model.Product
 import com.didiprogrammer.almacaprina.domain.model.ProductCategory
 import com.didiprogrammer.almacaprina.domain.model.ProductRecipeItem
+import org.jetbrains.compose.resources.stringResource
 
-enum class CatalogoSubTab(val label: String) {
-    PRODUCTOS("Productos"),
-    ENVASES("Envases"),
-    INSUMOS("Insumos"),
-    RECETAS("Recetas")
+enum class CatalogoSubTab {
+    PRODUCTOS,
+    ENVASES,
+    INSUMOS,
+    RECETAS
 }
+
+@Composable
+fun CatalogoSubTab.label(): String = stringResource(
+    when (this) {
+        CatalogoSubTab.PRODUCTOS -> Res.string.catalogo_sub_tab_productos
+        CatalogoSubTab.ENVASES -> Res.string.catalogo_sub_tab_envases
+        CatalogoSubTab.INSUMOS -> Res.string.catalogo_sub_tab_insumos
+        CatalogoSubTab.RECETAS -> Res.string.catalogo_sub_tab_recetas
+    }
+)
 
 data class AdminCatalogoUiState(
     val isLoading: Boolean = true,

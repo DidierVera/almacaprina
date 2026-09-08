@@ -1,5 +1,14 @@
 package com.didiprogrammer.almacaprina.ui.campo.pesada
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.common_save_button
+import almacaprina.shared.generated.resources.common_saving_button
+import almacaprina.shared.generated.resources.weighing_entry_bcs_label
+import almacaprina.shared.generated.resources.weighing_entry_date_label
+import almacaprina.shared.generated.resources.weighing_entry_eyebrow
+import almacaprina.shared.generated.resources.weighing_entry_notes_label
+import almacaprina.shared.generated.resources.weighing_entry_weight_label
+import almacaprina.shared.generated.resources.weighing_list_tag_prefix
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,6 +36,7 @@ import com.didiprogrammer.almacaprina.ui.components.RefreshableContent
 import com.didiprogrammer.almacaprina.ui.components.ScreenHeaderWithBack
 import com.didiprogrammer.almacaprina.ui.theme.Spacing
 import com.didiprogrammer.almacaprina.ui.theme.TintaSuave
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -62,27 +72,27 @@ fun CampoWeighingEntryScreen(
             ) {
                 item {
                     ScreenHeaderWithBack(
-                        eyebrow = "Registrar pesada",
+                        eyebrow = stringResource(Res.string.weighing_entry_eyebrow),
                         title = uiState.goat?.name ?: "",
                         onBack = onBack,
-                        subtitle = uiState.goat?.tagNumber?.let { "Arete $it" }
+                        subtitle = uiState.goat?.tagNumber?.let { stringResource(Res.string.weighing_list_tag_prefix, it) }
                     )
                 }
                 item {
-                    DateField(label = "Fecha", date = uiState.date, onDateSelected = viewModel::onDateChanged)
+                    DateField(label = stringResource(Res.string.weighing_entry_date_label), date = uiState.date, onDateSelected = viewModel::onDateChanged)
                 }
                 item {
                     OutlinedTextField(
                         value = uiState.weightText,
                         onValueChange = viewModel::onWeightChanged,
-                        label = { Text("Peso (kg)") },
+                        label = { Text(stringResource(Res.string.weighing_entry_weight_label)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
                 }
                 item {
                     Column {
-                        Text("Body Condition Score (1-5, opcional)", style = MaterialTheme.typography.bodySmall, color = TintaSuave)
+                        Text(stringResource(Res.string.weighing_entry_bcs_label), style = MaterialTheme.typography.bodySmall, color = TintaSuave)
                         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                             (1..5).forEach { score ->
                                 FilterChip(
@@ -98,13 +108,13 @@ fun CampoWeighingEntryScreen(
                     OutlinedTextField(
                         value = uiState.notes,
                         onValueChange = viewModel::onNotesChanged,
-                        label = { Text("Notas (opcional)") },
+                        label = { Text(stringResource(Res.string.weighing_entry_notes_label)) },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
                 item {
                     PrimaryButton(
-                        text = if (uiState.isSaving) "Guardando…" else "Guardar",
+                        text = if (uiState.isSaving) stringResource(Res.string.common_saving_button) else stringResource(Res.string.common_save_button),
                         enabled = uiState.isValid && !uiState.isSaving,
                         loading = uiState.isSaving,
                         onClick = viewModel::save,

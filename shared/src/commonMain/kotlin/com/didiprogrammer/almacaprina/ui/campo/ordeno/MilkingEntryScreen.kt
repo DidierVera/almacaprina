@@ -1,5 +1,24 @@
 package com.didiprogrammer.almacaprina.ui.campo.ordeno
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.common_cancel
+import almacaprina.shared.generated.resources.milking_entry_back_button
+import almacaprina.shared.generated.resources.milking_entry_editing_badge
+import almacaprina.shared.generated.resources.milking_entry_lactation_suffix
+import almacaprina.shared.generated.resources.milking_entry_liters_label
+import almacaprina.shared.generated.resources.milking_entry_mark_unmilked_button
+import almacaprina.shared.generated.resources.milking_entry_reason_dialog_goat_fallback
+import almacaprina.shared.generated.resources.milking_entry_reason_dialog_message
+import almacaprina.shared.generated.resources.milking_entry_reason_dialog_title
+import almacaprina.shared.generated.resources.milking_entry_reason_dry
+import almacaprina.shared.generated.resources.milking_entry_reason_other
+import almacaprina.shared.generated.resources.milking_entry_reason_sick
+import almacaprina.shared.generated.resources.milking_entry_reason_under_treatment
+import almacaprina.shared.generated.resources.milking_entry_save_button
+import almacaprina.shared.generated.resources.milking_entry_save_correction_button
+import almacaprina.shared.generated.resources.milking_entry_step_label
+import almacaprina.shared.generated.resources.milking_entry_use_keypad_button
+import almacaprina.shared.generated.resources.milking_entry_use_stepper_button
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +58,7 @@ import com.didiprogrammer.almacaprina.ui.theme.Terracota
 import com.didiprogrammer.almacaprina.ui.theme.Tinta
 import com.didiprogrammer.almacaprina.ui.theme.TintaSuave
 import com.didiprogrammer.almacaprina.ui.theme.Verde
+import org.jetbrains.compose.resources.stringResource
 
 private const val LITER_STEP = 0.1
 
@@ -63,11 +83,11 @@ fun MilkingEntryScreen(
     Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding).padding(Spacing.xxl)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                TextButton(onClick = onBack) { Text("‹ Volver") }
+                TextButton(onClick = onBack) { Text(stringResource(Res.string.milking_entry_back_button)) }
                 if (entry?.registered == true) {
                     Surface(shape = ShapeLarge, color = com.didiprogrammer.almacaprina.ui.theme.AmbarFondo) {
                         Text(
-                            "Editando registro",
+                            stringResource(Res.string.milking_entry_editing_badge),
                             style = MaterialTheme.typography.labelMedium,
                             color = com.didiprogrammer.almacaprina.ui.theme.AmbarTexto,
                             modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm)
@@ -79,13 +99,19 @@ fun MilkingEntryScreen(
             Spacer(Modifier.height(Spacing.md))
             Text(entry?.goat?.name ?: "", style = MaterialTheme.typography.displaySmall, color = Tinta)
             Text(
-                "${entry?.goat?.tagNumber ?: ""} · ${entry?.lactationNumber ?: 0}ª lactancia",
+                "${entry?.goat?.tagNumber ?: ""} · ${stringResource(Res.string.milking_entry_lactation_suffix, entry?.lactationNumber ?: 0)}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = TintaSuave
             )
 
             Spacer(Modifier.height(Spacing.xxl))
-            Text("LITROS DE ESTA SESIÓN", style = MaterialTheme.typography.labelMedium, color = TintaSuave, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+            Text(
+                stringResource(Res.string.milking_entry_liters_label),
+                style = MaterialTheme.typography.labelMedium,
+                color = TintaSuave,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.Bottom) {
                 Text(uiState.currentLitersText, style = MaterialTheme.typography.displayLarge, color = Tinta)
                 Text(" L", style = MaterialTheme.typography.titleLarge, color = TintaSuave)
@@ -105,7 +131,7 @@ fun MilkingEntryScreen(
                     }
                 )
                 TextButton(onClick = { viewModel.onToggleKeypad(false) }, modifier = Modifier.fillMaxWidth()) {
-                    Text("Usar stepper +/-", color = Terracota)
+                    Text(stringResource(Res.string.milking_entry_use_stepper_button), color = Terracota)
                 }
             } else {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -113,26 +139,26 @@ fun MilkingEntryScreen(
                         val newValue = (uiState.currentLitersValue - LITER_STEP).coerceAtLeast(0.0)
                         viewModel.onLitersChanged(formatStepper(newValue))
                     }
-                    Text("paso $LITER_STEP L", style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
+                    Text(stringResource(Res.string.milking_entry_step_label, LITER_STEP.toString()), style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
                     StepperButton(label = "+", color = Terracota, contentColor = SobreVerde) {
                         val newValue = uiState.currentLitersValue + LITER_STEP
                         viewModel.onLitersChanged(formatStepper(newValue))
                     }
                 }
                 TextButton(onClick = { viewModel.onToggleKeypad(true) }, modifier = Modifier.fillMaxWidth()) {
-                    Text("Usar teclado numérico", color = Terracota)
+                    Text(stringResource(Res.string.milking_entry_use_keypad_button), color = Terracota)
                 }
             }
 
             Spacer(Modifier.height(Spacing.xl))
             TextButton(onClick = { viewModel.onShowReasonPicker(true) }, modifier = Modifier.fillMaxWidth()) {
-                Text("Marcar sin ordeñar", color = TintaSuave)
+                Text(stringResource(Res.string.milking_entry_mark_unmilked_button), color = TintaSuave)
             }
 
             Spacer(Modifier.weight(1f))
 
             PrimaryButton(
-                text = if (entry?.registered == true) "Guardar corrección" else "Guardar",
+                text = if (entry?.registered == true) stringResource(Res.string.milking_entry_save_correction_button) else stringResource(Res.string.milking_entry_save_button),
                 enabled = !uiState.isSaving,
                 loading = uiState.isSaving,
                 onClick = { viewModel.saveCurrentEntry(onSaved) },
@@ -144,22 +170,29 @@ fun MilkingEntryScreen(
     if (uiState.showReasonPicker) {
         AlertDialog(
             onDismissRequest = { viewModel.onShowReasonPicker(false) },
-            title = { Text("Motivo") },
+            title = { Text(stringResource(Res.string.milking_entry_reason_dialog_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                    Text("¿Por qué no se ordeña ${entry?.goat?.name ?: "esta cabra"}?", style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
+                    Text(
+                        stringResource(
+                            Res.string.milking_entry_reason_dialog_message,
+                            entry?.goat?.name ?: stringResource(Res.string.milking_entry_reason_dialog_goat_fallback)
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TintaSuave
+                    )
                     Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                        FilterChip(selected = false, onClick = { viewModel.markUnmilked(NoMilkingReason.DRY, onSaved) }, label = { Text("Seca") })
-                        FilterChip(selected = false, onClick = { viewModel.markUnmilked(NoMilkingReason.SICK, onSaved) }, label = { Text("Enferma") })
+                        FilterChip(selected = false, onClick = { viewModel.markUnmilked(NoMilkingReason.DRY, onSaved) }, label = { Text(stringResource(Res.string.milking_entry_reason_dry)) })
+                        FilterChip(selected = false, onClick = { viewModel.markUnmilked(NoMilkingReason.SICK, onSaved) }, label = { Text(stringResource(Res.string.milking_entry_reason_sick)) })
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                        FilterChip(selected = false, onClick = { viewModel.markUnmilked(NoMilkingReason.UNDER_TREATMENT, onSaved) }, label = { Text("En tratamiento") })
-                        FilterChip(selected = false, onClick = { viewModel.markUnmilked(NoMilkingReason.OTHER, onSaved) }, label = { Text("Otra razón") })
+                        FilterChip(selected = false, onClick = { viewModel.markUnmilked(NoMilkingReason.UNDER_TREATMENT, onSaved) }, label = { Text(stringResource(Res.string.milking_entry_reason_under_treatment)) })
+                        FilterChip(selected = false, onClick = { viewModel.markUnmilked(NoMilkingReason.OTHER, onSaved) }, label = { Text(stringResource(Res.string.milking_entry_reason_other)) })
                     }
                 }
             },
             confirmButton = {},
-            dismissButton = { TextButton(onClick = { viewModel.onShowReasonPicker(false) }) { Text("Cancelar") } }
+            dismissButton = { TextButton(onClick = { viewModel.onShowReasonPicker(false) }) { Text(stringResource(Res.string.common_cancel)) } }
         )
     }
 }

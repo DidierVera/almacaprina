@@ -24,7 +24,6 @@ data class MilkingSessionUiState(
     val useNumericKeypad: Boolean = false,
     val showReasonPicker: Boolean = false
 ) {
-    val sessionLabel: String get() = if (isEveningSession) "Ordeño de la tarde" else "Ordeño de la mañana"
     val registeredCount: Int get() = entries.count { it.registered }
     val totalCount: Int get() = entries.size
     val allHandled: Boolean get() = entries.isNotEmpty() && entries.all { it.registered }

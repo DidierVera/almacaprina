@@ -1,5 +1,8 @@
 package com.didiprogrammer.almacaprina.ui.campo.pesada
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.weighing_entry_error_load
+import almacaprina.shared.generated.resources.weighing_entry_error_save
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.domain.model.WeightRecord
@@ -15,6 +18,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.getString
 
 class CampoWeighingEntryViewModel(
     private val goatId: String,
@@ -34,7 +38,7 @@ class CampoWeighingEntryViewModel(
                 _uiState.update { it.copy(isLoading = false, goat = goat, date = today) }
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: "No se pudo cargar la cabra") }
+                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: getString(Res.string.weighing_entry_error_load)) }
             }
         }
     }
@@ -64,7 +68,7 @@ class CampoWeighingEntryViewModel(
                 _uiState.update { it.copy(isSaving = false, saved = true) }
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: "No se pudo guardar la pesada") }
+                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: getString(Res.string.weighing_entry_error_save)) }
             }
         }
     }

@@ -1,5 +1,30 @@
 package com.didiprogrammer.almacaprina.ui.campo.checklist
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.campo_checklist_care_task_insumo_subtitle
+import almacaprina.shared.generated.resources.campo_checklist_care_task_reminder_subtitle
+import almacaprina.shared.generated.resources.campo_checklist_confirm_task_message
+import almacaprina.shared.generated.resources.campo_checklist_deleted_goat_fallback
+import almacaprina.shared.generated.resources.campo_checklist_diff_label
+import almacaprina.shared.generated.resources.campo_checklist_expected_quantity
+import almacaprina.shared.generated.resources.campo_checklist_health_chip_label
+import almacaprina.shared.generated.resources.campo_checklist_health_reminder_default_subtitle
+import almacaprina.shared.generated.resources.campo_checklist_logout_content_description
+import almacaprina.shared.generated.resources.campo_checklist_milking_chip_label
+import almacaprina.shared.generated.resources.campo_checklist_milking_goats_count
+import almacaprina.shared.generated.resources.campo_checklist_no_difference
+import almacaprina.shared.generated.resources.campo_checklist_now_section_label
+import almacaprina.shared.generated.resources.campo_checklist_of_total_suffix
+import almacaprina.shared.generated.resources.campo_checklist_open_milking_button
+import almacaprina.shared.generated.resources.campo_checklist_quantity_applied_label
+import almacaprina.shared.generated.resources.campo_checklist_rest_of_day_section_label
+import almacaprina.shared.generated.resources.campo_checklist_tasks_completed_label
+import almacaprina.shared.generated.resources.campo_checklist_title
+import almacaprina.shared.generated.resources.campo_checklist_today_fallback
+import almacaprina.shared.generated.resources.common_cancel
+import almacaprina.shared.generated.resources.common_confirm
+import almacaprina.shared.generated.resources.common_logout_confirm_button
+import almacaprina.shared.generated.resources.common_logout_confirm_title
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -67,6 +92,7 @@ import com.didiprogrammer.almacaprina.ui.theme.Verde
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Campo · Checklist de hoy (Home de Campo). Ver mockups Campo Checklist-selection*.png. */
@@ -111,10 +137,14 @@ fun CampoChecklistScreen(
                     ) {
                         Column {
                             Text(formatLongSpanishDate(today), style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
-                            Text("Checklist de hoy", style = MaterialTheme.typography.displaySmall, color = Tinta)
+                            Text(stringResource(Res.string.campo_checklist_title), style = MaterialTheme.typography.displaySmall, color = Tinta)
                         }
                         IconButton(onClick = { showLogoutConfirm = true }) {
-                            Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Cerrar sesión", tint = TintaSuave)
+                            Icon(
+                                Icons.AutoMirrored.Filled.Logout,
+                                contentDescription = stringResource(Res.string.campo_checklist_logout_content_description),
+                                tint = TintaSuave
+                            )
                         }
                     }
                 }
@@ -124,9 +154,9 @@ fun CampoChecklistScreen(
                         Column(modifier = Modifier.fillMaxWidth().padding(Spacing.xl)) {
                             Row(verticalAlignment = Alignment.Bottom) {
                                 Text("${checklist.completedCount}", style = MaterialTheme.typography.displayMedium, color = Tinta)
-                                Text(" de ${checklist.totalCount}", style = MaterialTheme.typography.titleMedium, color = TintaSuave)
+                                Text(" " + stringResource(Res.string.campo_checklist_of_total_suffix, checklist.totalCount), style = MaterialTheme.typography.titleMedium, color = TintaSuave)
                                 androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
-                                Text("tareas completadas", style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
+                                Text(stringResource(Res.string.campo_checklist_tasks_completed_label), style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
                             }
                             LinearProgressIndicator(
                                 progress = { if (checklist.totalCount > 0) checklist.completedCount.toFloat() / checklist.totalCount else 0f },
@@ -139,7 +169,7 @@ fun CampoChecklistScreen(
                 }
 
                 if (checklist.milkingTask != null) {
-                    item { Text("AHORA", style = MaterialTheme.typography.labelSmall, color = TintaSuave) }
+                    item { Text(stringResource(Res.string.campo_checklist_now_section_label), style = MaterialTheme.typography.labelSmall, color = TintaSuave) }
                     item {
                         Surface(
                             modifier = Modifier.fillMaxWidth().clickable(onClick = onOpenOrdeno),
@@ -149,7 +179,7 @@ fun CampoChecklistScreen(
                         ) {
                             Column(modifier = Modifier.fillMaxWidth().padding(Spacing.xl)) {
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    StatusChip(label = "ORDEÑO", containerColor = Riel, contentColor = Tinta)
+                                    StatusChip(label = stringResource(Res.string.campo_checklist_milking_chip_label), containerColor = Riel, contentColor = Tinta)
                                     CompletionCircle(completed = checklist.milkingProgress.isComplete)
                                 }
                                 Text(
@@ -159,13 +189,13 @@ fun CampoChecklistScreen(
                                     modifier = Modifier.padding(top = Spacing.sm)
                                 )
                                 Text(
-                                    "${checklist.milkingProgress.totalCount} cabras en ordeño",
+                                    stringResource(Res.string.campo_checklist_milking_goats_count, checklist.milkingProgress.totalCount),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = TintaSuave
                                 )
                                 androidx.compose.material3.HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.md), color = Borde)
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Text("Abrir registro de ordeño", style = MaterialTheme.typography.labelLarge, color = Terracota)
+                                    Text(stringResource(Res.string.campo_checklist_open_milking_button), style = MaterialTheme.typography.labelLarge, color = Terracota)
                                     Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = Terracota)
                                 }
                             }
@@ -173,7 +203,7 @@ fun CampoChecklistScreen(
                     }
                 }
 
-                item { Text("RESTO DEL DÍA", style = MaterialTheme.typography.labelSmall, color = TintaSuave) }
+                item { Text(stringResource(Res.string.campo_checklist_rest_of_day_section_label), style = MaterialTheme.typography.labelSmall, color = TintaSuave) }
 
                 items(checklist.otherCareTasks) { item ->
                     CareTaskRow(
@@ -206,8 +236,12 @@ fun CampoChecklistScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                     if (confirmingTask.insumoId != null) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Cantidad aplicada", style = MaterialTheme.typography.bodySmall, color = TintaSuave)
-                            Text("esperado ${confirmingTask.quantityPerOccurrence ?: 0.0}", style = MaterialTheme.typography.bodySmall, color = TintaSuave)
+                            Text(stringResource(Res.string.campo_checklist_quantity_applied_label), style = MaterialTheme.typography.bodySmall, color = TintaSuave)
+                            Text(
+                                stringResource(Res.string.campo_checklist_expected_quantity, (confirmingTask.quantityPerOccurrence ?: 0.0).toString()),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TintaSuave
+                            )
                         }
                         OutlinedTextField(
                             value = uiState.confirmQuantityText,
@@ -217,17 +251,20 @@ fun CampoChecklistScreen(
                         )
                         val diff = (uiState.confirmQuantityText.toDoubleOrNull() ?: 0.0) - (confirmingTask.quantityPerOccurrence ?: 0.0)
                         Text(
-                            "Diferencia con lo esperado: ${if (diff == 0.0) "Sin diferencia" else diff.toString()}",
+                            stringResource(
+                                Res.string.campo_checklist_diff_label,
+                                if (diff == 0.0) stringResource(Res.string.campo_checklist_no_difference) else diff.toString()
+                            ),
                             style = MaterialTheme.typography.bodySmall,
                             color = TintaSuave
                         )
                     } else {
-                        Text("¿Confirmar esta tarea como completada?", style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
+                        Text(stringResource(Res.string.campo_checklist_confirm_task_message), style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = viewModel::confirmCareTask, enabled = !uiState.isSaving) { Text("Confirmar") } },
-            dismissButton = { TextButton(onClick = viewModel::onDismissCareTaskConfirm) { Text("Cancelar") } }
+            confirmButton = { TextButton(onClick = viewModel::confirmCareTask, enabled = !uiState.isSaving) { Text(stringResource(Res.string.common_confirm)) } },
+            dismissButton = { TextButton(onClick = viewModel::onDismissCareTaskConfirm) { Text(stringResource(Res.string.common_cancel)) } }
         )
     }
 
@@ -238,7 +275,7 @@ fun CampoChecklistScreen(
             title = { Text(confirmingReminder.type.name) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                    Text("Cantidad aplicada", style = MaterialTheme.typography.bodySmall, color = TintaSuave)
+                    Text(stringResource(Res.string.campo_checklist_quantity_applied_label), style = MaterialTheme.typography.bodySmall, color = TintaSuave)
                     OutlinedTextField(
                         value = uiState.confirmHealthQuantityText,
                         onValueChange = viewModel::onConfirmHealthQuantityChanged,
@@ -247,22 +284,22 @@ fun CampoChecklistScreen(
                     )
                 }
             },
-            confirmButton = { TextButton(onClick = viewModel::confirmHealthReminder, enabled = !uiState.isSaving) { Text("Confirmar") } },
-            dismissButton = { TextButton(onClick = viewModel::onDismissHealthReminderConfirm) { Text("Cancelar") } }
+            confirmButton = { TextButton(onClick = viewModel::confirmHealthReminder, enabled = !uiState.isSaving) { Text(stringResource(Res.string.common_confirm)) } },
+            dismissButton = { TextButton(onClick = viewModel::onDismissHealthReminderConfirm) { Text(stringResource(Res.string.common_cancel)) } }
         )
     }
 
     if (showLogoutConfirm) {
         AlertDialog(
             onDismissRequest = { showLogoutConfirm = false },
-            title = { Text("¿Cerrar sesión?") },
+            title = { Text(stringResource(Res.string.common_logout_confirm_title)) },
             confirmButton = {
                 TextButton(onClick = {
                     showLogoutConfirm = false
                     viewModel.logout(onLoggedOut)
-                }) { Text("Cerrar sesión") }
+                }) { Text(stringResource(Res.string.common_logout_confirm_button)) }
             },
-            dismissButton = { TextButton(onClick = { showLogoutConfirm = false }) { Text("Cancelar") } }
+            dismissButton = { TextButton(onClick = { showLogoutConfirm = false }) { Text(stringResource(Res.string.common_cancel)) } }
         )
     }
 }
@@ -289,8 +326,11 @@ private fun CareTaskRow(item: ChecklistCareTaskItem, insumoName: String?, onClic
     val (chipBg, chipFg) = item.careTask.taskType.chipColors()
     val subtitle = when {
         insumoName != null && item.careTask.quantityPerOccurrence != null ->
-            "$insumoName · ${item.careTask.quantityPerOccurrence}"
-        else -> "Recordatorio · ${item.careTask.timeOfDay?.label() ?: "Hoy"}"
+            stringResource(Res.string.campo_checklist_care_task_insumo_subtitle, insumoName, item.careTask.quantityPerOccurrence.toString())
+        else -> stringResource(
+            Res.string.campo_checklist_care_task_reminder_subtitle,
+            item.careTask.timeOfDay?.label() ?: stringResource(Res.string.campo_checklist_today_fallback)
+        )
     }
     ChecklistRow(
         completed = item.completed,
@@ -305,14 +345,14 @@ private fun CareTaskRow(item: ChecklistCareTaskItem, insumoName: String?, onClic
 
 @Composable
 private fun HealthReminderRow(reminder: ChecklistHealthReminder, onClick: () -> Unit) {
-    val goatLabel = reminder.goat?.let { "${it.name} (${it.tagNumber})" } ?: "cabra eliminada"
+    val goatLabel = reminder.goat?.let { "${it.name} (${it.tagNumber})" } ?: stringResource(Res.string.campo_checklist_deleted_goat_fallback)
     ChecklistRow(
         completed = reminder.completed,
         title = "${reminder.healthRecord.type.name.lowercase().replaceFirstChar { it.uppercase() }} a $goatLabel",
-        chipLabel = "SALUD",
+        chipLabel = stringResource(Res.string.campo_checklist_health_chip_label),
         chipBg = Terracota.copy(alpha = 0.15f),
         chipFg = Terracota,
-        subtitle = reminder.healthRecord.dosage ?: "Recordatorio individual",
+        subtitle = reminder.healthRecord.dosage ?: stringResource(Res.string.campo_checklist_health_reminder_default_subtitle),
         onClick = onClick
     )
 }

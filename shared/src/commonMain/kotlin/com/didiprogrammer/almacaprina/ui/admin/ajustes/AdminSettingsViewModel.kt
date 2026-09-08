@@ -1,5 +1,11 @@
 package com.didiprogrammer.almacaprina.ui.admin.ajustes
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_settings_error_load
+import almacaprina.shared.generated.resources.admin_settings_error_save
+import almacaprina.shared.generated.resources.admin_settings_success_pin_deleted
+import almacaprina.shared.generated.resources.admin_settings_success_pin_updated
+import almacaprina.shared.generated.resources.admin_settings_success_save
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.business.costPerLiter
@@ -30,6 +36,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.getString
 
 /** Bundle de los datos crudos que necesita Ajustes — se piden todos en paralelo, ver [AdminSettingsViewModel.load]. */
 private data class AdminSettingsRawData(
@@ -102,7 +109,7 @@ class AdminSettingsViewModel(
                 }
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: "No se pudo cargar la configuración") }
+                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: getString(Res.string.admin_settings_error_load)) }
             }
         }
     }
@@ -134,11 +141,11 @@ class AdminSettingsViewModel(
                     businessSettingsRepository.insert(settings)
                 }
                 _uiState.update {
-                    it.copy(isSaving = false, settingsId = saved.id, successMessage = "Configuración guardada")
+                    it.copy(isSaving = false, settingsId = saved.id, successMessage = getString(Res.string.admin_settings_success_save))
                 }
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: "No se pudo guardar la configuración") }
+                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: getString(Res.string.admin_settings_error_save)) }
             }
         }
     }
@@ -147,12 +154,16 @@ class AdminSettingsViewModel(
     fun onSetPin(pin: String) {
         val userId = AuthService.currentUserId() ?: return
         PinManager.setPin(pin, userId)
-        _uiState.update { it.copy(hasPin = true, successMessage = "PIN actualizado") }
+        viewModelScope.launch {
+            _uiState.update { it.copy(hasPin = true, successMessage = getString(Res.string.admin_settings_success_pin_updated)) }
+        }
     }
 
     fun onRemovePin() {
         PinManager.clearPin()
-        _uiState.update { it.copy(hasPin = false, successMessage = "PIN eliminado") }
+        viewModelScope.launch {
+            _uiState.update { it.copy(hasPin = false, successMessage = getString(Res.string.admin_settings_success_pin_deleted)) }
+        }
     }
 
     fun logout(onLoggedOut: () -> Unit) {

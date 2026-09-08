@@ -1,5 +1,13 @@
 package com.didiprogrammer.almacaprina.ui.auth
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.pin_setup_confirm_label
+import almacaprina.shared.generated.resources.pin_setup_error_mismatch
+import almacaprina.shared.generated.resources.pin_setup_pin_label
+import almacaprina.shared.generated.resources.pin_setup_save_button
+import almacaprina.shared.generated.resources.pin_setup_skip_button
+import almacaprina.shared.generated.resources.pin_setup_subtitle
+import almacaprina.shared.generated.resources.pin_setup_title
 import androidx.compose.foundation.background
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +41,7 @@ import com.didiprogrammer.almacaprina.ui.theme.ShapeMedium
 import com.didiprogrammer.almacaprina.ui.theme.Spacing
 import com.didiprogrammer.almacaprina.ui.theme.Tinta
 import com.didiprogrammer.almacaprina.ui.theme.TintaSuave
+import org.jetbrains.compose.resources.stringResource
 
 private const val PIN_LENGTH = 4
 
@@ -47,24 +56,24 @@ fun PinSetupScreen(onContinue: () -> Unit) {
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val isValid = pin.length == PIN_LENGTH && confirmPin.length == PIN_LENGTH
+    val mismatchError = stringResource(Res.string.pin_setup_error_mismatch)
 
     Column(
         modifier = Modifier.fillMaxSize().padding(Spacing.xxl),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start
     ) {
-        Text("Crea un PIN de acceso rápido", style = MaterialTheme.typography.headlineSmall, color = Tinta)
+        Text(stringResource(Res.string.pin_setup_title), style = MaterialTheme.typography.headlineSmall, color = Tinta)
         Spacer(Modifier.height(Spacing.xs))
         Text(
-            "La próxima vez podrás entrar con este PIN de 4 dígitos en vez de tu contraseña, " +
-                "mientras tu sesión siga activa en este dispositivo. Es opcional.",
+            stringResource(Res.string.pin_setup_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = TintaSuave
         )
         Spacer(Modifier.height(Spacing.xxl))
 
         FormField(
-            label = "PIN (4 dígitos)",
+            label = stringResource(Res.string.pin_setup_pin_label),
             value = pin,
             onValueChange = {
                 if (it.length <= PIN_LENGTH && it.all(Char::isDigit)) pin = it
@@ -76,7 +85,7 @@ fun PinSetupScreen(onContinue: () -> Unit) {
         )
         Spacer(Modifier.height(Spacing.md))
         FormField(
-            label = "Confirma el PIN",
+            label = stringResource(Res.string.pin_setup_confirm_label),
             value = confirmPin,
             onValueChange = {
                 if (it.length <= PIN_LENGTH && it.all(Char::isDigit)) confirmPin = it
@@ -103,11 +112,11 @@ fun PinSetupScreen(onContinue: () -> Unit) {
         Spacer(Modifier.height(Spacing.xxl))
 
         PrimaryButton(
-            text = "Guardar PIN",
+            text = stringResource(Res.string.pin_setup_save_button),
             enabled = isValid,
             onClick = {
                 if (pin != confirmPin) {
-                    errorMessage = "Los PIN no coinciden."
+                    errorMessage = mismatchError
                 } else {
                     AuthService.currentUserId()?.let { userId -> PinManager.setPin(pin, userId) }
                     onContinue()
@@ -117,7 +126,7 @@ fun PinSetupScreen(onContinue: () -> Unit) {
         )
         Spacer(Modifier.height(Spacing.md))
         TextButton(onClick = onContinue, modifier = Modifier.fillMaxWidth()) {
-            Text("Omitir por ahora")
+            Text(stringResource(Res.string.pin_setup_skip_button))
         }
     }
 }

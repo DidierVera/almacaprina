@@ -1,5 +1,13 @@
 package com.didiprogrammer.almacaprina.ui.ventas.nueva
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.new_sale_cliente_create_button
+import almacaprina.shared.generated.resources.new_sale_cliente_last_sale_days
+import almacaprina.shared.generated.resources.new_sale_cliente_new_contact_placeholder
+import almacaprina.shared.generated.resources.new_sale_cliente_new_customer_title
+import almacaprina.shared.generated.resources.new_sale_cliente_new_name_placeholder
+import almacaprina.shared.generated.resources.new_sale_cliente_search_placeholder
+import almacaprina.shared.generated.resources.new_sale_cliente_title
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,6 +43,7 @@ import com.didiprogrammer.almacaprina.ui.theme.Terracota
 import com.didiprogrammer.almacaprina.ui.theme.Tinta
 import com.didiprogrammer.almacaprina.ui.theme.TintaSuave
 import kotlinx.datetime.daysUntil
+import org.jetbrains.compose.resources.stringResource
 
 /** Nueva venta · Paso 1 — ¿Para quién? Ver mockup Ventas-selection-clientes.png. */
 @Composable
@@ -62,13 +71,13 @@ fun NewSaleClienteScreen(
                 contentPadding = PaddingValues(Spacing.xxl),
                 verticalArrangement = Arrangement.spacedBy(Spacing.md)
             ) {
-                item { NewSaleStepHeader(step = 1, title = "¿Para quién?", onBack = onBack) }
+                item { NewSaleStepHeader(step = 1, title = stringResource(Res.string.new_sale_cliente_title), onBack = onBack) }
 
                 item {
                     OutlinedTextField(
                         value = uiState.customerSearchQuery,
                         onValueChange = viewModel::onCustomerSearchChanged,
-                        placeholder = { Text("Buscar cliente...") },
+                        placeholder = { Text(stringResource(Res.string.new_sale_cliente_search_placeholder)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -77,7 +86,7 @@ fun NewSaleClienteScreen(
                 items(uiState.filteredCustomers, key = { it.id }) { customer ->
                     val lastSaleDate = uiState.lastSaleDateByCustomer[customer.id]
                     val subtitle = if (lastSaleDate != null && uiState.today != null) {
-                        "${customer.type.label()} · última compra hace ${lastSaleDate.daysUntil(uiState.today!!)} días"
+                        stringResource(Res.string.new_sale_cliente_last_sale_days, customer.type.label(), lastSaleDate.daysUntil(uiState.today!!))
                     } else {
                         customer.type.label()
                     }
@@ -98,23 +107,23 @@ fun NewSaleClienteScreen(
                         border = BorderStroke(1.dp, BordeControl)
                     ) {
                         Column(modifier = Modifier.padding(Spacing.xl), verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                            Text("Cliente nuevo", style = MaterialTheme.typography.titleSmall, color = Tinta)
+                            Text(stringResource(Res.string.new_sale_cliente_new_customer_title), style = MaterialTheme.typography.titleSmall, color = Tinta)
                             OutlinedTextField(
                                 value = uiState.newCustomerName,
                                 onValueChange = viewModel::onNewCustomerNameChanged,
-                                placeholder = { Text("Nombre") },
+                                placeholder = { Text(stringResource(Res.string.new_sale_cliente_new_name_placeholder)) },
                                 modifier = Modifier.fillMaxWidth(),
                                 singleLine = true
                             )
                             OutlinedTextField(
                                 value = uiState.newCustomerContact,
                                 onValueChange = viewModel::onNewCustomerContactChanged,
-                                placeholder = { Text("Teléfono / contacto") },
+                                placeholder = { Text(stringResource(Res.string.new_sale_cliente_new_contact_placeholder)) },
                                 modifier = Modifier.fillMaxWidth(),
                                 singleLine = true
                             )
                             PrimaryButton(
-                                text = "Crear y continuar",
+                                text = stringResource(Res.string.new_sale_cliente_create_button),
                                 enabled = uiState.canCreateNewCustomer && !uiState.isSaving,
                                 loading = uiState.isSaving,
                                 onClick = { viewModel.createCustomerAndContinue(onContinue) },

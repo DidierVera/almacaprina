@@ -1,11 +1,27 @@
 package com.didiprogrammer.almacaprina.ui.admin.home
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.financial_period_month
+import almacaprina.shared.generated.resources.financial_period_today
+import almacaprina.shared.generated.resources.financial_period_week
+import androidx.compose.runtime.Composable
+import org.jetbrains.compose.resources.stringResource
+
 /** Período seleccionable para el resumen financiero de Inicio. */
-enum class FinancialPeriod(val label: String) {
-    TODAY("Hoy"),
-    WEEK("Semana"),
-    MONTH("Mes")
+enum class FinancialPeriod {
+    TODAY,
+    WEEK,
+    MONTH
 }
+
+@Composable
+fun FinancialPeriod.label(): String = stringResource(
+    when (this) {
+        FinancialPeriod.TODAY -> Res.string.financial_period_today
+        FinancialPeriod.WEEK -> Res.string.financial_period_week
+        FinancialPeriod.MONTH -> Res.string.financial_period_month
+    }
+)
 
 /** Tipo de alerta — determina el ícono/color en la lista de Alertas. */
 enum class HomeAlertType {

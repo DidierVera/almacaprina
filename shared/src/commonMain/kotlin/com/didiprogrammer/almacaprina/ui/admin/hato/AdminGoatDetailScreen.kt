@@ -1,5 +1,36 @@
 package com.didiprogrammer.almacaprina.ui.admin.hato
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_goat_detail_bcs_label
+import almacaprina.shared.generated.resources.admin_goat_detail_birth_label
+import almacaprina.shared.generated.resources.admin_goat_detail_breed_composition_label
+import almacaprina.shared.generated.resources.admin_goat_detail_edit_content_description
+import almacaprina.shared.generated.resources.admin_goat_detail_evolution_title
+import almacaprina.shared.generated.resources.admin_goat_detail_fab_register_event
+import almacaprina.shared.generated.resources.admin_goat_detail_fab_register_weight
+import almacaprina.shared.generated.resources.admin_goat_detail_father_label
+import almacaprina.shared.generated.resources.admin_goat_detail_last_weight_title
+import almacaprina.shared.generated.resources.admin_goat_detail_lactation_label
+import almacaprina.shared.generated.resources.admin_goat_detail_liters_curve_title
+import almacaprina.shared.generated.resources.admin_goat_detail_mother_label
+import almacaprina.shared.generated.resources.admin_goat_detail_next_birth_title
+import almacaprina.shared.generated.resources.admin_goat_detail_next_suggested_date
+import almacaprina.shared.generated.resources.admin_goat_detail_no_data_fallback
+import almacaprina.shared.generated.resources.admin_goat_detail_no_health_records
+import almacaprina.shared.generated.resources.admin_goat_detail_no_records_fallback
+import almacaprina.shared.generated.resources.admin_goat_detail_no_repro_events
+import almacaprina.shared.generated.resources.admin_goat_detail_notes_title
+import almacaprina.shared.generated.resources.admin_goat_detail_origin_born
+import almacaprina.shared.generated.resources.admin_goat_detail_origin_label
+import almacaprina.shared.generated.resources.admin_goat_detail_origin_purchased
+import almacaprina.shared.generated.resources.admin_goat_detail_parents_title
+import almacaprina.shared.generated.resources.admin_goat_detail_result_prefix
+import almacaprina.shared.generated.resources.admin_goat_detail_sex_female
+import almacaprina.shared.generated.resources.admin_goat_detail_sex_label
+import almacaprina.shared.generated.resources.admin_goat_detail_sex_male
+import almacaprina.shared.generated.resources.admin_goat_detail_tag_age
+import almacaprina.shared.generated.resources.admin_goat_detail_weaning_label
+import almacaprina.shared.generated.resources.goat_no_data_registered
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,6 +80,7 @@ import com.didiprogrammer.almacaprina.ui.components.GoatAvatar
 import com.didiprogrammer.almacaprina.ui.components.GoatStatusChip
 import com.didiprogrammer.almacaprina.ui.components.SectionHeader
 import com.didiprogrammer.almacaprina.ui.components.SimpleLineChart
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -100,7 +132,7 @@ fun AdminGoatDetailScreen(
                 title = { Text(goat.name) },
                 actions = {
                     IconButton(onClick = onEditClick) {
-                        Icon(Icons.Filled.Edit, contentDescription = "Editar ficha")
+                        Icon(Icons.Filled.Edit, contentDescription = stringResource(Res.string.admin_goat_detail_edit_content_description))
                     }
                 }
             )
@@ -110,15 +142,15 @@ fun AdminGoatDetailScreen(
             when (uiState.selectedTab) {
                 GoatDetailTab.PESO -> ExtendedFloatingActionButton(onClick = { showWeightDialog = true }) {
                     Icon(Icons.Filled.Add, contentDescription = null)
-                    Text(" Registrar pesada")
+                    Text(" " + stringResource(Res.string.admin_goat_detail_fab_register_weight))
                 }
                 GoatDetailTab.REPRODUCCION -> ExtendedFloatingActionButton(onClick = { showReproEventDialog = true }) {
                     Icon(Icons.Filled.Add, contentDescription = null)
-                    Text(" Registrar evento")
+                    Text(" " + stringResource(Res.string.admin_goat_detail_fab_register_event))
                 }
                 GoatDetailTab.SALUD -> ExtendedFloatingActionButton(onClick = { showHealthEventDialog = true }) {
                     Icon(Icons.Filled.Add, contentDescription = null)
-                    Text(" Registrar evento")
+                    Text(" " + stringResource(Res.string.admin_goat_detail_fab_register_event))
                 }
                 else -> {}
             }
@@ -138,7 +170,7 @@ fun AdminGoatDetailScreen(
                     Tab(
                         selected = uiState.selectedTab == tab,
                         onClick = { viewModel.onTabSelected(tab) },
-                        text = { Text(tab.label) }
+                        text = { Text(tab.label()) }
                     )
                 }
             }
@@ -218,7 +250,7 @@ private fun GoatDetailHeader(
         GoatAvatar(name = name, photoUrl = photoUrl, size = 64.dp)
         Column(modifier = Modifier.weight(1f)) {
             Text(name, style = MaterialTheme.typography.titleLarge)
-            Text("Arete $tagNumber · $ageLabel", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(Res.string.admin_goat_detail_tag_age, tagNumber, ageLabel), style = MaterialTheme.typography.bodyMedium)
         }
         statusChip()
     }
@@ -241,25 +273,25 @@ private fun DatosBasicosTab(
     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         item {
             AlmacaprinaCard {
-                InfoRow("Sexo", if (sex == GoatSex.FEMALE) "Hembra" else "Macho")
-                InfoRow("Composición racial", breedCompositionLabel(breedComposition))
-                InfoRow("Nacimiento", birthDate)
-                if (weaningDate != null) InfoRow("Destete", weaningDate)
-                InfoRow("Origen", if (origin == GoatOrigin.BORN_ON_FARM) "Nacida en la finca" else "Comprada")
-                if (lactationNumber > 0) InfoRow("Lactancia", "$lactationNumber°")
+                InfoRow(stringResource(Res.string.admin_goat_detail_sex_label), stringResource(if (sex == GoatSex.FEMALE) Res.string.admin_goat_detail_sex_female else Res.string.admin_goat_detail_sex_male))
+                InfoRow(stringResource(Res.string.admin_goat_detail_breed_composition_label), breedCompositionLabel(breedComposition))
+                InfoRow(stringResource(Res.string.admin_goat_detail_birth_label), birthDate)
+                if (weaningDate != null) InfoRow(stringResource(Res.string.admin_goat_detail_weaning_label), weaningDate)
+                InfoRow(stringResource(Res.string.admin_goat_detail_origin_label), stringResource(if (origin == GoatOrigin.BORN_ON_FARM) Res.string.admin_goat_detail_origin_born else Res.string.admin_goat_detail_origin_purchased))
+                if (lactationNumber > 0) InfoRow(stringResource(Res.string.admin_goat_detail_lactation_label), "$lactationNumber°")
             }
         }
         item {
             AlmacaprinaCard {
-                Text("Padres", style = MaterialTheme.typography.titleSmall)
-                ParentRow(label = "Madre", name = motherName, onClick = onMotherClick)
-                ParentRow(label = "Padre", name = fatherName, onClick = onFatherClick)
+                Text(stringResource(Res.string.admin_goat_detail_parents_title), style = MaterialTheme.typography.titleSmall)
+                ParentRow(label = stringResource(Res.string.admin_goat_detail_mother_label), name = motherName, onClick = onMotherClick)
+                ParentRow(label = stringResource(Res.string.admin_goat_detail_father_label), name = fatherName, onClick = onFatherClick)
             }
         }
         if (!notes.isNullOrBlank()) {
             item {
                 AlmacaprinaCard {
-                    Text("Notas", style = MaterialTheme.typography.titleSmall)
+                    Text(stringResource(Res.string.admin_goat_detail_notes_title), style = MaterialTheme.typography.titleSmall)
                     Text(notes, style = MaterialTheme.typography.bodyMedium)
                 }
             }
@@ -277,7 +309,7 @@ private fun ParentRow(label: String, name: String?, onClick: (() -> Unit)?) {
     ) {
         Text(label, style = MaterialTheme.typography.bodyMedium)
         Text(
-            text = name ?: "Sin registrar",
+            text = name ?: stringResource(Res.string.goat_no_data_registered),
             style = MaterialTheme.typography.bodyMedium,
             color = if (onClick != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
         )
@@ -298,17 +330,17 @@ private fun PesoTab(weightRecords: List<WeightRecord>, currentBcs: Int?) {
         item {
             AlmacaprinaCard {
                 val last = weightRecords.lastOrNull()
-                Text("Último peso", style = MaterialTheme.typography.titleSmall)
+                Text(stringResource(Res.string.admin_goat_detail_last_weight_title), style = MaterialTheme.typography.titleSmall)
                 Text(
-                    text = last?.let { "${it.weightKg} kg" } ?: "Sin registros",
+                    text = last?.let { "${it.weightKg} kg" } ?: stringResource(Res.string.admin_goat_detail_no_records_fallback),
                     style = MaterialTheme.typography.titleLarge
                 )
                 Text(
-                    text = "BCS: ${currentBcs ?: last?.bodyConditionScore ?: "sin dato"}",
+                    text = stringResource(Res.string.admin_goat_detail_bcs_label, (currentBcs ?: last?.bodyConditionScore)?.toString() ?: stringResource(Res.string.admin_goat_detail_no_data_fallback)),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 if (weightRecords.size >= 2) {
-                    SectionHeader(title = "Evolución", modifier = Modifier.padding(top = 12.dp))
+                    SectionHeader(title = stringResource(Res.string.admin_goat_detail_evolution_title), modifier = Modifier.padding(top = 12.dp))
                     SimpleLineChart(values = weightRecords.map { it.weightKg.toFloat() })
                 }
             }
@@ -331,13 +363,13 @@ private fun ReproduccionTab(events: List<ReproductiveEvent>, nextExpectedBirth: 
         if (nextExpectedBirth != null) {
             item {
                 AlmacaprinaCard {
-                    Text("Próximo parto estimado", style = MaterialTheme.typography.titleSmall)
+                    Text(stringResource(Res.string.admin_goat_detail_next_birth_title), style = MaterialTheme.typography.titleSmall)
                     Text(nextExpectedBirth.toString(), style = MaterialTheme.typography.titleLarge)
                 }
             }
         }
         if (events.isEmpty()) {
-            item { Text("Sin eventos reproductivos registrados.", style = MaterialTheme.typography.bodyMedium) }
+            item { Text(stringResource(Res.string.admin_goat_detail_no_repro_events), style = MaterialTheme.typography.bodyMedium) }
         }
         items(events) { event ->
             AlmacaprinaCard {
@@ -346,7 +378,7 @@ private fun ReproduccionTab(events: List<ReproductiveEvent>, nextExpectedBirth: 
                     Text(event.date.toString(), style = MaterialTheme.typography.bodySmall)
                 }
                 Text(
-                    text = "Resultado: ${event.result.name}",
+                    text = stringResource(Res.string.admin_goat_detail_result_prefix, event.result.name),
                     style = MaterialTheme.typography.bodySmall,
                     color = if (event.result == ReproductiveEventResult.SUCCESSFUL) {
                         MaterialTheme.colorScheme.primary
@@ -364,7 +396,7 @@ private fun ReproduccionTab(events: List<ReproductiveEvent>, nextExpectedBirth: 
 private fun SaludTab(records: List<HealthRecord>) {
     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (records.isEmpty()) {
-            item { Text("Sin historial de salud registrado.", style = MaterialTheme.typography.bodyMedium) }
+            item { Text(stringResource(Res.string.admin_goat_detail_no_health_records), style = MaterialTheme.typography.bodyMedium) }
         }
         items(records) { record ->
             AlmacaprinaCard {
@@ -375,7 +407,7 @@ private fun SaludTab(records: List<HealthRecord>) {
                 record.description?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
                 record.nextSuggestedDate?.let {
                     Text(
-                        "Próxima fecha sugerida: $it",
+                        stringResource(Res.string.admin_goat_detail_next_suggested_date, it.toString()),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.tertiary
                     )
@@ -390,7 +422,7 @@ private fun ProduccionLecheTab(records: List<com.didiprogrammer.almacaprina.doma
     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         item {
             AlmacaprinaCard {
-                Text("Curva de litros", style = MaterialTheme.typography.titleSmall)
+                Text(stringResource(Res.string.admin_goat_detail_liters_curve_title), style = MaterialTheme.typography.titleSmall)
                 SimpleLineChart(
                     values = records.map {
                         ((it.morningMilkingLiters ?: 0.0) + (it.eveningMilkingLiters ?: 0.0)).toFloat()

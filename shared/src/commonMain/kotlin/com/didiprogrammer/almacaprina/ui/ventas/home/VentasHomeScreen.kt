@@ -1,5 +1,20 @@
 package com.didiprogrammer.almacaprina.ui.ventas.home
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.common_cancel
+import almacaprina.shared.generated.resources.common_logout_confirm_button
+import almacaprina.shared.generated.resources.common_logout_confirm_title
+import almacaprina.shared.generated.resources.ventas_home_logout_content_description
+import almacaprina.shared.generated.resources.ventas_home_new_sale_cta
+import almacaprina.shared.generated.resources.ventas_home_no_active_product
+import almacaprina.shared.generated.resources.ventas_home_packaging_out_suffix
+import almacaprina.shared.generated.resources.ventas_home_pending_customers_one
+import almacaprina.shared.generated.resources.ventas_home_pending_customers_other
+import almacaprina.shared.generated.resources.ventas_home_pending_label
+import almacaprina.shared.generated.resources.ventas_home_stat_collected_label
+import almacaprina.shared.generated.resources.ventas_home_stat_packaging_label
+import almacaprina.shared.generated.resources.ventas_home_stat_today_label
+import almacaprina.shared.generated.resources.ventas_home_title
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -52,6 +67,7 @@ import com.didiprogrammer.almacaprina.ui.theme.Verde
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Sección Ventas — Inicio. Ver mockup Ventas-selection.png. */
@@ -87,10 +103,14 @@ fun VentasHomeScreen(
                 ) {
                     Column {
                         Text(formatLongSpanishDate(today), style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
-                        Text("Ventas", style = MaterialTheme.typography.displaySmall, color = Tinta)
+                        Text(stringResource(Res.string.ventas_home_title), style = MaterialTheme.typography.displaySmall, color = Tinta)
                     }
                     IconButton(onClick = { showLogoutConfirm = true }) {
-                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Cerrar sesión", tint = TintaSuave)
+                        Icon(
+                            Icons.AutoMirrored.Filled.Logout,
+                            contentDescription = stringResource(Res.string.ventas_home_logout_content_description),
+                            tint = TintaSuave
+                        )
                     }
                 }
             }
@@ -100,7 +120,7 @@ fun VentasHomeScreen(
                 val subtitle = if (product != null) {
                     "${product.name} · ${formatCurrency(product.defaultUnitPrice, uiState.currency)} / ${product.saleUnit.label()}"
                 } else {
-                    "Sin producto activo en el catálogo"
+                    stringResource(Res.string.ventas_home_no_active_product)
                 }
                 Surface(
                     modifier = Modifier.fillMaxWidth().clickable(onClick = onNuevaVentaClick),
@@ -111,7 +131,7 @@ fun VentasHomeScreen(
                         modifier = Modifier.fillMaxWidth().padding(Spacing.xxl),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("+ Nueva venta", style = MaterialTheme.typography.headlineSmall, color = SobreVerde)
+                        Text(stringResource(Res.string.ventas_home_new_sale_cta), style = MaterialTheme.typography.headlineSmall, color = SobreVerde)
                         Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = SobreVerde)
                     }
                 }
@@ -129,7 +149,7 @@ fun VentasHomeScreen(
                             androidx.compose.foundation.layout.Box(
                                 modifier = Modifier.size(8.dp).background(AmbarTexto, RoundedCornerShape(50))
                             )
-                            Text("Pendientes por cobrar", style = MaterialTheme.typography.labelLarge, color = AmbarTexto)
+                            Text(stringResource(Res.string.ventas_home_pending_label), style = MaterialTheme.typography.labelLarge, color = AmbarTexto)
                         }
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -144,7 +164,10 @@ fun VentasHomeScreen(
                             Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = AmbarTexto)
                         }
                         Text(
-                            "${uiState.pendingCustomerCount} ${if (uiState.pendingCustomerCount == 1) "cliente" else "clientes"} con deuda",
+                            stringResource(
+                                if (uiState.pendingCustomerCount == 1) Res.string.ventas_home_pending_customers_one else Res.string.ventas_home_pending_customers_other,
+                                uiState.pendingCustomerCount
+                            ),
                             style = MaterialTheme.typography.bodyMedium,
                             color = AmbarTexto
                         )
@@ -161,18 +184,18 @@ fun VentasHomeScreen(
                 ) {
                     Row(modifier = Modifier.fillMaxWidth().padding(Spacing.lg)) {
                         HomeStat(
-                            label = "Hoy",
+                            label = stringResource(Res.string.ventas_home_stat_today_label),
                             value = "${formatQuantity(uiState.litersSoldToday)} L",
                             modifier = Modifier.weight(1f)
                         )
                         HomeStat(
-                            label = "Cobrado",
+                            label = stringResource(Res.string.ventas_home_stat_collected_label),
                             value = formatCurrency(uiState.collectedToday, uiState.currency),
                             modifier = Modifier.weight(1f)
                         )
                         HomeStat(
-                            label = "Envases",
-                            value = "${uiState.packagingDepositsOut} fuera",
+                            label = stringResource(Res.string.ventas_home_stat_packaging_label),
+                            value = stringResource(Res.string.ventas_home_packaging_out_suffix, uiState.packagingDepositsOut),
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -185,14 +208,14 @@ fun VentasHomeScreen(
     if (showLogoutConfirm) {
         AlertDialog(
             onDismissRequest = { showLogoutConfirm = false },
-            title = { Text("¿Cerrar sesión?") },
+            title = { Text(stringResource(Res.string.common_logout_confirm_title)) },
             confirmButton = {
                 TextButton(onClick = {
                     showLogoutConfirm = false
                     viewModel.logout(onLoggedOut)
-                }) { Text("Cerrar sesión") }
+                }) { Text(stringResource(Res.string.common_logout_confirm_button)) }
             },
-            dismissButton = { TextButton(onClick = { showLogoutConfirm = false }) { Text("Cancelar") } }
+            dismissButton = { TextButton(onClick = { showLogoutConfirm = false }) { Text(stringResource(Res.string.common_cancel)) } }
         )
     }
 }

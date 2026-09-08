@@ -1,5 +1,11 @@
 package com.didiprogrammer.almacaprina.ui.campo.checklist
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.campo_checklist_error_confirm_reminder
+import almacaprina.shared.generated.resources.campo_checklist_error_confirm_task
+import almacaprina.shared.generated.resources.campo_checklist_error_load
+import almacaprina.shared.generated.resources.campo_checklist_success_reminder_confirmed
+import almacaprina.shared.generated.resources.campo_checklist_success_task_completed
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.business.buildDailyCareChecklist
@@ -34,6 +40,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.getString
 
 private data class ChecklistRawData(
     val goats: List<Goat>,
@@ -120,7 +127,7 @@ class CampoChecklistViewModel(
                 }
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: "No se pudo cargar el checklist") }
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: getString(Res.string.campo_checklist_error_load)) }
             }
         }
     }
@@ -184,11 +191,11 @@ class CampoChecklistViewModel(
                         linkedRecordId = linkedRecordId
                     )
                 )
-                _uiState.update { it.copy(isSaving = false, confirmingCareTask = null, confirmQuantityText = "", successMessage = "Tarea completada") }
+                _uiState.update { it.copy(isSaving = false, confirmingCareTask = null, confirmQuantityText = "", successMessage = getString(Res.string.campo_checklist_success_task_completed)) }
                 load()
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: "No se pudo completar la tarea") }
+                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: getString(Res.string.campo_checklist_error_confirm_task)) }
             }
         }
     }
@@ -225,11 +232,11 @@ class CampoChecklistViewModel(
                         nextSuggestedDate = null
                     )
                 )
-                _uiState.update { it.copy(isSaving = false, confirmingHealthReminder = null, confirmHealthQuantityText = "", successMessage = "Recordatorio confirmado") }
+                _uiState.update { it.copy(isSaving = false, confirmingHealthReminder = null, confirmHealthQuantityText = "", successMessage = getString(Res.string.campo_checklist_success_reminder_confirmed)) }
                 load()
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: "No se pudo confirmar el recordatorio") }
+                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: getString(Res.string.campo_checklist_error_confirm_reminder)) }
             }
         }
     }

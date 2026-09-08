@@ -34,10 +34,21 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.didiprogrammer.almacaprina.business.formatCurrency
 import com.didiprogrammer.almacaprina.business.totalCost
 import com.didiprogrammer.almacaprina.domain.model.PurchaseCategory
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_hato_status_filter_all
+import almacaprina.shared.generated.resources.admin_new_purchase_title
+import almacaprina.shared.generated.resources.admin_purchase_history_clear_dates_button
+import almacaprina.shared.generated.resources.admin_purchase_history_empty_message
+import almacaprina.shared.generated.resources.admin_purchase_history_from_label
+import almacaprina.shared.generated.resources.admin_purchase_history_supplier_prefix
+import almacaprina.shared.generated.resources.admin_purchase_history_title
+import almacaprina.shared.generated.resources.admin_purchase_history_to_label
+import almacaprina.shared.generated.resources.admin_purchase_history_total_label
 import com.didiprogrammer.almacaprina.ui.components.AlmacaprinaCard
 import com.didiprogrammer.almacaprina.ui.components.DateField
 import com.didiprogrammer.almacaprina.ui.components.RefreshableContent
 import com.didiprogrammer.almacaprina.ui.components.label
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Sección 5, pantalla 5.1 — Historial de compras. */
@@ -55,11 +66,11 @@ fun AdminPurchaseHistoryScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Compras") }) },
+        topBar = { TopAppBar(title = { Text(stringResource(Res.string.admin_purchase_history_title)) }) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = onNewPurchaseClick) {
-                Icon(Icons.Filled.Add, contentDescription = "Nueva compra")
+                Icon(Icons.Filled.Add, contentDescription = stringResource(Res.string.admin_new_purchase_title))
             }
         }
     ) { padding ->
@@ -72,7 +83,7 @@ fun AdminPurchaseHistoryScreen(
                     FilterChip(
                         selected = uiState.selectedCategory == null,
                         onClick = { viewModel.onCategorySelected(null) },
-                        label = { Text("Todas") }
+                        label = { Text(stringResource(Res.string.admin_hato_status_filter_all)) }
                     )
                 }
                 items(PurchaseCategory.entries) { category ->
@@ -90,13 +101,13 @@ fun AdminPurchaseHistoryScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 DateField(
-                    label = "Desde",
+                    label = stringResource(Res.string.admin_purchase_history_from_label),
                     date = uiState.fromDate,
                     onDateSelected = { viewModel.onFromDateChanged(it) },
                     modifier = Modifier.weight(1f)
                 )
                 DateField(
-                    label = "Hasta",
+                    label = stringResource(Res.string.admin_purchase_history_to_label),
                     date = uiState.toDate,
                     onDateSelected = { viewModel.onToDateChanged(it) },
                     modifier = Modifier.weight(1f)
@@ -106,7 +117,7 @@ fun AdminPurchaseHistoryScreen(
                 TextButton(
                     onClick = { viewModel.onFromDateChanged(null); viewModel.onToDateChanged(null) },
                     modifier = Modifier.padding(horizontal = 8.dp)
-                ) { Text("Limpiar fechas") }
+                ) { Text(stringResource(Res.string.admin_purchase_history_clear_dates_button)) }
             }
 
             RefreshableContent(
@@ -116,13 +127,13 @@ fun AdminPurchaseHistoryScreen(
             ) {
                 if (uiState.filteredItems.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-                        Text("Sin compras registradas para este filtro.", style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(Res.string.admin_purchase_history_empty_message), style = MaterialTheme.typography.bodyMedium)
                     }
                 } else {
                     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         item {
                             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                                Text("Total del filtro", style = MaterialTheme.typography.titleSmall)
+                                Text(stringResource(Res.string.admin_purchase_history_total_label), style = MaterialTheme.typography.titleSmall)
                                 Text(
                                     formatCurrency(uiState.totalAmount, uiState.currency),
                                     style = MaterialTheme.typography.titleSmall
@@ -150,7 +161,7 @@ private fun PurchaseRow(item: PurchaseHistoryItem, currency: String) {
                     style = MaterialTheme.typography.bodySmall
                 )
                 item.purchase.supplier?.let {
-                    Text("Proveedor: $it", style = MaterialTheme.typography.bodySmall)
+                    Text(stringResource(Res.string.admin_purchase_history_supplier_prefix, it), style = MaterialTheme.typography.bodySmall)
                 }
             }
             Text(

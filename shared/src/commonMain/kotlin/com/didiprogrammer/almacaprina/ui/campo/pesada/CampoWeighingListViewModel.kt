@@ -1,5 +1,7 @@
 package com.didiprogrammer.almacaprina.ui.campo.pesada
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.weighing_list_error_load
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.business.overdueWeighings
@@ -15,6 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.getString
 
 /** Campo · Pesada — lista de cabras con pesada vencida. Reutiliza `overdueWeighings` (ya existía). */
 class CampoWeighingListViewModel(
@@ -51,7 +54,7 @@ class CampoWeighingListViewModel(
                 }
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: "No se pudo cargar la lista de pesadas") }
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: getString(Res.string.weighing_list_error_load)) }
             }
         }
     }

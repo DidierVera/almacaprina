@@ -1,5 +1,8 @@
 package com.didiprogrammer.almacaprina.ui.admin.catalogo
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_catalog_error_load
+import almacaprina.shared.generated.resources.common_error_save_failed
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.domain.model.Insumo
@@ -23,6 +26,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 
 /** Bundle de los datos crudos del catálogo — se piden todos en paralelo, ver [AdminCatalogoViewModel.load]. */
 private data class AdminCatalogoRawData(
@@ -91,7 +95,7 @@ class AdminCatalogoViewModel(
                 }
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: "No se pudo cargar el catálogo") }
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, errorMessage = t.message ?: getString(Res.string.admin_catalog_error_load)) }
             }
         }
     }
@@ -202,7 +206,7 @@ class AdminCatalogoViewModel(
                 load()
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: "No se pudo guardar") }
+                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: getString(Res.string.common_error_save_failed)) }
             }
         }
     }

@@ -1,53 +1,89 @@
 package com.didiprogrammer.almacaprina.ui.components
 
+import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.insumo_category_feed
+import almacaprina.shared.generated.resources.insumo_category_labor
+import almacaprina.shared.generated.resources.insumo_category_maintenance
+import almacaprina.shared.generated.resources.insumo_category_other
+import almacaprina.shared.generated.resources.insumo_category_processing_input
+import almacaprina.shared.generated.resources.insumo_category_transport
+import almacaprina.shared.generated.resources.insumo_category_veterinary
+import almacaprina.shared.generated.resources.product_category_derived_dairy
+import almacaprina.shared.generated.resources.product_category_raw_milk
+import almacaprina.shared.generated.resources.purchase_category_packaging
+import almacaprina.shared.generated.resources.sale_unit_kilogram
+import almacaprina.shared.generated.resources.sale_unit_liter
+import almacaprina.shared.generated.resources.sale_unit_unit
+import almacaprina.shared.generated.resources.unit_of_measure_g
+import almacaprina.shared.generated.resources.unit_of_measure_kg
+import almacaprina.shared.generated.resources.unit_of_measure_liter
+import almacaprina.shared.generated.resources.unit_of_measure_ml
+import almacaprina.shared.generated.resources.unit_of_measure_unit
+import androidx.compose.runtime.Composable
 import com.didiprogrammer.almacaprina.domain.model.InsumoCategory
 import com.didiprogrammer.almacaprina.domain.model.ProductCategory
 import com.didiprogrammer.almacaprina.domain.model.PurchaseCategory
 import com.didiprogrammer.almacaprina.domain.model.SaleUnit
 import com.didiprogrammer.almacaprina.domain.model.UnitOfMeasure
+import org.jetbrains.compose.resources.stringResource
 
-/** Etiquetas en español de los enums del catálogo — funciones puras, sin contexto @Composable. */
+/** Etiquetas en español de los enums del catálogo — solo se pueden llamar desde contexto @Composable. */
 
-fun ProductCategory.label(): String = when (this) {
-    ProductCategory.RAW_MILK -> "Leche cruda"
-    ProductCategory.DERIVED_DAIRY -> "Derivado"
-}
+@Composable
+fun ProductCategory.label(): String = stringResource(
+    when (this) {
+        ProductCategory.RAW_MILK -> Res.string.product_category_raw_milk
+        ProductCategory.DERIVED_DAIRY -> Res.string.product_category_derived_dairy
+    }
+)
 
-fun SaleUnit.label(): String = when (this) {
-    SaleUnit.LITER -> "Litro"
-    SaleUnit.KILOGRAM -> "Kilogramo"
-    SaleUnit.UNIT -> "Unidad"
-}
+@Composable
+fun SaleUnit.label(): String = stringResource(
+    when (this) {
+        SaleUnit.LITER -> Res.string.sale_unit_liter
+        SaleUnit.KILOGRAM -> Res.string.sale_unit_kilogram
+        SaleUnit.UNIT -> Res.string.sale_unit_unit
+    }
+)
 
-fun InsumoCategory.label(): String = when (this) {
-    InsumoCategory.FEED -> "Alimento"
-    InsumoCategory.VETERINARY -> "Veterinario"
-    InsumoCategory.PROCESSING_INPUT -> "Insumo de proceso"
-    InsumoCategory.TRANSPORT -> "Transporte"
-    InsumoCategory.LABOR -> "Mano de obra"
-    InsumoCategory.MAINTENANCE -> "Mantenimiento"
-    InsumoCategory.OTHER -> "Otro"
-}
+@Composable
+fun InsumoCategory.label(): String = stringResource(
+    when (this) {
+        InsumoCategory.FEED -> Res.string.insumo_category_feed
+        InsumoCategory.VETERINARY -> Res.string.insumo_category_veterinary
+        InsumoCategory.PROCESSING_INPUT -> Res.string.insumo_category_processing_input
+        InsumoCategory.TRANSPORT -> Res.string.insumo_category_transport
+        InsumoCategory.LABOR -> Res.string.insumo_category_labor
+        InsumoCategory.MAINTENANCE -> Res.string.insumo_category_maintenance
+        InsumoCategory.OTHER -> Res.string.insumo_category_other
+    }
+)
 
-fun UnitOfMeasure.label(): String = when (this) {
-    UnitOfMeasure.KG -> "kg"
-    UnitOfMeasure.G -> "g"
-    UnitOfMeasure.LITER -> "L"
-    UnitOfMeasure.ML -> "ml"
-    UnitOfMeasure.UNIT -> "unidad"
-}
+@Composable
+fun UnitOfMeasure.label(): String = stringResource(
+    when (this) {
+        UnitOfMeasure.KG -> Res.string.unit_of_measure_kg
+        UnitOfMeasure.G -> Res.string.unit_of_measure_g
+        UnitOfMeasure.LITER -> Res.string.unit_of_measure_liter
+        UnitOfMeasure.ML -> Res.string.unit_of_measure_ml
+        UnitOfMeasure.UNIT -> Res.string.unit_of_measure_unit
+    }
+)
 
-/** PurchaseCategory comparte los mismos valores que InsumoCategory más "packaging" (Sección 5). */
-fun PurchaseCategory.label(): String = when (this) {
-    PurchaseCategory.FEED -> "Alimento"
-    PurchaseCategory.VETERINARY -> "Veterinario"
-    PurchaseCategory.PACKAGING -> "Envase"
-    PurchaseCategory.PROCESSING_INPUT -> "Insumo de proceso"
-    PurchaseCategory.TRANSPORT -> "Transporte"
-    PurchaseCategory.LABOR -> "Mano de obra"
-    PurchaseCategory.MAINTENANCE -> "Mantenimiento"
-    PurchaseCategory.OTHER -> "Otro"
-}
+/** PurchaseCategory comparte los mismos valores que InsumoCategory más "packaging" (Sección 5) — reutiliza esas claves. */
+@Composable
+fun PurchaseCategory.label(): String = stringResource(
+    when (this) {
+        PurchaseCategory.FEED -> Res.string.insumo_category_feed
+        PurchaseCategory.VETERINARY -> Res.string.insumo_category_veterinary
+        PurchaseCategory.PACKAGING -> Res.string.purchase_category_packaging
+        PurchaseCategory.PROCESSING_INPUT -> Res.string.insumo_category_processing_input
+        PurchaseCategory.TRANSPORT -> Res.string.insumo_category_transport
+        PurchaseCategory.LABOR -> Res.string.insumo_category_labor
+        PurchaseCategory.MAINTENANCE -> Res.string.insumo_category_maintenance
+        PurchaseCategory.OTHER -> Res.string.insumo_category_other
+    }
+)
 
 /**
  * Mapea una categoría de compra a su equivalente de Insumo — permite filtrar el selector
