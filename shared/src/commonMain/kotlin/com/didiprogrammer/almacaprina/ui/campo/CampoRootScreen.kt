@@ -10,6 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.savedstate.read
 import com.didiprogrammer.almacaprina.ui.campo.checklist.CampoChecklistScreen
+import com.didiprogrammer.almacaprina.ui.campo.novedad.CampoReportNovedadScreen
 import com.didiprogrammer.almacaprina.ui.campo.ordeno.MilkingEntryScreen
 import com.didiprogrammer.almacaprina.ui.campo.ordeno.MilkingSessionScreen
 import com.didiprogrammer.almacaprina.ui.campo.ordeno.MilkingSessionViewModel
@@ -34,7 +35,15 @@ fun CampoRootScreen(onLogout: () -> Unit) {
             CampoChecklistScreen(
                 onOpenOrdeno = { navController.navigate(CampoRoutes.ORDENO_SESION) },
                 onOpenPesada = { navController.navigate(CampoRoutes.PESADA_LISTA) },
+                onReportNovedad = { navController.navigate(CampoRoutes.NOVEDAD) },
                 onLoggedOut = onLogout
+            )
+        }
+
+        composable(CampoRoutes.NOVEDAD) {
+            CampoReportNovedadScreen(
+                onBack = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() }
             )
         }
 

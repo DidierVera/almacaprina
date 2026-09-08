@@ -13,6 +13,7 @@ import almacaprina.shared.generated.resources.login_first_time_hint
 import almacaprina.shared.generated.resources.login_password_hide
 import almacaprina.shared.generated.resources.login_password_label
 import almacaprina.shared.generated.resources.login_password_show
+import almacaprina.shared.generated.resources.login_remember_email_label
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -46,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import com.didiprogrammer.almacaprina.data.remote.AuthService
 import com.didiprogrammer.almacaprina.domain.model.UserRole
 import com.didiprogrammer.almacaprina.domain.repository.BusinessSettingsRepository
+import com.didiprogrammer.almacaprina.security.RememberedEmailStorage
 import com.didiprogrammer.almacaprina.ui.components.FormField
 import com.didiprogrammer.almacaprina.ui.components.PrimaryButton
 import com.didiprogrammer.almacaprina.ui.theme.AmbarFondo
@@ -64,7 +67,8 @@ fun LoginScreen(
     onLoginSuccess: (UserRole) -> Unit,
     businessSettingsRepository: BusinessSettingsRepository = koinInject()
 ) {
-    var email by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf(RememberedEmailStorage.readEmail() ?: "") }
+    var rememberEmail by remember { mutableStateOf(RememberedEmailStorage.readEmail() != null) }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
@@ -137,6 +141,14 @@ fun LoginScreen(
             }
         )
 
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(top = Spacing.sm)
+        ) {
+            Checkbox(checked = rememberEmail, onCheckedChange = { rememberEmail = it })
+            Text(stringResource(Res.string.login_remember_email_label), style = MaterialTheme.typography.bodyMedium)
+        }
+
         errorMessage?.let { message ->
             Spacer(Modifier.height(Spacing.md))
             Text(
@@ -165,6 +177,11 @@ fun LoginScreen(
                         val profile = AuthService.fetchOwnProfile()
                         isLoading = false
                         if (profile != null) {
+                            if (rememberEmail) {
+                                RememberedEmailStorage.saveEmail(email.trim())
+                            } else {
+                                RememberedEmailStorage.clearEmail()
+                            }
                             onLoginSuccess(profile.role)
                         } else {
                             errorMessage = profileNotFoundError

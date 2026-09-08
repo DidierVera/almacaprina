@@ -89,6 +89,7 @@ import com.didiprogrammer.almacaprina.domain.model.GoatOrigin
 import com.didiprogrammer.almacaprina.domain.model.GoatSex
 import com.didiprogrammer.almacaprina.domain.model.GoatStatus
 import com.didiprogrammer.almacaprina.ui.components.DateField
+import com.didiprogrammer.almacaprina.ui.components.GoatPickerDialog
 import com.didiprogrammer.almacaprina.ui.components.label
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher

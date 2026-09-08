@@ -13,6 +13,8 @@ object CampoRoutes {
     const val PESADA_LISTA = "campo/pesada"
     const val PESADA_PATTERN = "campo/pesada/{goatId}"
 
+    const val NOVEDAD = "campo/novedad"
+
     fun ordenoRegistro(goatId: String): String = "campo/ordeno/registro/$goatId"
     fun pesada(goatId: String): String = "campo/pesada/$goatId"
 }

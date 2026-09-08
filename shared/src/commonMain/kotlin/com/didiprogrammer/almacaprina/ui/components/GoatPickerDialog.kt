@@ -1,4 +1,4 @@
-package com.didiprogrammer.almacaprina.ui.admin.hato
+package com.didiprogrammer.almacaprina.ui.components
 
 import almacaprina.shared.generated.resources.Res
 import almacaprina.shared.generated.resources.admin_goat_form_goat_with_tag

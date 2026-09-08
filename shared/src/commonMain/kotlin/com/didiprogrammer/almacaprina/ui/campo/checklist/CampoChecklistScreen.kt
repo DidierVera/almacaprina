@@ -22,6 +22,7 @@ import almacaprina.shared.generated.resources.campo_checklist_rest_of_day_sectio
 import almacaprina.shared.generated.resources.campo_checklist_tasks_completed_label
 import almacaprina.shared.generated.resources.campo_checklist_title
 import almacaprina.shared.generated.resources.campo_checklist_today_fallback
+import almacaprina.shared.generated.resources.campo_novedad_fab_content_description
 import almacaprina.shared.generated.resources.common_cancel
 import almacaprina.shared.generated.resources.common_confirm
 import almacaprina.shared.generated.resources.common_logout_confirm_button
@@ -44,9 +45,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -101,6 +104,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun CampoChecklistScreen(
     onOpenOrdeno: () -> Unit,
     onOpenPesada: () -> Unit,
+    onReportNovedad: () -> Unit,
     onLoggedOut: () -> Unit,
     viewModel: CampoChecklistViewModel = koinViewModel()
 ) {
@@ -117,7 +121,14 @@ fun CampoChecklistScreen(
         }
     }
 
-    Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            FloatingActionButton(onClick = onReportNovedad) {
+                Icon(Icons.Filled.Add, contentDescription = stringResource(Res.string.campo_novedad_fab_content_description))
+            }
+        }
+    ) { padding ->
         RefreshableContent(
             isLoading = uiState.isLoading,
             isRefreshing = uiState.isRefreshing,

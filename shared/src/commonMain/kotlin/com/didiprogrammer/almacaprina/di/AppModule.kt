@@ -57,6 +57,7 @@ import com.didiprogrammer.almacaprina.ui.admin.home.AdminHomeViewModel
 import com.didiprogrammer.almacaprina.ui.admin.produccion.AdminNewBatchViewModel
 import com.didiprogrammer.almacaprina.ui.admin.produccion.AdminProductionHistoryViewModel
 import com.didiprogrammer.almacaprina.ui.campo.checklist.CampoChecklistViewModel
+import com.didiprogrammer.almacaprina.ui.campo.novedad.CampoReportNovedadViewModel
 import com.didiprogrammer.almacaprina.ui.campo.ordeno.MilkingSessionViewModel
 import com.didiprogrammer.almacaprina.ui.campo.pesada.CampoWeighingEntryViewModel
 import com.didiprogrammer.almacaprina.ui.campo.pesada.CampoWeighingListViewModel
@@ -317,6 +318,13 @@ val appModule = module {
             goatId = params.get(),
             goatRepository = get(),
             weightRecordRepository = get()
+        )
+    }
+
+    viewModel {
+        CampoReportNovedadViewModel(
+            goatRepository = get(),
+            healthRecordRepository = get()
         )
     }
 }
