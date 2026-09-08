@@ -69,6 +69,7 @@ fun VentasRootScreen(onLogout: () -> Unit) {
                 NewSaleCantidadScreen(
                     viewModel = viewModel,
                     onBack = { navController.popBackStack() },
+                    onAddAnotherProduct = { navController.navigate(VentasRoutes.NEW_SALE_PRODUCTO) },
                     onContinue = { navController.navigate(VentasRoutes.NEW_SALE_CONFIRMAR) }
                 )
             }
@@ -78,6 +79,7 @@ fun VentasRootScreen(onLogout: () -> Unit) {
                 NewSaleConfirmarScreen(
                     viewModel = viewModel,
                     onBack = { navController.popBackStack() },
+                    onEditLine = { navController.navigate(VentasRoutes.NEW_SALE_PRODUCTO) },
                     onSaved = {
                         navController.navigate(VentasRoutes.HOME) {
                             popUpTo(VentasRoutes.NEW_SALE_GRAPH) { inclusive = true }

@@ -8,6 +8,31 @@ import com.didiprogrammer.almacaprina.domain.model.Product
 import com.didiprogrammer.almacaprina.domain.model.ProductPackagingOption
 import kotlinx.datetime.LocalDate
 
+/**
+ * Una línea ya confirmada del "carrito" de la venta (ver [NewSaleUiState.cartLines]) — un
+ * producto con su cantidad y envase, independiente de los demás. Guarda datos crudos (no
+ * calculados) para poder recargarlos al editar la línea (ver NewSaleViewModel.editCartLine).
+ */
+data class CartLine(
+    val product: Product,
+    val quantityText: String,
+    val packagingId: String?,
+    val newPackagingUnitsOverride: Int? = null
+) {
+    val quantity: Double? get() = quantityText.toDoubleOrNull()
+}
+
+fun CartLine.packaging(packagingsById: Map<String, Packaging>): Packaging? = packagingId?.let { packagingsById[it] }
+
+fun CartLine.newPackagingUnitsCount(): Int = newPackagingUnitsOverride ?: (quantity?.toInt() ?: 0)
+
+fun CartLine.depositCharged(packagingsById: Map<String, Packaging>): Double =
+    packaging(packagingsById)?.takeIf { it.isReturnable }?.let { pkg -> newPackagingUnitsCount() * (pkg.depositAmount ?: 0.0) } ?: 0.0
+
+fun CartLine.subtotal(): Double = (quantity ?: 0.0) * product.defaultUnitPrice
+
+fun CartLine.total(packagingsById: Map<String, Packaging>): Double = subtotal() + depositCharged(packagingsById)
+
 /** Wizard de 4 pasos "Nueva venta" — un solo estado compartido por las 4 pantallas. */
 data class NewSaleUiState(
     val isLoading: Boolean = true,
@@ -25,11 +50,11 @@ data class NewSaleUiState(
     val newCustomerName: String = "",
     val newCustomerContact: String = "",
 
-    // Paso 2 — ¿Qué vas a vender?
+    // Paso 2 — ¿Qué vas a vender? (producto/cantidad/envase EN CURSO, todavía no está en el carrito)
     val activeProducts: List<Product> = emptyList(),
     val selectedProduct: Product? = null,
 
-    // Paso 3 — Cantidad y envase
+    // Paso 3 — Cantidad y envase (de la línea en curso)
     val quantityText: String = "",
     val packagings: List<Packaging> = emptyList(),
     /** Ver CLAUDE.md — qué envases aplican a cada producto (Catálogo > Empaques, Admin). */
@@ -42,6 +67,10 @@ data class NewSaleUiState(
      */
     val newPackagingUnitsOverride: Int? = null,
 
+    /** Líneas ya confirmadas del carrito — se pueden editar o eliminar (ver
+     * NewSaleViewModel.editCartLine/removeCartLine) antes de guardar la venta. */
+    val cartLines: List<CartLine> = emptyList(),
+
     // Paso 4 — Confirmar
     val paymentMethod: PaymentMethod = PaymentMethod.CASH,
     val paymentStatus: PaymentStatus = PaymentStatus.PAID
@@ -52,6 +81,8 @@ data class NewSaleUiState(
         } else {
             customers.filter { it.name.contains(customerSearchQuery, ignoreCase = true) }
         }
+
+    val packagingsById: Map<String, Packaging> get() = packagings.associateBy { it.id }
 
     val quantity: Double? get() = quantityText.toDoubleOrNull()
     val selectedPackaging: Packaging? get() = packagings.firstOrNull { it.id == selectedPackagingId }
@@ -77,6 +108,11 @@ data class NewSaleUiState(
 
     val subtotal: Double get() = (quantity ?: 0.0) * (selectedProduct?.defaultUnitPrice ?: 0.0)
     val total: Double get() = subtotal + depositCharged
+
+    // ---------- Carrito (todas las líneas ya confirmadas) ----------
+    val cartSubtotal: Double get() = cartLines.sumOf { it.subtotal() }
+    val cartDepositTotal: Double get() = cartLines.sumOf { it.depositCharged(packagingsById) }
+    val cartGrandTotal: Double get() = cartSubtotal + cartDepositTotal
 
     val canCreateNewCustomer: Boolean get() = newCustomerName.isNotBlank()
     val canContinueFromCliente: Boolean get() = selectedCustomer != null

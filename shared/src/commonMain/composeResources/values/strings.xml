@@ -96,6 +96,10 @@
     <string name="new_sale_cantidad_packaging_hint">Por ahora todos los productos pasan por el mismo selector de envase; no hay lógica distinta por producto en esta iteración.</string>
     <string name="new_sale_cantidad_new_units_label">Envases nuevos entregados</string>
     <string name="new_sale_cantidad_new_units_hint">Baja a 0 si el cliente reutiliza un envase que ya tenía — no se cobra depósito en ese caso.</string>
+    <string name="new_sale_cart_section_title">En el carrito</string>
+    <string name="new_sale_cart_edit_content_description">Editar producto</string>
+    <string name="new_sale_cart_remove_content_description">Quitar producto</string>
+    <string name="new_sale_add_another_button">Agregar otro producto</string>
 
     <string name="new_sale_confirmar_title">Confirmar</string>
     <string name="new_sale_confirmar_save_button">Guardar venta</string>

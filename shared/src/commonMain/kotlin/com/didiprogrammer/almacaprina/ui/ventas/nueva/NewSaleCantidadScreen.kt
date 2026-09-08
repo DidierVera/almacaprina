@@ -12,6 +12,8 @@ import almacaprina.shared.generated.resources.new_sale_cantidad_packaging_no_dep
 import almacaprina.shared.generated.resources.new_sale_cantidad_packaging_section_title
 import almacaprina.shared.generated.resources.new_sale_cantidad_partial_total_label
 import almacaprina.shared.generated.resources.new_sale_cantidad_unit_equivalence
+import almacaprina.shared.generated.resources.new_sale_cart_section_title
+import almacaprina.shared.generated.resources.new_sale_add_another_button
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +29,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -61,6 +64,7 @@ private const val QUANTITY_STEP = 1.0
 fun NewSaleCantidadScreen(
     viewModel: NewSaleViewModel,
     onBack: () -> Unit,
+    onAddAnotherProduct: () -> Unit,
     onContinue: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -72,15 +76,32 @@ fun NewSaleCantidadScreen(
                 Column(modifier = Modifier.fillMaxWidth().padding(Spacing.xxl)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(stringResource(Res.string.new_sale_cantidad_partial_total_label), style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
-                        Text(formatCurrency(uiState.total, uiState.currency), style = MaterialTheme.typography.headlineSmall, color = Tinta)
+                        Text(
+                            formatCurrency(uiState.cartGrandTotal + uiState.total, uiState.currency),
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = Tinta
+                        )
                     }
                     androidx.compose.foundation.layout.Spacer(Modifier.size(Spacing.md))
-                    PrimaryButton(
-                        text = stringResource(Res.string.common_continue),
-                        enabled = uiState.canContinueFromCantidad,
-                        onClick = onContinue,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                        OutlinedButton(
+                            enabled = uiState.canContinueFromCantidad,
+                            onClick = {
+                                viewModel.addCurrentLineToCart()
+                                onAddAnotherProduct()
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) { Text(stringResource(Res.string.new_sale_add_another_button)) }
+                        PrimaryButton(
+                            text = stringResource(Res.string.common_continue),
+                            enabled = uiState.canContinueFromCantidad,
+                            onClick = {
+                                viewModel.addCurrentLineToCart()
+                                onContinue()
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
         }
@@ -98,6 +119,22 @@ fun NewSaleCantidadScreen(
             ) {
                 item {
                     NewSaleStepHeader(step = 3, title = uiState.selectedCustomer?.name ?: "", onBack = onBack)
+                }
+
+                if (uiState.cartLines.isNotEmpty()) {
+                    item { Text(stringResource(Res.string.new_sale_cart_section_title), style = MaterialTheme.typography.titleSmall, color = Tinta) }
+                    item {
+                        CartLinesList(
+                            lines = uiState.cartLines,
+                            packagingsById = uiState.packagingsById,
+                            currency = uiState.currency,
+                            onEdit = { index ->
+                                viewModel.editCartLine(index)
+                                onAddAnotherProduct()
+                            },
+                            onRemove = viewModel::removeCartLine
+                        )
+                    }
                 }
 
                 item {

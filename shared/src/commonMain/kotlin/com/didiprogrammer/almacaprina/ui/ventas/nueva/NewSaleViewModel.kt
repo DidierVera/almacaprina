@@ -172,53 +172,103 @@ class NewSaleViewModel(
     fun onPackagingSelected(packagingId: String) = _uiState.update { it.copy(selectedPackagingId = packagingId, newPackagingUnitsOverride = null) }
     fun onNewPackagingUnitsChanged(count: Int) = _uiState.update { it.copy(newPackagingUnitsOverride = count.coerceIn(0, it.quantity?.toInt() ?: 0)) }
 
+    // ---------- Carrito (varios productos en una sola venta) ----------
+    /** Confirma la línea en curso (producto + cantidad + envase) al carrito y limpia el
+     * formulario para poder elegir el siguiente producto — usado tanto por "Agregar otro
+     * producto" (vuelve al Paso 2) como por "Continuar" (avanza al Paso 4). */
+    fun addCurrentLineToCart() {
+        val state = _uiState.value
+        val product = state.selectedProduct ?: return
+        if (!state.canContinueFromCantidad) return
+        val line = CartLine(
+            product = product,
+            quantityText = state.quantityText,
+            packagingId = state.selectedPackagingId,
+            newPackagingUnitsOverride = state.newPackagingUnitsOverride
+        )
+        _uiState.update {
+            it.copy(
+                cartLines = it.cartLines + line,
+                selectedProduct = null,
+                quantityText = "",
+                selectedPackagingId = null,
+                newPackagingUnitsOverride = null
+            )
+        }
+    }
+
+    /** Saca la línea del carrito y la vuelve a dejar "en curso" para editarla — la pantalla
+     * navega de vuelta al Paso 2 (producto) para que el usuario la reconfigure y la vuelva a
+     * confirmar con "Agregar otro producto"/"Continuar". */
+    fun editCartLine(index: Int) {
+        val line = _uiState.value.cartLines.getOrNull(index) ?: return
+        _uiState.update {
+            it.copy(
+                cartLines = it.cartLines.filterIndexed { i, _ -> i != index },
+                selectedProduct = line.product,
+                quantityText = line.quantityText,
+                selectedPackagingId = line.packagingId,
+                newPackagingUnitsOverride = line.newPackagingUnitsOverride
+            )
+        }
+    }
+
+    fun removeCartLine(index: Int) = _uiState.update { it.copy(cartLines = it.cartLines.filterIndexed { i, _ -> i != index }) }
+
     // ---------- Paso 4 — Confirmar ----------
     fun onPaymentMethodSelected(method: PaymentMethod) = _uiState.update { it.copy(paymentMethod = method) }
     fun onPaymentStatusSelected(status: PaymentStatus) = _uiState.update { it.copy(paymentStatus = status) }
 
+    /** Guarda una fila `Sale` por cada línea del carrito, todas con el mismo cliente/fecha/forma
+     * de pago — para el resto de la app (Admin, Cobrar pendientes) son ventas normales, solo que
+     * hechas en el mismo momento. Ver el punto del usuario: "no puedo vender 2 productos en la
+     * misma venta" — Sale sigue siendo 1 fila = 1 producto (cero cambios en Admin), el carrito
+     * solo agrupa varias inserciones desde este wizard. */
     fun save(onSaved: () -> Unit) {
         val state = _uiState.value
         val customer = state.selectedCustomer ?: return
-        val product = state.selectedProduct ?: return
-        val quantity = state.quantity ?: return
+        if (state.cartLines.isEmpty()) return
         val today = state.today ?: Clock.System.todayIn(TimeZone.currentSystemDefault())
 
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, errorMessage = null) }
             try {
-                val saleId = newId()
-                val packaging = state.selectedPackaging
-                val isReturnable = packaging?.isReturnable == true
-                saleRepository.insert(
-                    Sale(
-                        id = saleId,
-                        date = today,
-                        customerId = customer.id,
-                        productId = product.id,
-                        quantitySold = quantity,
-                        unitPrice = product.defaultUnitPrice,
-                        packagingId = packaging?.id,
-                        newPackagingUnitsCount = if (packaging != null) state.newPackagingUnitsCount else null,
-                        packagingReturnedCount = null,
-                        paymentMethod = state.paymentMethod,
-                        paymentStatus = state.paymentStatus,
-                        paidDate = if (state.paymentStatus == PaymentStatus.PAID) today else null
-                    )
-                )
-                // Si el envase es retornable, se registra el movimiento de depósito
-                // correspondiente — mismo patrón que Purchase -> PackagingInventory en Admin.
-                if (isReturnable && state.newPackagingUnitsCount > 0) {
-                    packagingDepositTransactionRepository.insert(
-                        PackagingDepositTransaction(
-                            id = newId(),
-                            customerId = customer.id,
-                            saleId = saleId,
-                            packagingId = packaging.id,
+                state.cartLines.forEach { line ->
+                    val saleId = newId()
+                    val packaging = line.packaging(state.packagingsById)
+                    val isReturnable = packaging?.isReturnable == true
+                    val units = line.newPackagingUnitsCount()
+                    saleRepository.insert(
+                        Sale(
+                            id = saleId,
                             date = today,
-                            movementType = DepositMovementType.DEPOSIT_CHARGED,
-                            quantity = state.newPackagingUnitsCount
+                            customerId = customer.id,
+                            productId = line.product.id,
+                            quantitySold = line.quantity ?: 0.0,
+                            unitPrice = line.product.defaultUnitPrice,
+                            packagingId = packaging?.id,
+                            newPackagingUnitsCount = if (packaging != null) units else null,
+                            packagingReturnedCount = null,
+                            paymentMethod = state.paymentMethod,
+                            paymentStatus = state.paymentStatus,
+                            paidDate = if (state.paymentStatus == PaymentStatus.PAID) today else null
                         )
                     )
+                    // Si el envase es retornable, se registra el movimiento de depósito
+                    // correspondiente — mismo patrón que Purchase -> PackagingInventory en Admin.
+                    if (isReturnable && units > 0) {
+                        packagingDepositTransactionRepository.insert(
+                            PackagingDepositTransaction(
+                                id = newId(),
+                                customerId = customer.id,
+                                saleId = saleId,
+                                packagingId = packaging.id,
+                                date = today,
+                                movementType = DepositMovementType.DEPOSIT_CHARGED,
+                                quantity = units
+                            )
+                        )
+                    }
                 }
                 _uiState.update { it.copy(isSaving = false) }
                 onSaved()

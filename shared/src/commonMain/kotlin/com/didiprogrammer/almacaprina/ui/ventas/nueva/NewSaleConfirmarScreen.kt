@@ -3,7 +3,6 @@ package com.didiprogrammer.almacaprina.ui.ventas.nueva
 import almacaprina.shared.generated.resources.Res
 import almacaprina.shared.generated.resources.common_saving_button
 import almacaprina.shared.generated.resources.new_sale_confirmar_deposit_label
-import almacaprina.shared.generated.resources.new_sale_confirmar_line_item
 import almacaprina.shared.generated.resources.new_sale_confirmar_paid_now_subtitle
 import almacaprina.shared.generated.resources.new_sale_confirmar_paid_now_title
 import almacaprina.shared.generated.resources.new_sale_confirmar_payment_method_title
@@ -40,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.didiprogrammer.almacaprina.business.formatCurrency
-import com.didiprogrammer.almacaprina.business.formatQuantity
 import com.didiprogrammer.almacaprina.domain.model.PaymentMethod
 import com.didiprogrammer.almacaprina.domain.model.PaymentStatus
 import com.didiprogrammer.almacaprina.ui.components.PrimaryButton
@@ -64,11 +62,10 @@ import org.jetbrains.compose.resources.stringResource
 fun NewSaleConfirmarScreen(
     viewModel: NewSaleViewModel,
     onBack: () -> Unit,
+    onEditLine: () -> Unit,
     onSaved: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val product = uiState.selectedProduct
-    val quantity = uiState.quantity ?: 0.0
 
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(uiState.errorMessage) {
@@ -81,7 +78,7 @@ fun NewSaleConfirmarScreen(
             Surface(color = com.didiprogrammer.almacaprina.ui.theme.Fondo) {
                 PrimaryButton(
                     text = if (uiState.isSaving) stringResource(Res.string.common_saving_button) else stringResource(Res.string.new_sale_confirmar_save_button),
-                    enabled = !uiState.isSaving,
+                    enabled = !uiState.isSaving && uiState.cartLines.isNotEmpty(),
                     loading = uiState.isSaving,
                     onClick = { viewModel.save(onSaved) },
                     modifier = Modifier.fillMaxWidth().padding(Spacing.xxl)
@@ -102,36 +99,34 @@ fun NewSaleConfirmarScreen(
             ) {
                 item { NewSaleStepHeader(step = 4, title = stringResource(Res.string.new_sale_confirmar_title), onBack = onBack) }
 
+                item { Text(uiState.selectedCustomer?.name ?: "", style = MaterialTheme.typography.titleMedium, color = Tinta) }
+
+                item {
+                    CartLinesList(
+                        lines = uiState.cartLines,
+                        packagingsById = uiState.packagingsById,
+                        currency = uiState.currency,
+                        onEdit = { index ->
+                            viewModel.editCartLine(index)
+                            onEditLine()
+                        },
+                        onRemove = viewModel::removeCartLine
+                    )
+                }
+
                 item {
                     Surface(modifier = Modifier.fillMaxWidth(), shape = ShapeExtraLarge, color = Superficie, border = BorderStroke(1.dp, Borde)) {
                         Column(modifier = Modifier.fillMaxWidth().padding(Spacing.xl), verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                            Text(uiState.selectedCustomer?.name ?: "", style = MaterialTheme.typography.titleMedium, color = Tinta)
-                            HorizontalDivider(color = Borde)
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text(
-                                    stringResource(
-                                        Res.string.new_sale_confirmar_line_item,
-                                        formatQuantity(quantity),
-                                        product?.saleUnit?.label()?.lowercase() ?: "",
-                                        product?.name ?: "",
-                                        formatCurrency(product?.defaultUnitPrice ?: 0.0, uiState.currency)
-                                    ),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = TintaSuave,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                Text(formatCurrency(uiState.subtotal, uiState.currency), style = MaterialTheme.typography.titleSmall, color = Tinta)
-                            }
-                            if (uiState.depositCharged > 0.0) {
+                            if (uiState.cartDepositTotal > 0.0) {
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                     Text(stringResource(Res.string.new_sale_confirmar_deposit_label), style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
-                                    Text(formatCurrency(uiState.depositCharged, uiState.currency), style = MaterialTheme.typography.titleSmall, color = Tinta)
+                                    Text(formatCurrency(uiState.cartDepositTotal, uiState.currency), style = MaterialTheme.typography.titleSmall, color = Tinta)
                                 }
+                                HorizontalDivider(color = Borde)
                             }
-                            HorizontalDivider(color = Borde)
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text(stringResource(Res.string.new_sale_confirmar_total_label), style = MaterialTheme.typography.titleSmall, color = Tinta)
-                                Text(formatCurrency(uiState.total, uiState.currency), style = MaterialTheme.typography.headlineSmall, color = Tinta)
+                                Text(formatCurrency(uiState.cartGrandTotal, uiState.currency), style = MaterialTheme.typography.headlineSmall, color = Tinta)
                             }
                         }
                     }
