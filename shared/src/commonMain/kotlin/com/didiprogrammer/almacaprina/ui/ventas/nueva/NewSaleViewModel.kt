@@ -14,11 +14,13 @@ import com.didiprogrammer.almacaprina.domain.model.PaymentMethod
 import com.didiprogrammer.almacaprina.domain.model.PaymentStatus
 import com.didiprogrammer.almacaprina.domain.model.Product
 import com.didiprogrammer.almacaprina.domain.model.ProductCategory
+import com.didiprogrammer.almacaprina.domain.model.ProductPackagingOption
 import com.didiprogrammer.almacaprina.domain.model.Sale
 import com.didiprogrammer.almacaprina.domain.repository.BusinessSettingsRepository
 import com.didiprogrammer.almacaprina.domain.repository.CustomerRepository
 import com.didiprogrammer.almacaprina.domain.repository.PackagingDepositTransactionRepository
 import com.didiprogrammer.almacaprina.domain.repository.PackagingRepository
+import com.didiprogrammer.almacaprina.domain.repository.ProductPackagingOptionRepository
 import com.didiprogrammer.almacaprina.domain.repository.ProductRepository
 import com.didiprogrammer.almacaprina.domain.repository.SaleRepository
 import com.didiprogrammer.almacaprina.util.newId
@@ -40,6 +42,7 @@ private data class NewSaleRawData(
     val sales: List<Sale>,
     val products: List<Product>,
     val packagings: List<com.didiprogrammer.almacaprina.domain.model.Packaging>,
+    val productPackagingOptions: List<ProductPackagingOption>,
     val currency: String
 )
 
@@ -54,6 +57,7 @@ class NewSaleViewModel(
     private val productRepository: ProductRepository,
     private val packagingRepository: PackagingRepository,
     private val packagingDepositTransactionRepository: PackagingDepositTransactionRepository,
+    private val productPackagingOptionRepository: ProductPackagingOptionRepository,
     private val businessSettingsRepository: BusinessSettingsRepository
 ) : ViewModel() {
 
@@ -70,20 +74,20 @@ class NewSaleViewModel(
                     val salesDeferred = async { saleRepository.getAll() }
                     val productsDeferred = async { productRepository.getAll() }
                     val packagingsDeferred = async { packagingRepository.getAll() }
+                    val productPackagingOptionsDeferred = async { productPackagingOptionRepository.getAll() }
                     val currencyDeferred = async { businessSettingsRepository.getAll().firstOrNull()?.currency ?: "COP" }
                     NewSaleRawData(
                         customers = customersDeferred.await(),
                         sales = salesDeferred.await(),
                         products = productsDeferred.await(),
                         packagings = packagingsDeferred.await(),
+                        productPackagingOptions = productPackagingOptionsDeferred.await(),
                         currency = currencyDeferred.await()
                     )
                 }
                 val lastSaleByCustomer = raw.sales
                     .groupBy { it.customerId }
                     .mapValues { (_, sales) -> sales.maxOf { it.date } }
-                val defaultPackagingId = raw.packagings.firstOrNull { !it.isReturnable }?.id
-                    ?: raw.packagings.firstOrNull()?.id
 
                 _uiState.update {
                     it.copy(
@@ -94,7 +98,7 @@ class NewSaleViewModel(
                         lastSaleDateByCustomer = lastSaleByCustomer,
                         activeProducts = raw.products.filter { p -> p.active },
                         packagings = raw.packagings,
-                        selectedPackagingId = defaultPackagingId
+                        productPackagingOptions = raw.productPackagingOptions
                     )
                 }
             } catch (t: Throwable) {
@@ -144,11 +148,29 @@ class NewSaleViewModel(
     }
 
     // ---------- Paso 2 — ¿Qué vas a vender? ----------
-    fun onProductSelected(product: Product) = _uiState.update { it.copy(selectedProduct = product) }
+    // Al elegir producto se preselecciona su envase predeterminado (Catálogo > Empaques,
+    // Admin) — si no tiene ninguno configurado, se conserva el criterio anterior (el primero
+    // no retornable, o el primero de todos) sobre el catálogo completo.
+    fun onProductSelected(product: Product) = _uiState.update { state ->
+        val options = state.productPackagingOptions.filter { it.productId == product.id }
+        val candidates = if (options.isNotEmpty()) {
+            val ids = options.map { it.packagingId }.toSet()
+            state.packagings.filter { it.id in ids }
+        } else {
+            state.packagings
+        }
+        val defaultPackagingId = options.firstOrNull { it.isDefault }?.packagingId
+            ?: candidates.firstOrNull { !it.isReturnable }?.id
+            ?: candidates.firstOrNull()?.id
+        state.copy(selectedProduct = product, selectedPackagingId = defaultPackagingId, newPackagingUnitsOverride = null)
+    }
 
     // ---------- Paso 3 — Cantidad y envase ----------
-    fun onQuantityChanged(value: String) = _uiState.update { it.copy(quantityText = value) }
-    fun onPackagingSelected(packagingId: String) = _uiState.update { it.copy(selectedPackagingId = packagingId) }
+    // Cambiar la cantidad o el envase invalida el ajuste manual de "envases nuevos entregados"
+    // — vuelve a calcularse por defecto (1 por unidad vendida) hasta que el usuario lo ajuste de nuevo.
+    fun onQuantityChanged(value: String) = _uiState.update { it.copy(quantityText = value, newPackagingUnitsOverride = null) }
+    fun onPackagingSelected(packagingId: String) = _uiState.update { it.copy(selectedPackagingId = packagingId, newPackagingUnitsOverride = null) }
+    fun onNewPackagingUnitsChanged(count: Int) = _uiState.update { it.copy(newPackagingUnitsOverride = count.coerceIn(0, it.quantity?.toInt() ?: 0)) }
 
     // ---------- Paso 4 — Confirmar ----------
     fun onPaymentMethodSelected(method: PaymentMethod) = _uiState.update { it.copy(paymentMethod = method) }

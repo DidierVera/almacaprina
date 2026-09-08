@@ -12,6 +12,7 @@ object SupabaseTables {
     const val PRODUCT_RECIPE_ITEMS = "product_recipe_items"
     const val PRODUCTS = "products"
     const val PACKAGINGS = "packagings"
+    const val PRODUCT_PACKAGING_OPTIONS = "product_packaging_options"
     const val PRODUCTION_BATCHES = "production_batches"
     const val PRODUCTION_BATCH_INSUMO_USAGES = "production_batch_insumo_usages"
     const val PURCHASES = "purchases"

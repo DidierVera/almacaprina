@@ -64,3 +64,23 @@ fun totalPackagingDepositsOut(transactions: List<PackagingDepositTransaction>, p
  */
 fun totalPackagingUnitsOut(transactions: List<PackagingDepositTransaction>): Int =
     transactions.sumOf { tx -> if (tx.movementType == DepositMovementType.DEPOSIT_CHARGED) tx.quantity else -tx.quantity }
+
+/** Envases de un cliente, de un tipo de envase puntual, que siguen fuera (sin devolver). */
+data class CustomerPackagingUnitsOut(
+    val customerId: String,
+    val packagingId: String,
+    val unitsOut: Int
+)
+
+/**
+ * Desglosa `totalPackagingUnitsOut` por cliente y tipo de envase — es la base de la pantalla
+ * "Devolver envase" (Ventas). Solo incluye combinaciones con saldo > 0 (ya devuelto todo, o
+ * cliente/envase sin movimientos, no aparecen).
+ */
+fun packagingUnitsOutByCustomer(transactions: List<PackagingDepositTransaction>): List<CustomerPackagingUnitsOut> =
+    transactions
+        .groupBy { it.customerId to it.packagingId }
+        .mapNotNull { (key, txs) ->
+            val unitsOut = txs.sumOf { tx -> if (tx.movementType == DepositMovementType.DEPOSIT_CHARGED) tx.quantity else -tx.quantity }
+            if (unitsOut > 0) CustomerPackagingUnitsOut(customerId = key.first, packagingId = key.second, unitsOut = unitsOut) else null
+        }

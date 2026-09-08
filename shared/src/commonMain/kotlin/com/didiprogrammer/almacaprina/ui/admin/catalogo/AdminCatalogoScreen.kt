@@ -13,15 +13,17 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,11 +39,14 @@ import com.didiprogrammer.almacaprina.business.formatCurrency
 import com.didiprogrammer.almacaprina.domain.model.Insumo
 import com.didiprogrammer.almacaprina.domain.model.Packaging
 import com.didiprogrammer.almacaprina.domain.model.Product
+import com.didiprogrammer.almacaprina.domain.model.ProductPackagingOption
 import com.didiprogrammer.almacaprina.domain.model.ProductRecipeItem
 import almacaprina.shared.generated.resources.Res
 import almacaprina.shared.generated.resources.admin_catalog_active_label
 import almacaprina.shared.generated.resources.admin_catalog_add_recipe_item_content_description
+import almacaprina.shared.generated.resources.admin_catalog_add_product_packaging_content_description
 import almacaprina.shared.generated.resources.admin_catalog_empty_recipe_message
+import almacaprina.shared.generated.resources.admin_catalog_empty_product_packaging_message
 import almacaprina.shared.generated.resources.admin_catalog_inactive_label
 import almacaprina.shared.generated.resources.admin_catalog_insumos_empty
 import almacaprina.shared.generated.resources.admin_catalog_new_insumo_content_description
@@ -49,10 +54,14 @@ import almacaprina.shared.generated.resources.admin_catalog_new_packaging_conten
 import almacaprina.shared.generated.resources.admin_catalog_new_product_content_description
 import almacaprina.shared.generated.resources.admin_catalog_no_cost_fallback
 import almacaprina.shared.generated.resources.admin_catalog_no_derived_products_message
+import almacaprina.shared.generated.resources.admin_catalog_no_products_message
+import almacaprina.shared.generated.resources.admin_catalog_packaging_default_label
 import almacaprina.shared.generated.resources.admin_catalog_packaging_not_returnable_label
 import almacaprina.shared.generated.resources.admin_catalog_packaging_returnable_label
 import almacaprina.shared.generated.resources.admin_catalog_packagings_empty
 import almacaprina.shared.generated.resources.admin_catalog_products_empty
+import almacaprina.shared.generated.resources.admin_catalog_remove_product_packaging_content_description
+import almacaprina.shared.generated.resources.admin_catalog_set_default_content_description
 import almacaprina.shared.generated.resources.admin_new_batch_deleted_insumo_fallback
 import com.didiprogrammer.almacaprina.ui.components.AlmacaprinaCard
 import com.didiprogrammer.almacaprina.ui.components.RefreshableContent
@@ -70,6 +79,7 @@ fun AdminCatalogoScreen(viewModel: AdminCatalogoViewModel = koinViewModel()) {
     var showNewPackagingDialog by remember { mutableStateOf(false) }
     var showNewInsumoDialog by remember { mutableStateOf(false) }
     var showAddRecipeItemDialog by remember { mutableStateOf(false) }
+    var showAddProductPackagingDialog by remember { mutableStateOf(false) }
     var editingProduct by remember { mutableStateOf<Product?>(null) }
     var editingPackaging by remember { mutableStateOf<Packaging?>(null) }
     var editingInsumo by remember { mutableStateOf<Insumo?>(null) }
@@ -97,16 +107,24 @@ fun AdminCatalogoScreen(viewModel: AdminCatalogoViewModel = koinViewModel()) {
                         Icon(Icons.Filled.Add, contentDescription = stringResource(Res.string.admin_catalog_add_recipe_item_content_description))
                     }
                 }
+                CatalogoSubTab.EMPAQUES -> if (uiState.selectedPackagingProductId != null) {
+                    FloatingActionButton(onClick = { showAddProductPackagingDialog = true }) {
+                        Icon(Icons.Filled.Add, contentDescription = stringResource(Res.string.admin_catalog_add_product_packaging_content_description))
+                    }
+                }
             }
         }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            PrimaryTabRow(selectedTabIndex = uiState.selectedTab.ordinal) {
-                CatalogoSubTab.entries.forEach { tab ->
-                    Tab(
+            LazyRow(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                items(CatalogoSubTab.entries) { tab ->
+                    FilterChip(
                         selected = uiState.selectedTab == tab,
                         onClick = { viewModel.onTabSelected(tab) },
-                        text = { Text(tab.label()) }
+                        label = { Text(tab.label()) }
                     )
                 }
             }
@@ -126,6 +144,15 @@ fun AdminCatalogoScreen(viewModel: AdminCatalogoViewModel = koinViewModel()) {
                         recipeItems = uiState.selectedRecipeItems,
                         insumosById = uiState.insumos.associateBy { it.id },
                         onProductSelected = viewModel::onRecipeProductSelected
+                    )
+                    CatalogoSubTab.EMPAQUES -> EmpaquesContent(
+                        products = uiState.products,
+                        selectedProductId = uiState.selectedPackagingProductId,
+                        options = uiState.selectedProductPackagingOptions,
+                        packagingsById = uiState.packagings.associateBy { it.id },
+                        onProductSelected = viewModel::onPackagingProductSelected,
+                        onSetDefault = viewModel::setDefaultPackagingOption,
+                        onRemove = viewModel::deleteProductPackagingOption
                     )
                 }
             }
@@ -199,6 +226,17 @@ fun AdminCatalogoScreen(viewModel: AdminCatalogoViewModel = koinViewModel()) {
             onSave = { insumoId, quantity ->
                 viewModel.addRecipeItem(uiState.selectedRecipeProductId!!, insumoId, quantity)
                 showAddRecipeItemDialog = false
+            }
+        )
+    }
+    if (showAddProductPackagingDialog && uiState.selectedPackagingProductId != null) {
+        val alreadyLinkedIds = uiState.selectedProductPackagingOptions.map { it.packagingId }.toSet()
+        AddProductPackagingDialog(
+            availablePackagings = uiState.packagings.filterNot { it.id in alreadyLinkedIds },
+            onDismiss = { showAddProductPackagingDialog = false },
+            onSave = { packagingId, isDefault ->
+                viewModel.addProductPackagingOption(uiState.selectedPackagingProductId!!, packagingId, isDefault)
+                showAddProductPackagingDialog = false
             }
         )
     }
@@ -327,6 +365,66 @@ private fun RecetasContent(
                                 "${item.quantityPerOutputUnit} ${insumo?.unitOfMeasure?.label() ?: ""}",
                                 style = MaterialTheme.typography.bodyMedium
                             )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmpaquesContent(
+    products: List<Product>,
+    selectedProductId: String?,
+    options: List<ProductPackagingOption>,
+    packagingsById: Map<String, Packaging>,
+    onProductSelected: (String) -> Unit,
+    onSetDefault: (ProductPackagingOption) -> Unit,
+    onRemove: (String) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        if (products.isEmpty()) {
+            EmptyState(stringResource(Res.string.admin_catalog_no_products_message))
+            return
+        }
+        LazyRow(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(products, key = { it.id }) { product ->
+                FilterChip(
+                    selected = selectedProductId == product.id,
+                    onClick = { onProductSelected(product.id) },
+                    label = { Text(product.name) }
+                )
+            }
+        }
+        if (options.isEmpty()) {
+            EmptyState(stringResource(Res.string.admin_catalog_empty_product_packaging_message))
+        } else {
+            LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                items(options, key = { it.id }) { option ->
+                    val packaging = packagingsById[option.packagingId]
+                    AlmacaprinaCard {
+                        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Column {
+                                Text(packaging?.name ?: stringResource(Res.string.admin_new_batch_deleted_insumo_fallback), style = MaterialTheme.typography.titleSmall)
+                                if (option.isDefault) {
+                                    Text(stringResource(Res.string.admin_catalog_packaging_default_label), style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                IconButton(onClick = { onSetDefault(option) }) {
+                                    Icon(
+                                        if (option.isDefault) Icons.Filled.Star else Icons.Outlined.StarOutline,
+                                        contentDescription = stringResource(Res.string.admin_catalog_set_default_content_description)
+                                    )
+                                }
+                                IconButton(onClick = { onRemove(option.id) }) {
+                                    Icon(Icons.Outlined.Close, contentDescription = stringResource(Res.string.admin_catalog_remove_product_packaging_content_description))
+                                }
+                            }
                         }
                     }
                 }

@@ -4,6 +4,8 @@ import almacaprina.shared.generated.resources.Res
 import almacaprina.shared.generated.resources.common_continue
 import almacaprina.shared.generated.resources.new_sale_cantidad_default_title
 import almacaprina.shared.generated.resources.new_sale_cantidad_default_unit_label
+import almacaprina.shared.generated.resources.new_sale_cantidad_new_units_hint
+import almacaprina.shared.generated.resources.new_sale_cantidad_new_units_label
 import almacaprina.shared.generated.resources.new_sale_cantidad_packaging_deposit_suffix
 import almacaprina.shared.generated.resources.new_sale_cantidad_packaging_hint
 import almacaprina.shared.generated.resources.new_sale_cantidad_packaging_no_deposit
@@ -124,6 +126,7 @@ fun NewSaleCantidadScreen(
                                     },
                                     shape = ShapeLarge,
                                     colors = ButtonDefaults.buttonColors(containerColor = Borde, contentColor = Tinta),
+                                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
                                     modifier = Modifier.size(56.dp)
                                 ) { Text("–", style = MaterialTheme.typography.headlineSmall) }
 
@@ -143,6 +146,7 @@ fun NewSaleCantidadScreen(
                                     },
                                     shape = ShapeLarge,
                                     colors = ButtonDefaults.buttonColors(containerColor = Verde, contentColor = SobreVerde),
+                                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
                                     modifier = Modifier.size(56.dp)
                                 ) { Text("+", style = MaterialTheme.typography.headlineSmall) }
                             }
@@ -153,12 +157,12 @@ fun NewSaleCantidadScreen(
                 item { Text(stringResource(Res.string.new_sale_cantidad_packaging_section_title), style = MaterialTheme.typography.titleSmall, color = Tinta) }
 
                 item {
-                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                        uiState.packagings.forEach { packaging ->
+                    Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                        uiState.availablePackagings.forEach { packaging ->
                             val selected = uiState.selectedPackagingId == packaging.id
                             Surface(
                                 modifier = Modifier
-                                    .weight(1f)
+                                    .fillMaxWidth()
                                     .clickable { viewModel.onPackagingSelected(packaging.id) },
                                 shape = ShapeLarge,
                                 color = if (selected) Verde.copy(alpha = 0.12f) else Superficie,
@@ -176,6 +180,41 @@ fun NewSaleCantidadScreen(
                                         color = TintaSuave
                                     )
                                 }
+                            }
+                        }
+                    }
+                }
+
+                if (uiState.selectedPackaging?.isReturnable == true) {
+                    item {
+                        Surface(modifier = Modifier.fillMaxWidth(), shape = ShapeExtraLarge, color = Superficie, border = BorderStroke(1.dp, Borde)) {
+                            Column(modifier = Modifier.fillMaxWidth().padding(Spacing.xl)) {
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                    Text(stringResource(Res.string.new_sale_cantidad_new_units_label), style = MaterialTheme.typography.titleSmall, color = Tinta)
+                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                                        Button(
+                                            onClick = { viewModel.onNewPackagingUnitsChanged(uiState.newPackagingUnitsCount - 1) },
+                                            shape = ShapeLarge,
+                                            colors = ButtonDefaults.buttonColors(containerColor = Borde, contentColor = Tinta),
+                                            contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                                            modifier = Modifier.size(40.dp)
+                                        ) { Text("–") }
+                                        Text("${uiState.newPackagingUnitsCount}", style = MaterialTheme.typography.titleLarge, color = Tinta)
+                                        Button(
+                                            onClick = { viewModel.onNewPackagingUnitsChanged(uiState.newPackagingUnitsCount + 1) },
+                                            shape = ShapeLarge,
+                                            colors = ButtonDefaults.buttonColors(containerColor = Verde, contentColor = SobreVerde),
+                                            contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                                            modifier = Modifier.size(40.dp)
+                                        ) { Text("+") }
+                                    }
+                                }
+                                Text(
+                                    stringResource(Res.string.new_sale_cantidad_new_units_hint),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TintaSuave,
+                                    modifier = Modifier.padding(top = Spacing.sm)
+                                )
                             }
                         }
                     }

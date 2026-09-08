@@ -94,6 +94,8 @@
     <string name="new_sale_cantidad_packaging_deposit_suffix">+%1$s depósito c/u</string>
     <string name="new_sale_cantidad_packaging_no_deposit">Sin depósito</string>
     <string name="new_sale_cantidad_packaging_hint">Por ahora todos los productos pasan por el mismo selector de envase; no hay lógica distinta por producto en esta iteración.</string>
+    <string name="new_sale_cantidad_new_units_label">Envases nuevos entregados</string>
+    <string name="new_sale_cantidad_new_units_hint">Baja a 0 si el cliente reutiliza un envase que ya tenía — no se cobra depósito en ese caso.</string>
 
     <string name="new_sale_confirmar_title">Confirmar</string>
     <string name="new_sale_confirmar_save_button">Guardar venta</string>
@@ -213,6 +215,7 @@
     <string name="product_category_derived_dairy">Derivado</string>
     <string name="sale_unit_liter">Litro</string>
     <string name="sale_unit_kilogram">Kilogramo</string>
+    <string name="sale_unit_gram">Gramo</string>
     <string name="sale_unit_unit">Unidad</string>
     <string name="insumo_category_feed">Alimento</string>
     <string name="insumo_category_veterinary">Veterinario</string>
@@ -488,10 +491,12 @@
     <string name="catalogo_sub_tab_envases">Envases</string>
     <string name="catalogo_sub_tab_insumos">Insumos</string>
     <string name="catalogo_sub_tab_recetas">Recetas</string>
+    <string name="catalogo_sub_tab_empaques">Empaques</string>
     <string name="admin_catalog_new_product_content_description">Nuevo producto</string>
     <string name="admin_catalog_new_packaging_content_description">Nuevo envase</string>
     <string name="admin_catalog_new_insumo_content_description">Nuevo insumo</string>
     <string name="admin_catalog_add_recipe_item_content_description">Agregar insumo a la receta</string>
+    <string name="admin_catalog_add_product_packaging_content_description">Asociar envase al producto</string>
     <string name="admin_catalog_products_empty">Sin productos registrados todavía.</string>
     <string name="admin_catalog_packagings_empty">Sin envases registrados todavía.</string>
     <string name="admin_catalog_packaging_returnable_label">Retornable · depósito %1$s</string>
@@ -500,6 +505,11 @@
     <string name="admin_catalog_no_cost_fallback">Sin costo</string>
     <string name="admin_catalog_no_derived_products_message">Primero crea un producto derivado en la pestaña Productos.</string>
     <string name="admin_catalog_empty_recipe_message">Este producto todavía no tiene insumos en su receta.</string>
+    <string name="admin_catalog_no_products_message">Primero crea un producto en la pestaña Productos.</string>
+    <string name="admin_catalog_empty_product_packaging_message">Este producto todavía no tiene envases asociados.</string>
+    <string name="admin_catalog_packaging_default_label">Predeterminado</string>
+    <string name="admin_catalog_set_default_content_description">Marcar como predeterminado</string>
+    <string name="admin_catalog_remove_product_packaging_content_description">Quitar envase del producto</string>
     <string name="admin_catalog_active_label">Activo</string>
     <string name="admin_catalog_inactive_label">Inactivo</string>
     <string name="admin_catalog_error_load">No se pudo cargar el catálogo</string>
@@ -524,6 +534,9 @@
     <string name="admin_recipe_item_dialog_title">Agregar insumo a la receta</string>
     <string name="admin_recipe_item_insumo_label">Insumo</string>
     <string name="admin_recipe_item_quantity_label">Cantidad esperada por unidad de producto</string>
+    <string name="admin_product_packaging_dialog_title">Asociar envase al producto</string>
+    <string name="admin_product_packaging_dialog_packaging_label">Envase</string>
+    <string name="admin_product_packaging_dialog_default_label">Marcar como predeterminado</string>
 
     <!-- ==================== Admin · Nueva compra ==================== -->
     <string name="admin_new_purchase_title">Nueva compra</string>
@@ -594,5 +607,23 @@
     <string name="admin_settings_success_save">Configuración guardada</string>
     <string name="admin_settings_success_pin_updated">PIN actualizado</string>
     <string name="admin_settings_success_pin_deleted">PIN eliminado</string>
+
+    <!-- ==================== Ventas · Devolver envase ==================== -->
+    <string name="deposits_list_eyebrow">Envases</string>
+    <string name="deposits_list_title">%1$d envases fuera</string>
+    <string name="deposits_list_subtitle">%1$s en depósitos sin devolver</string>
+    <string name="deposits_list_empty_message">No hay envases pendientes de devolución.</string>
+    <string name="deposits_list_units_out_suffix">%1$d fuera</string>
+    <string name="deposits_list_error_load">No se pudo cargar la lista de envases</string>
+    <string name="deposits_detail_units_out_label">%1$d fuera · %2$s de depósito c/u</string>
+    <string name="deposits_detail_return_quantity_label">Envases que devuelve ahora</string>
+    <string name="deposits_detail_refund_label">Se devuelve</string>
+    <string name="deposits_detail_confirm_button">Confirmar devolución</string>
+    <string name="deposits_detail_error_load">No se pudo cargar los envases del cliente</string>
+    <string name="deposits_detail_error_save">No se pudo registrar la devolución</string>
+    <string name="deposits_detail_success_returned">Devolución registrada</string>
+    <string name="deposits_detail_unknown_customer_fallback">Cliente</string>
+
+    <string name="admin_care_task_form_error_duplicate_milking">Ya existe una tarea de ordeño activa: "%1$s". Solo puede haber una a la vez — desactívala primero si quieres reemplazarla.</string>
 
 </resources>

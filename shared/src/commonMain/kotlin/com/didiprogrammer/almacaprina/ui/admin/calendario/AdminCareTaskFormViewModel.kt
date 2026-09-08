@@ -1,6 +1,7 @@
 package com.didiprogrammer.almacaprina.ui.admin.calendario
 
 import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_care_task_form_error_duplicate_milking
 import almacaprina.shared.generated.resources.admin_care_task_form_error_save
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -77,6 +78,19 @@ class AdminCareTaskFormViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, errorMessage = null) }
             try {
+                // Solo puede haber una tarea de ordeño ACTIVA a la vez — MilkProductionRecord
+                // solo tiene 2 casillas por cabra y día (mañana/tarde, decidido por reloj), así
+                // que 2 tareas de ordeño no pueden representar sesiones realmente independientes.
+                if (state.taskType == CareTaskType.MILKING && state.active) {
+                    val conflicting = careTaskRepository.getAll()
+                        .firstOrNull { it.taskType == CareTaskType.MILKING && it.active && it.id != taskId }
+                    if (conflicting != null) {
+                        _uiState.update {
+                            it.copy(isSaving = false, errorMessage = getString(Res.string.admin_care_task_form_error_duplicate_milking, conflicting.name))
+                        }
+                        return@launch
+                    }
+                }
                 val task = CareTask(
                     id = taskId ?: newId(),
                     name = state.name.trim(),

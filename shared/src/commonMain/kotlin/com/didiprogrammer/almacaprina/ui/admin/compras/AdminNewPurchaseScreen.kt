@@ -96,8 +96,8 @@ fun AdminNewPurchaseScreen(
                     }
                 }
             }
-            item {
-                if (uiState.category == PurchaseCategory.PACKAGING) {
+            if (uiState.category == PurchaseCategory.PACKAGING) {
+                item {
                     Column {
                         Text(stringResource(Res.string.admin_new_purchase_packaging_catalog_label))
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -110,7 +110,9 @@ fun AdminNewPurchaseScreen(
                             }
                         }
                     }
-                } else {
+                }
+            } else if (uiState.requiresInsumo) {
+                item {
                     Column {
                         Text(stringResource(Res.string.admin_new_purchase_insumo_catalog_label))
                         if (uiState.filteredInsumos.isEmpty()) {
@@ -132,6 +134,7 @@ fun AdminNewPurchaseScreen(
                     }
                 }
             }
+            // Mano de obra / Otro: sin selector — es un gasto, no algo que se consuma de un catálogo.
             item { DateField(label = stringResource(Res.string.weighing_entry_date_label), date = uiState.date, onDateSelected = viewModel::onDateChanged) }
             item {
                 OutlinedTextField(

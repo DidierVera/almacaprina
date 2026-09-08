@@ -11,6 +11,7 @@ import almacaprina.shared.generated.resources.insumo_category_veterinary
 import almacaprina.shared.generated.resources.product_category_derived_dairy
 import almacaprina.shared.generated.resources.product_category_raw_milk
 import almacaprina.shared.generated.resources.purchase_category_packaging
+import almacaprina.shared.generated.resources.sale_unit_gram
 import almacaprina.shared.generated.resources.sale_unit_kilogram
 import almacaprina.shared.generated.resources.sale_unit_liter
 import almacaprina.shared.generated.resources.sale_unit_unit
@@ -42,6 +43,7 @@ fun SaleUnit.label(): String = stringResource(
     when (this) {
         SaleUnit.LITER -> Res.string.sale_unit_liter
         SaleUnit.KILOGRAM -> Res.string.sale_unit_kilogram
+        SaleUnit.GRAM -> Res.string.sale_unit_gram
         SaleUnit.UNIT -> Res.string.sale_unit_unit
     }
 )

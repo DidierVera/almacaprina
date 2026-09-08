@@ -17,4 +17,9 @@ object VentasRoutes {
     const val PENDING_DETAIL_PATTERN = "ventas/pendientes/detalle/{customerId}"
 
     fun pendingDetail(customerId: String): String = "ventas/pendientes/detalle/$customerId"
+
+    const val DEPOSITS_LIST = "ventas/envases"
+    const val DEPOSITS_DETAIL_PATTERN = "ventas/envases/detalle/{customerId}"
+
+    fun depositsDetail(customerId: String): String = "ventas/envases/detalle/$customerId"
 }

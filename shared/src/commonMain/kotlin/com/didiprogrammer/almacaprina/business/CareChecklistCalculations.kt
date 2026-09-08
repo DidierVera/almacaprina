@@ -24,6 +24,10 @@ data class MilkingSessionProgress(val registeredCount: Int, val totalCount: Int)
 data class DailyCareChecklist(
     val totalCount: Int,
     val completedCount: Int,
+    /** Solo puede haber una CareTask activa de tipo `milking` a la vez (ver
+     * AdminCareTaskFormViewModel) — MilkProductionRecord solo tiene 2 casillas de producción
+     * por cabra y día (mañana/tarde, decidido por reloj), así que 2 tareas de ordeño no pueden
+     * representar sesiones realmente independientes. */
     val milkingTask: ChecklistCareTaskItem?,
     val milkingProgress: MilkingSessionProgress,
     val otherCareTasks: List<ChecklistCareTaskItem>,

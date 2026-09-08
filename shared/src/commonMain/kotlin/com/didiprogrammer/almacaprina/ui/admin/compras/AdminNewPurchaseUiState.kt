@@ -59,9 +59,18 @@ data class AdminNewPurchaseUiState(
     val filteredInsumos: List<Insumo>
         get() = category.toInsumoCategoryOrNull()?.let { ic -> insumos.filter { it.category == ic } } ?: emptyList()
 
+    /** Mano de obra y Otro son gastos, no algo que se consuma de un catálogo con stock —
+     * no tiene sentido forzar seleccionar un insumo para esas dos categorías. */
+    val requiresInsumo: Boolean
+        get() = category != PurchaseCategory.PACKAGING && category != PurchaseCategory.LABOR && category != PurchaseCategory.OTHER
+
     val isValid: Boolean
         get() = date != null &&
             (quantity ?: 0.0) > 0.0 &&
             (unitCost ?: -1.0) >= 0.0 &&
-            if (category == PurchaseCategory.PACKAGING) selectedPackagingId != null else selectedInsumoId != null
+            when (category) {
+                PurchaseCategory.PACKAGING -> selectedPackagingId != null
+                PurchaseCategory.LABOR, PurchaseCategory.OTHER -> true
+                else -> selectedInsumoId != null
+            }
 }

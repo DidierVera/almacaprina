@@ -10,12 +10,14 @@ import com.didiprogrammer.almacaprina.domain.model.InsumoCategory
 import com.didiprogrammer.almacaprina.domain.model.Packaging
 import com.didiprogrammer.almacaprina.domain.model.Product
 import com.didiprogrammer.almacaprina.domain.model.ProductCategory
+import com.didiprogrammer.almacaprina.domain.model.ProductPackagingOption
 import com.didiprogrammer.almacaprina.domain.model.ProductRecipeItem
 import com.didiprogrammer.almacaprina.domain.model.SaleUnit
 import com.didiprogrammer.almacaprina.domain.model.UnitOfMeasure
 import com.didiprogrammer.almacaprina.domain.repository.BusinessSettingsRepository
 import com.didiprogrammer.almacaprina.domain.repository.InsumoRepository
 import com.didiprogrammer.almacaprina.domain.repository.PackagingRepository
+import com.didiprogrammer.almacaprina.domain.repository.ProductPackagingOptionRepository
 import com.didiprogrammer.almacaprina.domain.repository.ProductRecipeItemRepository
 import com.didiprogrammer.almacaprina.domain.repository.ProductRepository
 import com.didiprogrammer.almacaprina.util.newId
@@ -34,18 +36,20 @@ private data class AdminCatalogoRawData(
     val packagings: List<Packaging>,
     val insumos: List<Insumo>,
     val recipeItems: List<ProductRecipeItem>,
+    val productPackagingOptions: List<ProductPackagingOption>,
     val currency: String
 )
 
 /**
- * Sección 3 — Catálogo. Un solo ViewModel para los 4 sub-tabs (Productos, Envases,
- * Insumos, Recetas) porque son catálogos pequeños que se cargan completos de una vez.
+ * Sección 3 — Catálogo. Un solo ViewModel para los 5 sub-tabs (Productos, Envases,
+ * Insumos, Recetas, Empaques) porque son catálogos pequeños que se cargan completos de una vez.
  */
 class AdminCatalogoViewModel(
     private val productRepository: ProductRepository,
     private val packagingRepository: PackagingRepository,
     private val insumoRepository: InsumoRepository,
     private val productRecipeItemRepository: ProductRecipeItemRepository,
+    private val productPackagingOptionRepository: ProductPackagingOptionRepository,
     private val businessSettingsRepository: BusinessSettingsRepository
 ) : ViewModel() {
 
@@ -64,33 +68,38 @@ class AdminCatalogoViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = !isRefresh, isRefreshing = isRefresh, errorMessage = null) }
             try {
-                // Los 5 repositorios son independientes — se piden todos a la vez.
-                val (products, packagings, insumos, recipeItems, currency) = coroutineScope {
+                // Los 6 repositorios son independientes — se piden todos a la vez.
+                val raw = coroutineScope {
                     val productsDeferred = async { productRepository.getAll() }
                     val packagingsDeferred = async { packagingRepository.getAll() }
                     val insumosDeferred = async { insumoRepository.getAll() }
                     val recipeItemsDeferred = async { productRecipeItemRepository.getAll() }
+                    val productPackagingOptionsDeferred = async { productPackagingOptionRepository.getAll() }
                     val currencyDeferred = async { businessSettingsRepository.getAll().firstOrNull()?.currency ?: "COP" }
                     AdminCatalogoRawData(
                         products = productsDeferred.await(),
                         packagings = packagingsDeferred.await(),
                         insumos = insumosDeferred.await(),
                         recipeItems = recipeItemsDeferred.await(),
+                        productPackagingOptions = productPackagingOptionsDeferred.await(),
                         currency = currencyDeferred.await()
                     )
                 }
                 _uiState.update {
                     val defaultRecipeProduct = it.selectedRecipeProductId
-                        ?: products.firstOrNull { p -> p.category == ProductCategory.DERIVED_DAIRY }?.id
+                        ?: raw.products.firstOrNull { p -> p.category == ProductCategory.DERIVED_DAIRY }?.id
+                    val defaultPackagingProduct = it.selectedPackagingProductId ?: raw.products.firstOrNull()?.id
                     it.copy(
                         isLoading = false,
                         isRefreshing = false,
-                        currency = currency,
-                        products = products,
-                        packagings = packagings,
-                        insumos = insumos,
-                        recipeItems = recipeItems,
-                        selectedRecipeProductId = defaultRecipeProduct
+                        currency = raw.currency,
+                        products = raw.products,
+                        packagings = raw.packagings,
+                        insumos = raw.insumos,
+                        recipeItems = raw.recipeItems,
+                        selectedRecipeProductId = defaultRecipeProduct,
+                        productPackagingOptions = raw.productPackagingOptions,
+                        selectedPackagingProductId = defaultPackagingProduct
                     )
                 }
             } catch (t: Throwable) {
@@ -102,6 +111,7 @@ class AdminCatalogoViewModel(
 
     fun onTabSelected(tab: CatalogoSubTab) = _uiState.update { it.copy(selectedTab = tab) }
     fun onRecipeProductSelected(productId: String) = _uiState.update { it.copy(selectedRecipeProductId = productId) }
+    fun onPackagingProductSelected(productId: String) = _uiState.update { it.copy(selectedPackagingProductId = productId) }
 
     fun addProduct(name: String, category: ProductCategory, saleUnit: SaleUnit, defaultUnitPrice: Double, active: Boolean) {
         save {
@@ -196,6 +206,36 @@ class AdminCatalogoViewModel(
                 ProductRecipeItem(id = newId(), productId = productId, insumoId = insumoId, quantityPerOutputUnit = quantityPerOutputUnit)
             )
         }
+    }
+
+    /** Ver CLAUDE.md — qué envases/empaques aplican a cada producto, para precargarlos en
+     * "Nueva venta" (Ventas). Solo puede haber un default por producto. */
+    fun addProductPackagingOption(productId: String, packagingId: String, isDefault: Boolean) {
+        save {
+            if (isDefault) clearDefaultPackagingOption(productId)
+            productPackagingOptionRepository.insert(
+                ProductPackagingOption(id = newId(), productId = productId, packagingId = packagingId, isDefault = isDefault)
+            )
+        }
+    }
+
+    fun setDefaultPackagingOption(option: ProductPackagingOption) {
+        save {
+            clearDefaultPackagingOption(option.productId, exceptId = option.id)
+            productPackagingOptionRepository.update(option.id, option.copy(isDefault = true))
+        }
+    }
+
+    fun deleteProductPackagingOption(id: String) {
+        save {
+            productPackagingOptionRepository.delete(id)
+        }
+    }
+
+    private suspend fun clearDefaultPackagingOption(productId: String, exceptId: String? = null) {
+        _uiState.value.productPackagingOptions
+            .filter { it.productId == productId && it.isDefault && it.id != exceptId }
+            .forEach { productPackagingOptionRepository.update(it.id, it.copy(isDefault = false)) }
     }
 
     private fun save(block: suspend () -> Unit) {

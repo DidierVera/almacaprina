@@ -13,6 +13,7 @@ enum class ProductCategory {
 enum class SaleUnit {
     @SerialName("liter") LITER,
     @SerialName("kilogram") KILOGRAM,
+    @SerialName("gram") GRAM,
     @SerialName("unit") UNIT
 }
 

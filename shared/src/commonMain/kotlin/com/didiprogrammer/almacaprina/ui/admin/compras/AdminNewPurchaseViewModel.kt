@@ -90,7 +90,7 @@ class AdminNewPurchaseViewModel(
                         id = newId(),
                         date = date,
                         category = state.category,
-                        insumoId = if (state.category != PurchaseCategory.PACKAGING) state.selectedInsumoId else null,
+                        insumoId = if (state.requiresInsumo) state.selectedInsumoId else null,
                         packagingId = if (state.category == PurchaseCategory.PACKAGING) state.selectedPackagingId else null,
                         supplier = state.supplier.ifBlank { null },
                         quantity = quantity,
@@ -118,7 +118,7 @@ class AdminNewPurchaseViewModel(
                     if (packaging != null) {
                         packagingRepository.update(packagingId, packaging.copy(unitCost = unitCost))
                     }
-                } else {
+                } else if (state.requiresInsumo) {
                     val insumoId = state.selectedInsumoId!!
                     // Actualiza Insumo.last_unit_cost.
                     val insumo = insumoRepository.getById(insumoId)
@@ -126,6 +126,7 @@ class AdminNewPurchaseViewModel(
                         insumoRepository.update(insumoId, insumo.copy(lastUnitCost = unitCost))
                     }
                 }
+                // Mano de obra / Otro: solo queda el gasto en Purchase, sin insumo ni envase asociado.
 
                 onSaved()
             } catch (t: Throwable) {

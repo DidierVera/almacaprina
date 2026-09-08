@@ -75,6 +75,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun VentasHomeScreen(
     onNuevaVentaClick: () -> Unit,
     onPendientesClick: () -> Unit,
+    onEnvasesClick: () -> Unit,
     onLoggedOut: () -> Unit,
     viewModel: VentasHomeViewModel = koinViewModel()
 ) {
@@ -196,7 +197,8 @@ fun VentasHomeScreen(
                         HomeStat(
                             label = stringResource(Res.string.ventas_home_stat_packaging_label),
                             value = stringResource(Res.string.ventas_home_packaging_out_suffix, uiState.packagingDepositsOut),
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            onClick = onEnvasesClick
                         )
                     }
                 }
@@ -221,8 +223,11 @@ fun VentasHomeScreen(
 }
 
 @Composable
-private fun HomeStat(label: String, value: String, modifier: Modifier = Modifier) {
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+private fun HomeStat(label: String, value: String, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
+    Column(
+        modifier = if (onClick != null) modifier.clickable(onClick = onClick) else modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(label.uppercase(), style = MaterialTheme.typography.labelSmall, color = TintaSuave)
         Text(value, style = MaterialTheme.typography.titleMedium, color = Tinta)
     }

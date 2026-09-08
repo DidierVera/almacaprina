@@ -5,6 +5,7 @@ import com.didiprogrammer.almacaprina.domain.model.Packaging
 import com.didiprogrammer.almacaprina.domain.model.PaymentMethod
 import com.didiprogrammer.almacaprina.domain.model.PaymentStatus
 import com.didiprogrammer.almacaprina.domain.model.Product
+import com.didiprogrammer.almacaprina.domain.model.ProductPackagingOption
 import kotlinx.datetime.LocalDate
 
 /** Wizard de 4 pasos "Nueva venta" — un solo estado compartido por las 4 pantallas. */
@@ -31,7 +32,15 @@ data class NewSaleUiState(
     // Paso 3 — Cantidad y envase
     val quantityText: String = "",
     val packagings: List<Packaging> = emptyList(),
+    /** Ver CLAUDE.md — qué envases aplican a cada producto (Catálogo > Empaques, Admin). */
+    val productPackagingOptions: List<ProductPackagingOption> = emptyList(),
     val selectedPackagingId: String? = null,
+    /**
+     * Null = por defecto, 1 envase nuevo por unidad vendida (ver CLAUDE.md). El usuario puede
+     * bajarlo (incluso a 0) cuando el cliente reutiliza un envase que ya tenía — confirmado con
+     * el dueño: en ese caso no se cobra depósito adicional.
+     */
+    val newPackagingUnitsOverride: Int? = null,
 
     // Paso 4 — Confirmar
     val paymentMethod: PaymentMethod = PaymentMethod.CASH,
@@ -47,8 +56,19 @@ data class NewSaleUiState(
     val quantity: Double? get() = quantityText.toDoubleOrNull()
     val selectedPackaging: Packaging? get() = packagings.firstOrNull { it.id == selectedPackagingId }
 
-    /** Ver CLAUDE.md: las botellas son siempre de 1 L para Leche fresca — 1 envase por unidad vendida. */
-    val newPackagingUnitsCount: Int get() = quantity?.toInt() ?: 0
+    /** Envases asociados al producto elegido en el Paso 2 (Catálogo > Empaques, Admin). Si el
+     * producto todavía no tiene ninguno configurado, se muestran todos — evita romper el flujo
+     * mientras el catálogo de empaques se termina de cargar por producto. */
+    val availablePackagings: List<Packaging>
+        get() {
+            val product = selectedProduct ?: return packagings
+            val optionIds = productPackagingOptions.filter { it.productId == product.id }.map { it.packagingId }.toSet()
+            return if (optionIds.isEmpty()) packagings else packagings.filter { it.id in optionIds }
+        }
+
+    /** Ver CLAUDE.md: las botellas son siempre de 1 L para Leche fresca — 1 envase por unidad vendida,
+     * salvo que el usuario lo haya ajustado manualmente (ver [newPackagingUnitsOverride]). */
+    val newPackagingUnitsCount: Int get() = newPackagingUnitsOverride ?: (quantity?.toInt() ?: 0)
 
     val depositCharged: Double
         get() = selectedPackaging?.takeIf { it.isReturnable }?.let { pkg ->

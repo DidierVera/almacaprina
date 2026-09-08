@@ -14,6 +14,8 @@ import com.didiprogrammer.almacaprina.ui.ventas.nueva.NewSaleClienteScreen
 import com.didiprogrammer.almacaprina.ui.ventas.nueva.NewSaleConfirmarScreen
 import com.didiprogrammer.almacaprina.ui.ventas.nueva.NewSaleProductoScreen
 import com.didiprogrammer.almacaprina.ui.ventas.nueva.NewSaleViewModel
+import com.didiprogrammer.almacaprina.ui.ventas.envases.VentasDepositsDetailScreen
+import com.didiprogrammer.almacaprina.ui.ventas.envases.VentasDepositsListScreen
 import com.didiprogrammer.almacaprina.ui.ventas.home.VentasHomeScreen
 import com.didiprogrammer.almacaprina.ui.ventas.pendientes.PendingSalesDetailScreen
 import com.didiprogrammer.almacaprina.ui.ventas.pendientes.PendingSalesListScreen
@@ -37,6 +39,7 @@ fun VentasRootScreen(onLogout: () -> Unit) {
             VentasHomeScreen(
                 onNuevaVentaClick = { navController.navigate(VentasRoutes.NEW_SALE_CLIENTE) },
                 onPendientesClick = { navController.navigate(VentasRoutes.PENDING_LIST) },
+                onEnvasesClick = { navController.navigate(VentasRoutes.DEPOSITS_LIST) },
                 onLoggedOut = onLogout
             )
         }
@@ -96,6 +99,23 @@ fun VentasRootScreen(onLogout: () -> Unit) {
         ) { backStackEntry ->
             val customerId = backStackEntry.arguments?.read { getStringOrNull("customerId") }.orEmpty()
             PendingSalesDetailScreen(
+                customerId = customerId,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(VentasRoutes.DEPOSITS_LIST) {
+            VentasDepositsListScreen(
+                onBack = { navController.popBackStack() },
+                onCustomerClick = { customerId -> navController.navigate(VentasRoutes.depositsDetail(customerId)) }
+            )
+        }
+        composable(
+            route = VentasRoutes.DEPOSITS_DETAIL_PATTERN,
+            arguments = listOf(navArgument("customerId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val customerId = backStackEntry.arguments?.read { getStringOrNull("customerId") }.orEmpty()
+            VentasDepositsDetailScreen(
                 customerId = customerId,
                 onBack = { navController.popBackStack() }
             )

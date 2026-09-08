@@ -12,6 +12,7 @@ import com.didiprogrammer.almacaprina.data.repository.MilkProductionRecordReposi
 import com.didiprogrammer.almacaprina.data.repository.PackagingDepositTransactionRepositoryImpl
 import com.didiprogrammer.almacaprina.data.repository.PackagingInventoryRepositoryImpl
 import com.didiprogrammer.almacaprina.data.repository.PackagingRepositoryImpl
+import com.didiprogrammer.almacaprina.data.repository.ProductPackagingOptionRepositoryImpl
 import com.didiprogrammer.almacaprina.data.repository.ProductRecipeItemRepositoryImpl
 import com.didiprogrammer.almacaprina.data.repository.ProductRepositoryImpl
 import com.didiprogrammer.almacaprina.data.repository.ProductionBatchInsumoUsageRepositoryImpl
@@ -32,6 +33,7 @@ import com.didiprogrammer.almacaprina.domain.repository.MilkProductionRecordRepo
 import com.didiprogrammer.almacaprina.domain.repository.PackagingDepositTransactionRepository
 import com.didiprogrammer.almacaprina.domain.repository.PackagingInventoryRepository
 import com.didiprogrammer.almacaprina.domain.repository.PackagingRepository
+import com.didiprogrammer.almacaprina.domain.repository.ProductPackagingOptionRepository
 import com.didiprogrammer.almacaprina.domain.repository.ProductRecipeItemRepository
 import com.didiprogrammer.almacaprina.domain.repository.ProductRepository
 import com.didiprogrammer.almacaprina.domain.repository.ProductionBatchInsumoUsageRepository
@@ -56,6 +58,8 @@ import com.didiprogrammer.almacaprina.ui.campo.checklist.CampoChecklistViewModel
 import com.didiprogrammer.almacaprina.ui.campo.ordeno.MilkingSessionViewModel
 import com.didiprogrammer.almacaprina.ui.campo.pesada.CampoWeighingEntryViewModel
 import com.didiprogrammer.almacaprina.ui.campo.pesada.CampoWeighingListViewModel
+import com.didiprogrammer.almacaprina.ui.ventas.envases.VentasDepositsDetailViewModel
+import com.didiprogrammer.almacaprina.ui.ventas.envases.VentasDepositsListViewModel
 import com.didiprogrammer.almacaprina.ui.ventas.home.VentasHomeViewModel
 import com.didiprogrammer.almacaprina.ui.ventas.nueva.NewSaleViewModel
 import com.didiprogrammer.almacaprina.ui.ventas.pendientes.PendingSalesDetailViewModel
@@ -79,6 +83,7 @@ val appModule = module {
     single<ProductRecipeItemRepository> { ProductRecipeItemRepositoryImpl() }
     single<ProductRepository> { ProductRepositoryImpl() }
     single<PackagingRepository> { PackagingRepositoryImpl() }
+    single<ProductPackagingOptionRepository> { ProductPackagingOptionRepositoryImpl() }
     single<ProductionBatchRepository> { ProductionBatchRepositoryImpl() }
     single<ProductionBatchInsumoUsageRepository> { ProductionBatchInsumoUsageRepositoryImpl() }
     single<PurchaseRepository> { PurchaseRepositoryImpl() }
@@ -140,6 +145,7 @@ val appModule = module {
             packagingRepository = get(),
             insumoRepository = get(),
             productRecipeItemRepository = get(),
+            productPackagingOptionRepository = get(),
             businessSettingsRepository = get()
         )
     }
@@ -229,6 +235,7 @@ val appModule = module {
             productRepository = get(),
             packagingRepository = get(),
             packagingDepositTransactionRepository = get(),
+            productPackagingOptionRepository = get(),
             businessSettingsRepository = get()
         )
     }
@@ -249,6 +256,25 @@ val appModule = module {
             customerRepository = get(),
             productRepository = get(),
             packagingRepository = get(),
+            businessSettingsRepository = get()
+        )
+    }
+
+    viewModel {
+        VentasDepositsListViewModel(
+            customerRepository = get(),
+            packagingRepository = get(),
+            packagingDepositTransactionRepository = get(),
+            businessSettingsRepository = get()
+        )
+    }
+
+    viewModel { params ->
+        VentasDepositsDetailViewModel(
+            customerId = params.get(),
+            customerRepository = get(),
+            packagingRepository = get(),
+            packagingDepositTransactionRepository = get(),
             businessSettingsRepository = get()
         )
     }

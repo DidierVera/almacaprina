@@ -23,6 +23,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -137,11 +139,11 @@ fun NewSaleConfirmarScreen(
 
                 item { Text(stringResource(Res.string.new_sale_confirmar_payment_method_title), style = MaterialTheme.typography.titleSmall, color = Tinta) }
                 item {
-                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                        PaymentMethod.entries.forEach { method ->
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                        items(PaymentMethod.entries) { method ->
                             val selected = uiState.paymentMethod == method
                             Surface(
-                                modifier = Modifier.weight(1f).clickable { viewModel.onPaymentMethodSelected(method) },
+                                modifier = Modifier.clickable { viewModel.onPaymentMethodSelected(method) },
                                 shape = ShapeLarge,
                                 color = if (selected) Verde else Superficie,
                                 border = BorderStroke(1.dp, if (selected) Verde else Borde)
@@ -150,7 +152,7 @@ fun NewSaleConfirmarScreen(
                                     method.label(),
                                     style = MaterialTheme.typography.labelLarge,
                                     color = if (selected) SobreVerde else Tinta,
-                                    modifier = Modifier.padding(vertical = Spacing.lg, horizontal = Spacing.sm),
+                                    modifier = Modifier.padding(vertical = Spacing.lg, horizontal = Spacing.lg),
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                                 )
                             }
