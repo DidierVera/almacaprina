@@ -226,9 +226,28 @@
     <string name="campo_novedad_error_load">No se pudo cargar el hato</string>
     <string name="campo_novedad_error_save">No se pudo guardar la novedad</string>
 
+    <!-- ==================== Campo · Cabras (historial de salud, solo lectura) ==================== -->
+    <string name="campo_goats_content_description">Ver cabras</string>
+    <string name="campo_goats_list_eyebrow">Hato</string>
+    <string name="campo_goats_list_title">Cabras</string>
+    <string name="campo_goats_list_search_placeholder">Buscar por nombre o arete</string>
+    <string name="campo_goats_list_empty_message">No hay cabras registradas todavía.</string>
+    <string name="campo_goats_list_error_load">No se pudo cargar el hato</string>
+    <string name="campo_goat_health_eyebrow">Historial de salud</string>
+    <string name="campo_goat_health_error_load">No se pudo cargar el historial</string>
+
+    <!-- ==================== Campo · Alertas de salud ==================== -->
+    <string name="campo_alerts_content_description">Ver alertas de salud</string>
+    <string name="campo_alerts_eyebrow">Alertas</string>
+    <string name="campo_alerts_title">Alertas de salud</string>
+    <string name="campo_alerts_empty_message">No hay alertas de salud pendientes.</string>
+    <string name="campo_alerts_error_load">No se pudo cargar las alertas</string>
+    <string name="campo_alerts_next_date_prefix">Próxima: %1$s</string>
+
     <!-- ==================== Admin/compartidas · Etiquetas de enums (CatalogLabels) ==================== -->
     <string name="product_category_raw_milk">Leche cruda</string>
     <string name="product_category_derived_dairy">Derivado</string>
+    <string name="product_category_other">Otro</string>
     <string name="sale_unit_liter">Litro</string>
     <string name="sale_unit_kilogram">Kilogramo</string>
     <string name="sale_unit_gram">Gramo</string>
@@ -311,6 +330,7 @@
     <string name="financial_period_week">Semana</string>
     <string name="financial_period_month">Mes</string>
     <string name="admin_home_alert_health_upcoming">%1$s próxima el %2$s</string>
+    <string name="admin_home_alert_health_upcoming_for_goat">%1$s próxima el %2$s a %3$s</string>
     <string name="admin_home_alert_weighing_overdue">Pesada vencida: %1$s (%2$s)</string>
     <string name="admin_home_alert_birth_expected">Parto esperado el %1$s</string>
     <string name="admin_home_alert_insumo_low_stock_one">%1$s: quedan %2$d día</string>

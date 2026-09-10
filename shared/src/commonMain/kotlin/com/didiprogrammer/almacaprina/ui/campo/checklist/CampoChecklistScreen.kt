@@ -21,7 +21,9 @@ import almacaprina.shared.generated.resources.campo_checklist_quantity_applied_l
 import almacaprina.shared.generated.resources.campo_checklist_rest_of_day_section_label
 import almacaprina.shared.generated.resources.campo_checklist_tasks_completed_label
 import almacaprina.shared.generated.resources.campo_checklist_title
+import almacaprina.shared.generated.resources.campo_alerts_content_description
 import almacaprina.shared.generated.resources.campo_checklist_today_fallback
+import almacaprina.shared.generated.resources.campo_goats_content_description
 import almacaprina.shared.generated.resources.campo_novedad_fab_content_description
 import almacaprina.shared.generated.resources.common_cancel
 import almacaprina.shared.generated.resources.common_confirm
@@ -48,7 +50,11 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -105,6 +111,8 @@ fun CampoChecklistScreen(
     onOpenOrdeno: () -> Unit,
     onOpenPesada: () -> Unit,
     onReportNovedad: () -> Unit,
+    onOpenCabras: () -> Unit,
+    onOpenAlertas: () -> Unit,
     onLoggedOut: () -> Unit,
     viewModel: CampoChecklistViewModel = koinViewModel()
 ) {
@@ -142,22 +150,46 @@ fun CampoChecklistScreen(
                 verticalArrangement = Arrangement.spacedBy(Spacing.md)
             ) {
                 item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        Column {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Text(formatLongSpanishDate(today), style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
-                            Text(stringResource(Res.string.campo_checklist_title), style = MaterialTheme.typography.displaySmall, color = Tinta)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                IconButton(onClick = onOpenCabras) {
+                                    Icon(
+                                        Icons.Filled.Pets,
+                                        contentDescription = stringResource(Res.string.campo_goats_content_description),
+                                        tint = TintaSuave
+                                    )
+                                }
+                                IconButton(onClick = onOpenAlertas) {
+                                    val pendingAlerts = checklist.healthReminders.count { !it.completed }
+                                    BadgedBox(badge = { if (pendingAlerts > 0) Badge { Text(pendingAlerts.toString()) } }) {
+                                        Icon(
+                                            Icons.Filled.Warning,
+                                            contentDescription = stringResource(Res.string.campo_alerts_content_description),
+                                            tint = TintaSuave
+                                        )
+                                    }
+                                }
+                                IconButton(onClick = { showLogoutConfirm = true }) {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.Logout,
+                                        contentDescription = stringResource(Res.string.campo_checklist_logout_content_description),
+                                        tint = TintaSuave
+                                    )
+                                }
+                            }
                         }
-                        IconButton(onClick = { showLogoutConfirm = true }) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.Logout,
-                                contentDescription = stringResource(Res.string.campo_checklist_logout_content_description),
-                                tint = TintaSuave
-                            )
-                        }
+                        Text(
+                            stringResource(Res.string.campo_checklist_title),
+                            style = MaterialTheme.typography.displaySmall,
+                            color = Tinta,
+                            modifier = Modifier.padding(top = Spacing.xs)
+                        )
                     }
                 }
 

@@ -9,6 +9,7 @@ import almacaprina.shared.generated.resources.insumo_category_processing_input
 import almacaprina.shared.generated.resources.insumo_category_transport
 import almacaprina.shared.generated.resources.insumo_category_veterinary
 import almacaprina.shared.generated.resources.product_category_derived_dairy
+import almacaprina.shared.generated.resources.product_category_other
 import almacaprina.shared.generated.resources.product_category_raw_milk
 import almacaprina.shared.generated.resources.purchase_category_packaging
 import almacaprina.shared.generated.resources.sale_unit_gram
@@ -35,6 +36,7 @@ fun ProductCategory.label(): String = stringResource(
     when (this) {
         ProductCategory.RAW_MILK -> Res.string.product_category_raw_milk
         ProductCategory.DERIVED_DAIRY -> Res.string.product_category_derived_dairy
+        ProductCategory.OTHER -> Res.string.product_category_other
     }
 )
 

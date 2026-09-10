@@ -34,7 +34,10 @@ enum class HomeAlertType {
 data class HomeAlert(
     val id: String,
     val type: HomeAlertType,
-    val message: String
+    val message: String,
+    /** Nulo cuando la alerta no está asociada a una cabra puntual (ej. insumo por agotarse,
+     * o una tarea de medicación de grupo) — en ese caso no es clickable hacia una ficha técnica. */
+    val goatId: String? = null
 )
 
 data class HerdStatusCounts(

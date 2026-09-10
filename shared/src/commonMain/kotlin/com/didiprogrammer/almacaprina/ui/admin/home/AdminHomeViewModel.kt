@@ -3,6 +3,7 @@ package com.didiprogrammer.almacaprina.ui.admin.home
 import almacaprina.shared.generated.resources.Res
 import almacaprina.shared.generated.resources.admin_home_alert_birth_expected
 import almacaprina.shared.generated.resources.admin_home_alert_health_upcoming
+import almacaprina.shared.generated.resources.admin_home_alert_health_upcoming_for_goat
 import almacaprina.shared.generated.resources.health_record_type_deworming
 import almacaprina.shared.generated.resources.health_record_type_diagnosis
 import almacaprina.shared.generated.resources.health_record_type_routine_checkup
@@ -293,10 +294,18 @@ class AdminHomeViewModel(
                     HealthRecordType.DIAGNOSIS -> Res.string.health_record_type_diagnosis
                 }
             )
+            // Solo es clickable hacia una ficha técnica si el recordatorio es de una cabra
+            // puntual — una medicación de grupo (goat_id nulo) no tiene a dónde navegar.
+            val goat = record.goatId?.let { id -> goats.firstOrNull { it.id == id } }
             alerts += HomeAlert(
                 id = "health_${record.id}",
                 type = HomeAlertType.VACCINE,
-                message = getString(Res.string.admin_home_alert_health_upcoming, label, record.nextSuggestedDate.toString())
+                message = if (goat != null) {
+                    getString(Res.string.admin_home_alert_health_upcoming_for_goat, label, record.nextSuggestedDate.toString(), goat.name)
+                } else {
+                    getString(Res.string.admin_home_alert_health_upcoming, label, record.nextSuggestedDate.toString())
+                },
+                goatId = goat?.id
             )
         }
 
@@ -304,7 +313,8 @@ class AdminHomeViewModel(
             alerts += HomeAlert(
                 id = "weighing_${goat.id}",
                 type = HomeAlertType.WEIGHING,
-                message = getString(Res.string.admin_home_alert_weighing_overdue, goat.name, goat.tagNumber)
+                message = getString(Res.string.admin_home_alert_weighing_overdue, goat.name, goat.tagNumber),
+                goatId = goat.id
             )
         }
 
@@ -313,7 +323,8 @@ class AdminHomeViewModel(
             alerts += HomeAlert(
                 id = "birth_${event.id}",
                 type = HomeAlertType.BIRTH,
-                message = getString(Res.string.admin_home_alert_birth_expected, expectedDate.toString())
+                message = getString(Res.string.admin_home_alert_birth_expected, expectedDate.toString()),
+                goatId = event.doeId
             )
         }
 

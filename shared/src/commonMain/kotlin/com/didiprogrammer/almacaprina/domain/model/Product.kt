@@ -6,7 +6,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 enum class ProductCategory {
     @SerialName("raw_milk") RAW_MILK,
-    @SerialName("derived_dairy") DERIVED_DAIRY
+    @SerialName("derived_dairy") DERIVED_DAIRY,
+    /** Producto sin receta de insumos ni lote de producción (no consume leche cruda) — ej.
+     * huevos, trucha, pollo. Se vende como SKU simple: nombre, unidad de venta y precio. */
+    @SerialName("other") OTHER
 }
 
 @Serializable

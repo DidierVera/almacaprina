@@ -9,6 +9,9 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.savedstate.read
+import com.didiprogrammer.almacaprina.ui.campo.alertas.CampoAlertsScreen
+import com.didiprogrammer.almacaprina.ui.campo.cabras.CampoGoatHealthDetailScreen
+import com.didiprogrammer.almacaprina.ui.campo.cabras.CampoGoatListScreen
 import com.didiprogrammer.almacaprina.ui.campo.checklist.CampoChecklistScreen
 import com.didiprogrammer.almacaprina.ui.campo.novedad.CampoReportNovedadScreen
 import com.didiprogrammer.almacaprina.ui.campo.ordeno.MilkingEntryScreen
@@ -36,7 +39,16 @@ fun CampoRootScreen(onLogout: () -> Unit) {
                 onOpenOrdeno = { navController.navigate(CampoRoutes.ORDENO_SESION) },
                 onOpenPesada = { navController.navigate(CampoRoutes.PESADA_LISTA) },
                 onReportNovedad = { navController.navigate(CampoRoutes.NOVEDAD) },
+                onOpenCabras = { navController.navigate(CampoRoutes.CABRAS_LISTA) },
+                onOpenAlertas = { navController.navigate(CampoRoutes.ALERTAS) },
                 onLoggedOut = onLogout
+            )
+        }
+
+        composable(CampoRoutes.ALERTAS) {
+            CampoAlertsScreen(
+                onBack = { navController.popBackStack() },
+                onGoatClick = { goatId -> navController.navigate(CampoRoutes.cabraDetalle(goatId)) }
             )
         }
 
@@ -44,6 +56,23 @@ fun CampoRootScreen(onLogout: () -> Unit) {
             CampoReportNovedadScreen(
                 onBack = { navController.popBackStack() },
                 onSaved = { navController.popBackStack() }
+            )
+        }
+
+        composable(CampoRoutes.CABRAS_LISTA) {
+            CampoGoatListScreen(
+                onBack = { navController.popBackStack() },
+                onGoatClick = { goatId -> navController.navigate(CampoRoutes.cabraDetalle(goatId)) }
+            )
+        }
+        composable(
+            route = CampoRoutes.CABRAS_DETALLE_PATTERN,
+            arguments = listOf(navArgument("goatId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val goatId = backStackEntry.arguments?.read { getStringOrNull("goatId") }.orEmpty()
+            CampoGoatHealthDetailScreen(
+                goatId = goatId,
+                onBack = { navController.popBackStack() }
             )
         }
 

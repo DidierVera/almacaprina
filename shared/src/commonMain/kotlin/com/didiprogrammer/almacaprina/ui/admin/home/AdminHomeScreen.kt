@@ -70,6 +70,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun AdminHomeScreen(
     onHerdStatusClick: (String) -> Unit,
     onSeeAllAlertsClick: () -> Unit,
+    onAlertGoatClick: (String) -> Unit,
     onRegistrarCompraClick: () -> Unit,
     onNuevoLoteClick: () -> Unit,
     onNuevaTareaClick: () -> Unit,
@@ -105,7 +106,7 @@ fun AdminHomeScreen(
 
             item { HerdStatusSection(uiState.herdCounts, onHerdStatusClick) }
 
-            item { AlertsSection(uiState.alerts, onSeeAllAlertsClick) }
+            item { AlertsSection(uiState.alerts, onSeeAllAlertsClick, onAlertGoatClick) }
 
             item {
                 FinancialSummarySection(
@@ -181,7 +182,7 @@ private fun HerdStatusSection(counts: HerdStatusCounts, onClick: (String) -> Uni
 }
 
 @Composable
-private fun AlertsSection(alerts: List<HomeAlert>, onSeeAllClick: () -> Unit) {
+private fun AlertsSection(alerts: List<HomeAlert>, onSeeAllClick: () -> Unit, onGoatClick: (String) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
         SectionHeader(
             title = stringResource(Res.string.admin_home_alerts_title),
@@ -194,7 +195,9 @@ private fun AlertsSection(alerts: List<HomeAlert>, onSeeAllClick: () -> Unit) {
             }
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                alerts.take(4).forEach { alert -> AlertRow(message = alert.message) }
+                alerts.take(4).forEach { alert ->
+                    AlertRow(message = alert.message, onClick = alert.goatId?.let { goatId -> { onGoatClick(goatId) } })
+                }
             }
         }
     }

@@ -86,6 +86,7 @@ fun AdminRootScreen(onLogout: () -> Unit) {
                         navController.navigate(HatoRoutes.listFilteredByStatus(statusFilter))
                     },
                     onSeeAllAlertsClick = { /* TODO: pantalla "Todas las alertas" */ },
+                    onAlertGoatClick = { goatId -> navController.navigate(HatoRoutes.detail(goatId)) },
                     onRegistrarCompraClick = { navController.navigate(PurchaseRoutes.NEW_PURCHASE) },
                     onNuevoLoteClick = { navController.navigate(ProductionRoutes.NEW_BATCH) },
                     onNuevaTareaClick = { navController.navigate(CareTaskRoutes.NEW_TASK) }
@@ -98,7 +99,10 @@ fun AdminRootScreen(onLogout: () -> Unit) {
                 arguments = listOf(navArgument("status") { type = NavType.StringType; nullable = true; defaultValue = null })
             ) { backStackEntry ->
                 val statusArg = backStackEntry.arguments?.read { getStringOrNull("status") }
-                val initialStatus = statusArg?.let { runCatching { GoatStatus.valueOf(it) }.getOrNull() }
+                // El filtro llega en snake_case (ej. "in_production", ver HerdStatusItem en
+                // AdminHomeScreen) — comparar por nombre exacto (GoatStatus.valueOf) siempre
+                // fallaba porque el enum de Kotlin está en mayúsculas.
+                val initialStatus = statusArg?.let { arg -> GoatStatus.entries.firstOrNull { it.name.equals(arg, ignoreCase = true) } }
                 AdminHatoListScreen(
                     initialStatusFilter = initialStatus,
                     onGoatClick = { goat -> navController.navigate(HatoRoutes.detail(goat.id)) },

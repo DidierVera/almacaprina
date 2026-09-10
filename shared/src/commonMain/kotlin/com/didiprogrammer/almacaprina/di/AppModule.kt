@@ -56,6 +56,9 @@ import com.didiprogrammer.almacaprina.ui.admin.hato.AdminGoatFormViewModel
 import com.didiprogrammer.almacaprina.ui.admin.home.AdminHomeViewModel
 import com.didiprogrammer.almacaprina.ui.admin.produccion.AdminNewBatchViewModel
 import com.didiprogrammer.almacaprina.ui.admin.produccion.AdminProductionHistoryViewModel
+import com.didiprogrammer.almacaprina.ui.campo.alertas.CampoAlertsViewModel
+import com.didiprogrammer.almacaprina.ui.campo.cabras.CampoGoatHealthDetailViewModel
+import com.didiprogrammer.almacaprina.ui.campo.cabras.CampoGoatListViewModel
 import com.didiprogrammer.almacaprina.ui.campo.checklist.CampoChecklistViewModel
 import com.didiprogrammer.almacaprina.ui.campo.novedad.CampoReportNovedadViewModel
 import com.didiprogrammer.almacaprina.ui.campo.ordeno.MilkingSessionViewModel
@@ -323,6 +326,25 @@ val appModule = module {
 
     viewModel {
         CampoReportNovedadViewModel(
+            goatRepository = get(),
+            healthRecordRepository = get()
+        )
+    }
+
+    viewModel {
+        CampoGoatListViewModel(goatRepository = get())
+    }
+
+    viewModel { params ->
+        CampoGoatHealthDetailViewModel(
+            goatId = params.get(),
+            goatRepository = get(),
+            healthRecordRepository = get()
+        )
+    }
+
+    viewModel {
+        CampoAlertsViewModel(
             goatRepository = get(),
             healthRecordRepository = get()
         )
