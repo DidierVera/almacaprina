@@ -9,6 +9,10 @@ plugins {
 }
 
 kotlin {
+    // NOTA: no se declara iosX64 (simulador de Macs Intel) a proposito.
+    // Compose Multiplatform 1.11.1 no publica variante iosX64, por lo que ese
+    // target no resuelve dependencias. En un Mac Intel hay que correr la app en
+    // un iPhone fisico (iosArm64). Ver docs/ios_setup.md.
     listOf(
         iosArm64(),
         iosSimulatorArm64()

@@ -4,5 +4,11 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>CFBundleDisplayName</key>
+	<string>Almacaprina</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Almacaprina necesita acceso a tus fotos para adjuntar la foto de una cabra a su ficha técnica.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Almacaprina necesita acceso a la cámara para tomar la foto de una cabra y adjuntarla a su ficha técnica.</string>
 </dict>
 </plist>

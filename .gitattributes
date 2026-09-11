@@ -1,0 +1,12 @@
+# Scripts que ejecuta macOS/Linux: deben conservar finales de línea LF
+# aunque se commiteen desde Windows (core.autocrlf=true los convertiría).
+gradlew     text eol=lf
+*.sh        text eol=lf
+
+# Script equivalente de Windows
+gradlew.bat text eol=crlf
+
+# Xcode: no normalizar finales de línea ni intentar merge automático
+*.pbxproj        -text
+*.xcworkspacedata -text
+*.xcscheme       -text
