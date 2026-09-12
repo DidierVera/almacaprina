@@ -357,6 +357,7 @@
     <string name="admin_hato_new_goat_content_description">Nueva cabra</string>
     <string name="admin_hato_search_placeholder">Buscar por nombre o arete</string>
     <string name="admin_hato_status_filter_all">Todas</string>
+    <string name="admin_hato_status_filter_title">Filtrar por estado</string>
     <string name="admin_hato_empty_message">No hay cabras que coincidan con el filtro.</string>
     <string name="admin_hato_tag_prefix">Arete %1$s</string>
     <string name="admin_hato_error_load">No se pudo cargar el hato</string>
@@ -528,6 +529,7 @@
     <!-- ==================== Admin · Historial de producción ==================== -->
     <string name="admin_production_history_new_batch_content_description">Nuevo lote</string>
     <string name="admin_production_history_all_filter">Todos</string>
+    <string name="admin_production_history_filter_title">Filtrar por producto</string>
     <string name="admin_production_history_empty_message">Sin lotes de producción registrados todavía.</string>
     <string name="admin_production_history_yield_label">Rinde %1$s L/unidad</string>
     <string name="admin_production_history_liters_used_label">%1$s L usados</string>
@@ -564,6 +566,10 @@
     <string name="admin_catalog_active_label">Activo</string>
     <string name="admin_catalog_inactive_label">Inactivo</string>
     <string name="admin_catalog_error_load">No se pudo cargar el catálogo</string>
+    <string name="admin_catalog_error_in_use">No se puede eliminar: está en uso en otros registros del sistema (compras, ventas, recetas, etc.).</string>
+    <string name="admin_catalog_delete_content_description">Eliminar</string>
+    <string name="admin_catalog_delete_confirm_title">¿Eliminar \"%1$s\"?</string>
+    <string name="admin_catalog_delete_confirm_message">Esta acción no se puede deshacer. Si está en uso en compras, ventas, recetas u otros registros, no se podrá eliminar.</string>
     <string name="admin_catalog_breeds_empty">Sin razas registradas todavía.</string>
     <string name="admin_catalog_breed_no_prefix_fallback">Sin prefijo</string>
     <string name="admin_product_form_new_title">Nuevo producto</string>
@@ -607,6 +613,9 @@
     <string name="admin_new_purchase_cost_per_package_label">Costo por %1$s</string>
     <string name="admin_new_purchase_computed_summary_label">= %1$s %2$s a %3$s c/u</string>
     <string name="admin_new_purchase_quantity_label">Cantidad</string>
+    <string name="admin_new_purchase_edit_title">Editar compra</string>
+    <string name="admin_new_purchase_vat_included_label">El costo ya incluye IVA</string>
+    <string name="admin_new_purchase_vat_percentage_label">% IVA (opcional)</string>
     <string name="admin_new_purchase_error_save">No se pudo guardar la compra</string>
     <string name="admin_purchase_history_title">Compras</string>
     <string name="admin_purchase_history_from_label">Desde</string>

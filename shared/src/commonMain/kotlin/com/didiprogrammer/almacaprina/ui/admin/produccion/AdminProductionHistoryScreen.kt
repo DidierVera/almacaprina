@@ -9,11 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -34,11 +32,13 @@ import com.didiprogrammer.almacaprina.business.yieldRatio
 import almacaprina.shared.generated.resources.Res
 import almacaprina.shared.generated.resources.admin_production_history_all_filter
 import almacaprina.shared.generated.resources.admin_production_history_empty_message
+import almacaprina.shared.generated.resources.admin_production_history_filter_title
 import almacaprina.shared.generated.resources.admin_production_history_liters_used_label
 import almacaprina.shared.generated.resources.admin_production_history_new_batch_content_description
 import almacaprina.shared.generated.resources.admin_production_history_responsible_label
 import almacaprina.shared.generated.resources.admin_production_history_yield_label
 import com.didiprogrammer.almacaprina.ui.components.AlmacaprinaCard
+import com.didiprogrammer.almacaprina.ui.components.ChipFilterRow
 import com.didiprogrammer.almacaprina.ui.components.RefreshableContent
 import com.didiprogrammer.almacaprina.ui.components.label
 import org.jetbrains.compose.resources.stringResource
@@ -67,25 +67,16 @@ fun AdminProductionHistoryScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            LazyRow(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                item {
-                    FilterChip(
-                        selected = uiState.selectedProductId == null,
-                        onClick = { viewModel.onProductFilterSelected(null) },
-                        label = { Text(stringResource(Res.string.admin_production_history_all_filter)) }
-                    )
-                }
-                items(uiState.derivedProducts, key = { it.id }) { product ->
-                    FilterChip(
-                        selected = uiState.selectedProductId == product.id,
-                        onClick = { viewModel.onProductFilterSelected(product.id) },
-                        label = { Text(product.name) }
-                    )
-                }
-            }
+            val productFilterOptions = remember(uiState.derivedProducts) { listOf(null) + uiState.derivedProducts.map { it.id } }
+            val allProductsLabel = stringResource(Res.string.admin_production_history_all_filter)
+            ChipFilterRow(
+                options = productFilterOptions,
+                selected = uiState.selectedProductId,
+                onSelect = viewModel::onProductFilterSelected,
+                label = { productId -> if (productId == null) allProductsLabel else uiState.derivedProducts.firstOrNull { it.id == productId }?.name.orEmpty() },
+                pickerTitle = stringResource(Res.string.admin_production_history_filter_title),
+                modifier = Modifier.padding(16.dp)
+            )
 
             RefreshableContent(
                 isLoading = uiState.isLoading,

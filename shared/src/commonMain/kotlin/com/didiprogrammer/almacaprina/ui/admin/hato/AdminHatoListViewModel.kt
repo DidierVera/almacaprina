@@ -116,6 +116,11 @@ class AdminHatoListViewModel(
         viewModelScope.launch { applyFilters(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
     }
 
+    fun onSortOptionSelected(option: GoatSortOption) {
+        _uiState.update { it.copy(sortOption = option) }
+        viewModelScope.launch { applyFilters(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
+    }
+
     private suspend fun applyFilters(today: LocalDate) {
         val query = _uiState.value.searchQuery.trim().lowercase()
         val status = _uiState.value.selectedStatus
@@ -132,20 +137,31 @@ class AdminHatoListViewModel(
                     goat.name.lowercase().contains(query) ||
                     goat.tagNumber.lowercase().contains(query)
             }
-            .sortedBy { it.name }
-            .map { goat ->
-                GoatListItem(
-                    goat = goat,
-                    contextualInfo = goatContextualInfo(
-                        goat = goat,
-                        today = today,
-                        milkLitersToday = milkToday[goat.id],
-                        nextExpectedBirth = pendingBirthByDoe[goat.id],
-                        lastWeightDate = lastWeightByGoat[goat.id]
-                    )
-                )
-            }
 
-        _uiState.update { it.copy(isLoading = false, isRefreshing = false, items = filtered) }
+        val sorted = when (_uiState.value.sortOption) {
+            GoatSortOption.NAME -> filtered.sortedBy { it.name.lowercase() }
+            // Orden numérico del arete (no alfabético) para que "9" quede antes que "10";
+            // si el arete no es numérico cae al final, ordenado alfabéticamente entre sí.
+            GoatSortOption.TAG_NUMBER -> filtered.sortedWith(
+                compareBy({ it.tagNumber.toIntOrNull() ?: Int.MAX_VALUE }, { it.tagNumber })
+            )
+            // Cabra de más edad primero (fecha de nacimiento más antigua primero).
+            GoatSortOption.AGE -> filtered.sortedBy { it.birthDate }
+        }
+
+        val items = sorted.map { goat ->
+            GoatListItem(
+                goat = goat,
+                contextualInfo = goatContextualInfo(
+                    goat = goat,
+                    today = today,
+                    milkLitersToday = milkToday[goat.id],
+                    nextExpectedBirth = pendingBirthByDoe[goat.id],
+                    lastWeightDate = lastWeightByGoat[goat.id]
+                )
+            )
+        }
+
+        _uiState.update { it.copy(isLoading = false, isRefreshing = false, items = items) }
     }
 }

@@ -186,6 +186,10 @@ fun AdminCatalogoScreen(viewModel: AdminCatalogoViewModel = koinViewModel()) {
             onSave = { name, category, saleUnit, price, active ->
                 viewModel.updateProduct(product, name, category, saleUnit, price, active)
                 editingProduct = null
+            },
+            onDelete = {
+                viewModel.deleteProduct(product.id)
+                editingProduct = null
             }
         )
     }
@@ -206,6 +210,10 @@ fun AdminCatalogoScreen(viewModel: AdminCatalogoViewModel = koinViewModel()) {
             onSave = { name, isReturnable, deposit, unitCost ->
                 viewModel.updatePackaging(packaging, name, isReturnable, deposit, unitCost)
                 editingPackaging = null
+            },
+            onDelete = {
+                viewModel.deletePackaging(packaging.id)
+                editingPackaging = null
             }
         )
     }
@@ -225,6 +233,10 @@ fun AdminCatalogoScreen(viewModel: AdminCatalogoViewModel = koinViewModel()) {
             onDismiss = { editingInsumo = null },
             onSave = { name, category, unitOfMeasure, active, purchasePackageLabel, purchasePackageSize, notes ->
                 viewModel.updateInsumo(insumo, name, category, unitOfMeasure, active, purchasePackageLabel, purchasePackageSize, notes)
+                editingInsumo = null
+            },
+            onDelete = {
+                viewModel.deleteInsumo(insumo.id)
                 editingInsumo = null
             }
         )
@@ -266,6 +278,10 @@ fun AdminCatalogoScreen(viewModel: AdminCatalogoViewModel = koinViewModel()) {
             onDismiss = { editingBreed = null },
             onSave = { name, prefix ->
                 viewModel.updateBreed(breed, name, prefix)
+                editingBreed = null
+            },
+            onDelete = {
+                viewModel.deleteBreed(breed.id)
                 editingBreed = null
             }
         )

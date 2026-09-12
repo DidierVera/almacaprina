@@ -191,8 +191,9 @@ val appModule = module {
         )
     }
 
-    viewModel {
+    viewModel { params ->
         AdminNewPurchaseViewModel(
+            purchaseId = params.getOrNull(),
             purchaseRepository = get(),
             insumoRepository = get(),
             packagingRepository = get(),

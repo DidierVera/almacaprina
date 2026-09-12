@@ -27,8 +27,8 @@ android {
         applicationId = "com.didiprogrammer.almacaprina"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 8
-        versionName = "1.0.8"
+        versionCode = 13
+        versionName = "1.1.3"
     }
     packaging {
         resources {

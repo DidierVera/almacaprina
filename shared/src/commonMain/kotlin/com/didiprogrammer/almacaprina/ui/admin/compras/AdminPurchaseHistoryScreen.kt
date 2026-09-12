@@ -55,6 +55,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun AdminPurchaseHistoryScreen(
     onNewPurchaseClick: () -> Unit,
+    onPurchaseClick: (String) -> Unit,
     viewModel: AdminPurchaseHistoryViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -141,7 +142,7 @@ fun AdminPurchaseHistoryScreen(
                             }
                         }
                         items(uiState.filteredItems, key = { it.purchase.id }) { item ->
-                            PurchaseRow(item, uiState.currency)
+                            PurchaseRow(item, uiState.currency, onClick = { onPurchaseClick(item.purchase.id) })
                         }
                     }
                 }
@@ -151,8 +152,8 @@ fun AdminPurchaseHistoryScreen(
 }
 
 @Composable
-private fun PurchaseRow(item: PurchaseHistoryItem, currency: String) {
-    AlmacaprinaCard {
+private fun PurchaseRow(item: PurchaseHistoryItem, currency: String, onClick: () -> Unit) {
+    AlmacaprinaCard(onClick = onClick) {
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
             Column {
                 Text(item.itemName, style = MaterialTheme.typography.titleSmall)

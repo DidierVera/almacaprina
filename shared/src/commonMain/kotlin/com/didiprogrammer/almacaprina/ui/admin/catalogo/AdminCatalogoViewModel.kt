@@ -1,6 +1,7 @@
 package com.didiprogrammer.almacaprina.ui.admin.catalogo
 
 import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_catalog_error_in_use
 import almacaprina.shared.generated.resources.admin_catalog_error_load
 import almacaprina.shared.generated.resources.common_error_save_failed
 import androidx.lifecycle.ViewModel
@@ -137,6 +138,8 @@ class AdminCatalogoViewModel(
         }
     }
 
+    fun deleteProduct(id: String) = save { productRepository.delete(id) }
+
     fun addPackaging(name: String, isReturnable: Boolean, depositAmount: Double?, unitCost: Double) {
         save {
             packagingRepository.insert(
@@ -153,6 +156,8 @@ class AdminCatalogoViewModel(
             )
         }
     }
+
+    fun deletePackaging(id: String) = save { packagingRepository.delete(id) }
 
     fun addInsumo(
         name: String,
@@ -207,6 +212,8 @@ class AdminCatalogoViewModel(
         }
     }
 
+    fun deleteInsumo(id: String) = save { insumoRepository.delete(id) }
+
     fun addRecipeItem(productId: String, insumoId: String, quantityPerOutputUnit: Double) {
         save {
             productRecipeItemRepository.insert(
@@ -251,6 +258,8 @@ class AdminCatalogoViewModel(
         }
     }
 
+    fun deleteBreed(id: String) = save { breedRepository.delete(id) }
+
     private suspend fun clearDefaultPackagingOption(productId: String, exceptId: String? = null) {
         _uiState.value.productPackagingOptions
             .filter { it.productId == productId && it.isDefault && it.id != exceptId }
@@ -265,8 +274,20 @@ class AdminCatalogoViewModel(
                 load()
             } catch (t: Throwable) {
                 t.printStackTrace()
-                _uiState.update { it.copy(isSaving = false, errorMessage = t.message ?: getString(Res.string.common_error_save_failed)) }
+                _uiState.update { it.copy(isSaving = false, errorMessage = errorMessageFor(t)) }
             }
+        }
+    }
+
+    // Postgres rechaza el delete con un "foreign key constraint" cuando el registro sigue
+    // referenciado (ej. un insumo usado en compras/recetas) — se traduce a un mensaje
+    // entendible en vez de mostrar el error crudo de Postgrest.
+    private suspend fun errorMessageFor(t: Throwable): String {
+        val message = t.message.orEmpty()
+        return if (message.contains("foreign key", ignoreCase = true) || message.contains("violates", ignoreCase = true)) {
+            getString(Res.string.admin_catalog_error_in_use)
+        } else {
+            t.message ?: getString(Res.string.common_error_save_failed)
         }
     }
 }

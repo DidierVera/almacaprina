@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -38,6 +39,7 @@ import almacaprina.shared.generated.resources.admin_new_batch_total_label
 import almacaprina.shared.generated.resources.admin_new_purchase_buy_by_package_label
 import almacaprina.shared.generated.resources.admin_new_purchase_computed_summary_label
 import almacaprina.shared.generated.resources.admin_new_purchase_cost_per_package_label
+import almacaprina.shared.generated.resources.admin_new_purchase_edit_title
 import almacaprina.shared.generated.resources.admin_new_purchase_insumo_catalog_label
 import almacaprina.shared.generated.resources.admin_new_purchase_no_insumos_message
 import almacaprina.shared.generated.resources.admin_new_purchase_package_count_label
@@ -47,6 +49,8 @@ import almacaprina.shared.generated.resources.admin_new_purchase_packaging_catal
 import almacaprina.shared.generated.resources.admin_new_purchase_quantity_label
 import almacaprina.shared.generated.resources.admin_new_purchase_supplier_label
 import almacaprina.shared.generated.resources.admin_new_purchase_title
+import almacaprina.shared.generated.resources.admin_new_purchase_vat_included_label
+import almacaprina.shared.generated.resources.admin_new_purchase_vat_percentage_label
 import almacaprina.shared.generated.resources.admin_packaging_form_unit_cost_label
 import almacaprina.shared.generated.resources.admin_product_form_category_label
 import almacaprina.shared.generated.resources.common_cancel
@@ -58,13 +62,15 @@ import com.didiprogrammer.almacaprina.ui.components.DateField
 import com.didiprogrammer.almacaprina.ui.components.label
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
-/** Sección 5, pantalla 5.2 — Nueva compra. */
+/** Sección 5, pantalla 5.2 — Nueva/editar compra. `purchaseId` nulo = alta. */
 @Composable
 fun AdminNewPurchaseScreen(
+    purchaseId: String?,
     onSaved: () -> Unit,
     onCancel: () -> Unit,
-    viewModel: AdminNewPurchaseViewModel = koinViewModel()
+    viewModel: AdminNewPurchaseViewModel = koinViewModel(parameters = { parametersOf(purchaseId) })
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -74,7 +80,11 @@ fun AdminNewPurchaseScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(stringResource(Res.string.admin_new_purchase_title)) }) },
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(if (uiState.isEditing) Res.string.admin_new_purchase_edit_title else Res.string.admin_new_purchase_title)) }
+            )
+        },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         LazyColumn(
@@ -213,6 +223,22 @@ fun AdminNewPurchaseScreen(
                         singleLine = true
                     )
                 }
+            }
+            item {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Checkbox(checked = uiState.vatIncluded, onCheckedChange = viewModel::onVatIncludedToggled)
+                    Text(stringResource(Res.string.admin_new_purchase_vat_included_label))
+                }
+            }
+            item {
+                OutlinedTextField(
+                    value = uiState.vatPercentageText,
+                    onValueChange = viewModel::onVatPercentageChanged,
+                    label = { Text(stringResource(Res.string.admin_new_purchase_vat_percentage_label)) },
+                    enabled = !uiState.vatIncluded,
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
             }
             item {
                 AlmacaprinaCard {

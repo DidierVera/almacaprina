@@ -6,6 +6,7 @@ import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.storage.Storage
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpTimeout
 
 /**
@@ -15,6 +16,20 @@ import io.ktor.client.plugins.HttpTimeout
  * tardó más de lo esperado en responder.
  */
 private const val NETWORK_TIMEOUT_MILLIS = 30_000L
+
+/**
+ * Reintentos automáticos para fallas transitorias (ej. 504 Gateway Timeout del lado de
+ * Supabase, cortes intermitentes de la red rural). Sin esto, cualquier hipo de red hace
+ * fallar la operación de una sola vez y el usuario (ej. Campo registrando ordeño) tiene que
+ * notarlo y reintentar a mano. Es seguro reintentar inserts/updates/deletes aquí porque:
+ * - Insert: el id (UUID) lo genera el cliente ANTES de la petición y se reutiliza igual en
+ *   el reintento — si el intento original en realidad sí se guardó (solo se perdió la
+ *   respuesta), el reintento choca con la restricción de llave primaria (23505) en vez de
+ *   crear una fila duplicada.
+ * - Update/Delete: son idempotentes por diseño (filtran por id), repetirlos no cambia el
+ *   resultado.
+ */
+private const val MAX_NETWORK_RETRIES = 3
 
 object SupabaseClientProvider {
     @OptIn(SupabaseInternal::class)
@@ -38,6 +53,10 @@ object SupabaseClientProvider {
                 connectTimeoutMillis = NETWORK_TIMEOUT_MILLIS
                 requestTimeoutMillis = NETWORK_TIMEOUT_MILLIS
                 socketTimeoutMillis = NETWORK_TIMEOUT_MILLIS
+            }
+            install(HttpRequestRetry) {
+                retryOnExceptionOrServerErrors(maxRetries = MAX_NETWORK_RETRIES)
+                exponentialDelay()
             }
         }
     }

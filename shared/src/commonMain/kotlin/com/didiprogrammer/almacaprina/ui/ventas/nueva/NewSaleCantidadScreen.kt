@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -73,7 +74,7 @@ fun NewSaleCantidadScreen(
     Scaffold(
         bottomBar = {
             Surface(color = Fondo) {
-                Column(modifier = Modifier.fillMaxWidth().padding(Spacing.xxl)) {
+                Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(Spacing.xxl)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(stringResource(Res.string.new_sale_cantidad_partial_total_label), style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
                         Text(

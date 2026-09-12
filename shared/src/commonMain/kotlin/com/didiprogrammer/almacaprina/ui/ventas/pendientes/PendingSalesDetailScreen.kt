@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -76,7 +77,10 @@ fun PendingSalesDetailScreen(
         bottomBar = {
             if (uiState.items.isNotEmpty()) {
                 Surface(color = Fondo) {
-                    Column(modifier = Modifier.fillMaxWidth().padding(Spacing.xxl), verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(Spacing.xxl),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                    ) {
                         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                             PaymentMethod.entries.forEach { method ->
                                 val selected = uiState.paymentMethod == method

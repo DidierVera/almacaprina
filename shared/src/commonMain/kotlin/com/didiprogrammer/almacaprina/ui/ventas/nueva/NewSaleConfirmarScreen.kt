@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -81,7 +82,7 @@ fun NewSaleConfirmarScreen(
                     enabled = !uiState.isSaving && uiState.cartLines.isNotEmpty(),
                     loading = uiState.isSaving,
                     onClick = { viewModel.save(onSaved) },
-                    modifier = Modifier.fillMaxWidth().padding(Spacing.xxl)
+                    modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(Spacing.xxl)
                 )
             }
         }

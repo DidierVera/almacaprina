@@ -31,6 +31,7 @@ import com.didiprogrammer.almacaprina.ui.admin.hato.AdminGoatDetailScreen
 import com.didiprogrammer.almacaprina.ui.admin.hato.AdminGoatFormScreen
 import com.didiprogrammer.almacaprina.ui.admin.hato.AdminHatoListScreen
 import com.didiprogrammer.almacaprina.ui.admin.hato.HatoRoutes
+import com.didiprogrammer.almacaprina.ui.admin.home.AdminAllAlertsScreen
 import com.didiprogrammer.almacaprina.ui.admin.home.AdminHomeScreen
 import com.didiprogrammer.almacaprina.ui.admin.mas.AdminMasMenuScreen
 import com.didiprogrammer.almacaprina.ui.admin.produccion.AdminNewBatchScreen
@@ -44,6 +45,7 @@ import com.didiprogrammer.almacaprina.ui.admin.produccion.ProductionRoutes
  * técnica, formularios) para que se sientan como una pila de navegación normal.
  */
 private const val ROUTE_SETTINGS = "admin/ajustes"
+private const val ROUTE_ALL_ALERTS = "admin/inicio/alertas"
 
 @Composable
 fun AdminRootScreen(onLogout: () -> Unit) {
@@ -61,10 +63,25 @@ fun AdminRootScreen(onLogout: () -> Unit) {
                         NavigationBarItem(
                             selected = selected,
                             onClick = {
-                                navController.navigate(tab.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
+                                // Inicio ES el destino de inicio del grafo, así que también es el
+                                // límite de popUpTo: guardar su estado (saveState) y restaurarlo
+                                // (restoreState) en la misma llamada hace que Navigation-Compose
+                                // devuelva justo lo que se acababa de sacar de la pila — quedando
+                                // "atascado" en la pantalla anterior (ej. Hato filtrado) en vez de
+                                // llegar a Inicio. Por eso Inicio limpia la pila entera sin guardar
+                                // estado; las demás pestañas sí usan save/restore para conservar su
+                                // scroll/filtro al volver.
+                                if (tab == AdminTab.INICIO) {
+                                    navController.navigate(tab.route) {
+                                        popUpTo(navController.graph.id) { inclusive = true }
+                                        launchSingleTop = true
+                                    }
+                                } else {
+                                    navController.navigate(tab.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
                                 }
                             },
                             icon = { Icon(imageVector = tab.icon, contentDescription = tab.label()) },
@@ -85,11 +102,18 @@ fun AdminRootScreen(onLogout: () -> Unit) {
                     onHerdStatusClick = { statusFilter ->
                         navController.navigate(HatoRoutes.listFilteredByStatus(statusFilter))
                     },
-                    onSeeAllAlertsClick = { /* TODO: pantalla "Todas las alertas" */ },
+                    onSeeAllAlertsClick = { navController.navigate(ROUTE_ALL_ALERTS) },
                     onAlertGoatClick = { goatId -> navController.navigate(HatoRoutes.detail(goatId)) },
                     onRegistrarCompraClick = { navController.navigate(PurchaseRoutes.NEW_PURCHASE) },
                     onNuevoLoteClick = { navController.navigate(ProductionRoutes.NEW_BATCH) },
                     onNuevaTareaClick = { navController.navigate(CareTaskRoutes.NEW_TASK) }
+                )
+            }
+
+            // ---------- INICIO · TODAS LAS ALERTAS ----------
+            composable(ROUTE_ALL_ALERTS) {
+                AdminAllAlertsScreen(
+                    onAlertGoatClick = { goatId -> navController.navigate(HatoRoutes.detail(goatId)) }
                 )
             }
 
@@ -170,10 +194,25 @@ fun AdminRootScreen(onLogout: () -> Unit) {
 
             // ---------- MÁS · COMPRAS (Sección 5) ----------
             composable(PurchaseRoutes.HISTORY) {
-                AdminPurchaseHistoryScreen(onNewPurchaseClick = { navController.navigate(PurchaseRoutes.NEW_PURCHASE) })
+                AdminPurchaseHistoryScreen(
+                    onNewPurchaseClick = { navController.navigate(PurchaseRoutes.NEW_PURCHASE) },
+                    onPurchaseClick = { purchaseId -> navController.navigate(PurchaseRoutes.editPurchase(purchaseId)) }
+                )
             }
             composable(PurchaseRoutes.NEW_PURCHASE) {
                 AdminNewPurchaseScreen(
+                    purchaseId = null,
+                    onSaved = { navController.popBackStack() },
+                    onCancel = { navController.popBackStack() }
+                )
+            }
+            composable(
+                route = PurchaseRoutes.EDIT_PURCHASE_PATTERN,
+                arguments = listOf(navArgument("purchaseId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val purchaseId = backStackEntry.arguments?.read { getStringOrNull("purchaseId") }
+                AdminNewPurchaseScreen(
+                    purchaseId = purchaseId,
                     onSaved = { navController.popBackStack() },
                     onCancel = { navController.popBackStack() }
                 )

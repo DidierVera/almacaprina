@@ -7,8 +7,16 @@ import com.didiprogrammer.almacaprina.domain.model.ProductionBatchInsumoUsage
 import com.didiprogrammer.almacaprina.domain.model.Purchase
 import com.didiprogrammer.almacaprina.domain.model.Sale
 
-/** total_cost (calculado) = quantity * unit_cost. */
-fun Purchase.totalCost(): Double = quantity * unitCost
+/**
+ * total_cost (calculado) = quantity * unit_cost, + IVA cuando aplica. Si vat_included es
+ * true, unit_cost ya trae el IVA por dentro y no se suma nada más; si hay vat_percentage
+ * (mutuamente excluyente con vat_included), se suma ese % sobre el subtotal.
+ */
+fun Purchase.totalCost(): Double {
+    val subtotal = quantity * unitCost
+    val vatPercentage = vatPercentage
+    return if (vatIncluded || vatPercentage == null) subtotal else subtotal * (1 + vatPercentage / 100)
+}
 
 /** cost (calculado) = quantity_used * unit_cost_at_time. */
 fun ProductionBatchInsumoUsage.cost(): Double = quantityUsed * unitCostAtTime

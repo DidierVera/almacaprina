@@ -8,6 +8,7 @@ import kotlinx.datetime.LocalDate
 
 data class AdminNewPurchaseUiState(
     val isLoading: Boolean = true,
+    val isEditing: Boolean = false,
     val category: PurchaseCategory = PurchaseCategory.FEED,
     val insumos: List<Insumo> = emptyList(),
     val packagings: List<Packaging> = emptyList(),
@@ -21,6 +22,10 @@ data class AdminNewPurchaseUiState(
     val purchaseByPackage: Boolean = false,
     val packageCountText: String = "",
     val packageCostText: String = "",
+    /** % de IVA a sumar sobre el subtotal — mutuamente excluyente con [vatIncluded]. */
+    val vatPercentageText: String = "",
+    /** El unit_cost ingresado ya incluye IVA — no se suma nada extra. */
+    val vatIncluded: Boolean = false,
     val notes: String = "",
     val currency: String = "COP",
     val isSaving: Boolean = false,
@@ -53,7 +58,15 @@ data class AdminNewPurchaseUiState(
             unitCostText.toDoubleOrNull()
         }
 
-    val totalCost: Double get() = (quantity ?: 0.0) * (unitCost ?: 0.0)
+    /** Nulo = sin % de IVA cargado. Ignorado si [vatIncluded] es true. */
+    val vatPercentage: Double? get() = if (vatIncluded) null else vatPercentageText.toDoubleOrNull()
+
+    val totalCost: Double
+        get() {
+            val subtotal = (quantity ?: 0.0) * (unitCost ?: 0.0)
+            val vatPercentage = vatPercentage
+            return if (vatIncluded || vatPercentage == null) subtotal else subtotal * (1 + vatPercentage / 100)
+        }
 
     /** Insumos filtrados al rubro de la categoría elegida (ver PurchaseCategory.toInsumoCategoryOrNull). */
     val filteredInsumos: List<Insumo>
@@ -64,10 +77,14 @@ data class AdminNewPurchaseUiState(
     val requiresInsumo: Boolean
         get() = category != PurchaseCategory.PACKAGING && category != PurchaseCategory.LABOR && category != PurchaseCategory.OTHER
 
+    private val vatPercentageIsValid: Boolean
+        get() = vatIncluded || vatPercentageText.isBlank() || (vatPercentageText.toDoubleOrNull()?.let { it >= 0.0 } == true)
+
     val isValid: Boolean
         get() = date != null &&
             (quantity ?: 0.0) > 0.0 &&
             (unitCost ?: -1.0) >= 0.0 &&
+            vatPercentageIsValid &&
             when (category) {
                 PurchaseCategory.PACKAGING -> selectedPackagingId != null
                 PurchaseCategory.LABOR, PurchaseCategory.OTHER -> true

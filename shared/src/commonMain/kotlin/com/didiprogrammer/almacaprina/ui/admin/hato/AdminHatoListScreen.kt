@@ -4,7 +4,9 @@ import almacaprina.shared.generated.resources.Res
 import almacaprina.shared.generated.resources.admin_hato_empty_message
 import almacaprina.shared.generated.resources.admin_hato_new_goat_content_description
 import almacaprina.shared.generated.resources.admin_hato_search_placeholder
+import almacaprina.shared.generated.resources.admin_hato_sort_label
 import almacaprina.shared.generated.resources.admin_hato_status_filter_all
+import almacaprina.shared.generated.resources.admin_hato_status_filter_title
 import almacaprina.shared.generated.resources.admin_hato_tag_prefix
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,13 +17,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.didiprogrammer.almacaprina.domain.model.Goat
 import com.didiprogrammer.almacaprina.domain.model.GoatStatus
 import com.didiprogrammer.almacaprina.ui.components.AlmacaprinaCard
+import com.didiprogrammer.almacaprina.ui.components.ChipFilterRow
 import com.didiprogrammer.almacaprina.ui.components.GoatAvatar
 import com.didiprogrammer.almacaprina.ui.components.GoatStatusChip
 import com.didiprogrammer.almacaprina.ui.components.RefreshOnResume
@@ -87,25 +88,32 @@ fun AdminHatoListScreen(
                 singleLine = true
             )
 
-            LazyRow(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                item {
-                    FilterChip(
-                        selected = uiState.selectedStatus == null,
-                        onClick = { viewModel.onStatusFilterSelected(null) },
-                        label = { Text(stringResource(Res.string.admin_hato_status_filter_all)) }
-                    )
-                }
-                items(GoatStatus.entries) { status ->
-                    FilterChip(
-                        selected = uiState.selectedStatus == status,
-                        onClick = { viewModel.onStatusFilterSelected(status) },
-                        label = { Text(status.label()) }
-                    )
-                }
-            }
+            val statusFilterOptions = remember { listOf(null) + GoatStatus.entries }
+            val allStatusLabel = stringResource(Res.string.admin_hato_status_filter_all)
+            ChipFilterRow(
+                options = statusFilterOptions,
+                selected = uiState.selectedStatus,
+                onSelect = viewModel::onStatusFilterSelected,
+                label = { status -> if (status == null) allStatusLabel else status.label() },
+                pickerTitle = stringResource(Res.string.admin_hato_status_filter_title),
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+
+            Text(
+                text = stringResource(Res.string.admin_hato_sort_label),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+            )
+            val sortLabel = stringResource(Res.string.admin_hato_sort_label)
+            ChipFilterRow(
+                options = GoatSortOption.entries,
+                selected = uiState.sortOption,
+                onSelect = viewModel::onSortOptionSelected,
+                label = { option -> option.label() },
+                pickerTitle = sortLabel,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
 
             RefreshableContent(
                 isLoading = uiState.isLoading,

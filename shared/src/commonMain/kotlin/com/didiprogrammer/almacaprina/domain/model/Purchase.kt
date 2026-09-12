@@ -27,6 +27,10 @@ data class Purchase(
     val quantity: Double,
     val unit: String? = null,
     @SerialName("unit_cost") val unitCost: Double,
+    /** % de IVA a sumar sobre quantity*unit_cost. Mutuamente excluyente con [vatIncluded]. */
+    @SerialName("vat_percentage") val vatPercentage: Double? = null,
+    /** true si el unit_cost ingresado ya incluye IVA — no se suma nada extra. */
+    @SerialName("vat_included") val vatIncluded: Boolean = false,
     val notes: String? = null
-    // total_cost es calculado (quantity * unit_cost) — ver business/
+    // total_cost es calculado (quantity * unit_cost, + IVA si aplica) — ver business/
 )

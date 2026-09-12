@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -73,7 +74,7 @@ fun MilkingSessionScreen(
                     PrimaryButton(
                         text = stringResource(Res.string.milking_session_finish_button),
                         onClick = onFinishSession,
-                        modifier = Modifier.fillMaxWidth().padding(24.dp)
+                        modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(24.dp)
                     )
                 }
             }
