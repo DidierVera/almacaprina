@@ -1,6 +1,7 @@
 package com.didiprogrammer.almacaprina.ui.admin.hato
 
 import com.didiprogrammer.almacaprina.business.breedCompositionTotal
+import com.didiprogrammer.almacaprina.business.formatQuantity
 import com.didiprogrammer.almacaprina.business.isLikelyAdult
 import com.didiprogrammer.almacaprina.domain.model.Breed
 import com.didiprogrammer.almacaprina.domain.model.BreedPercentage
@@ -33,6 +34,8 @@ data class AdminGoatFormUiState(
     val mother: Goat? = null,
     val father: Goat? = null,
     val externalFatherDescription: String = "",
+    /** Composición racial del semental externo — ver [externalFatherDescription] y CLAUDE.md. */
+    val externalFatherBreedRows: List<BreedCompositionRow> = emptyList(),
     val origin: GoatOrigin = GoatOrigin.BORN_ON_FARM,
     val existingPhotoUrl: String? = null,
     val photoBytes: ByteArray? = null,
@@ -55,13 +58,13 @@ data class AdminGoatFormUiState(
     val availableFathers: List<Goat> get() = allGoats.filter { it.sex == GoatSex.MALE && it.id != editingGoatId }
 
     /** Filas con nombre de raza no vacío, convertidas a la forma que se guarda en `Goat`. */
-    val breedComposition: List<BreedPercentage>
-        get() = breedRows
-            .filter { it.breedName.isNotBlank() }
-            .mapNotNull { row -> row.percentageText.toDoubleOrNull()?.let { BreedPercentage(row.breedName.trim(), it) } }
+    val breedComposition: List<BreedPercentage> get() = breedRows.toBreedComposition()
 
     /** Referencia informativa junto al editor — idealmente 100, pero no bloquea guardar. */
     val breedCompositionTotal: Double get() = breedCompositionTotal(breedComposition)
+
+    /** Filas con nombre de raza no vacío del semental externo, ver [externalFatherBreedRows]. */
+    val externalFatherBreedComposition: List<BreedPercentage> get() = externalFatherBreedRows.toBreedComposition()
 
     val hasPhoto: Boolean get() = photoBytes != null || (existingPhotoUrl != null && !photoRemoved)
 
@@ -71,3 +74,12 @@ data class AdminGoatFormUiState(
             birthDate != null &&
             (!requiresInitialStatus || initialStatus != null)
 }
+
+/** Filas con nombre de raza no vacío, convertidas a la forma que se guarda en el dominio. */
+fun List<BreedCompositionRow>.toBreedComposition(): List<BreedPercentage> = this
+    .filter { it.breedName.isNotBlank() }
+    .mapNotNull { row -> row.percentageText.toDoubleOrNull()?.let { BreedPercentage(row.breedName.trim(), it) } }
+
+/** Inverso de [toBreedComposition] — para precargar el editor desde datos ya guardados. */
+fun List<BreedPercentage>.toRows(): List<BreedCompositionRow> =
+    map { BreedCompositionRow(breedName = it.breedName, percentageText = formatQuantity(it.percentage)) }

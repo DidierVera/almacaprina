@@ -38,11 +38,12 @@ Este modelo soporta desde el día 1 no solo venta de leche cruda, sino también 
 | name | text | Nombre del animal |
 | photo_url | text | Foto de referencia |
 | sex | enum (male, female) | |
-| breed_composition | jsonb — array de `{breed_name: text, percentage: decimal}` | Puede ser 100% de una raza o una mezcla. Si `origin = born_on_farm` y se conocen ambos padres, se calcula automáticamente como el promedio de la composición de la madre y el padre (herencia 50/50) al crear la ficha del cabrito junto con el evento de parto; si `origin = purchased`, se captura manualmente. Siempre editable a mano después. Si el padre es semental externo (no está en el sistema), el cálculo solo refleja el aporte conocido de la madre — no se inventa un 50% para una raza desconocida. Ver `business/averageBreedComposition` |
+| breed_composition | jsonb — array de `{breed_name: text, percentage: decimal}` | Puede ser 100% de una raza o una mezcla. Si `origin = born_on_farm` y se conocen ambos padres, se calcula automáticamente como el promedio de la composición de la madre y el padre (herencia 50/50) al crear la ficha del cabrito junto con el evento de parto; si `origin = purchased`, se captura manualmente. Siempre editable a mano después. Si el padre es semental externo (no está en el sistema) y no se cargó `external_father_breed_composition`, el cálculo solo refleja el aporte conocido de la madre — no se inventa un 50% para una raza desconocida. Ver `business/averageBreedComposition` |
 | birth_date | date | |
 | mother_id | UUID (FK → Goat) | Nula si es fundadora del hato o de origen externo |
 | father_id | UUID (FK → Goat) | Nula si es semental externo |
-| external_father_description | text | Si el padre no está en el sistema |
+| external_father_description | text | Nombre/descripción, si el padre no está en el sistema |
+| external_father_breed_composition | jsonb — array de `{breed_name: text, percentage: decimal}`, nullable | Solo tiene sentido junto con `external_father_description`. Si se carga, permite calcular `breed_composition` de la cría con el aporte real del padre en vez de dejarlo solo con la mitad de la madre |
 | current_status | enum (kid, young_doe, in_production, pregnant, dry, breeding_buck, retired, deceased) | **Siempre manual.** El admin lo define y actualiza a mano en cualquier momento — NO se deriva ni se actualiza automáticamente a partir de `ReproductiveEvent` (partos, montas, etc.). Corrección explícita confirmada con el dueño; cualquier versión anterior de este documento que diga lo contrario está desactualizada |
 | current_weight_kg | decimal | Último peso registrado (espejo del último WeightRecord) |
 | current_body_condition_score | integer (1-5) | Body Condition Score |
@@ -84,7 +85,9 @@ Frecuencia esperada: cada 15 días.
 | doe_id | UUID (FK → Goat) | Cabra hembra |
 | event_type | enum (heat_detected, breeding, pregnancy_diagnosis, birth, abortion) | |
 | date | date | |
-| buck_id | UUID (FK → Goat) | Macho, nulo si no aplica |
+| buck_id | UUID (FK → Goat) | Macho, nulo si no aplica o si es semental externo |
+| external_buck_name | text | Nombre/descripción del semental, si no está en el hato (`buck_id` nulo) |
+| external_buck_breed_composition | jsonb — array de `{breed_name: text, percentage: decimal}`, nullable | Solo tiene sentido junto con `external_buck_name`. Capturado en el evento de tipo `breeding`; si al registrar el `birth` correspondiente ya está cargado aquí, se reutiliza tal cual — no se vuelve a pedir |
 | expected_birth_date | date (calculated) | = fecha de breeding + 150 días |
 | result | enum (pending, successful, failed) | |
 | kids_born_count | integer | Solo si event_type = birth |

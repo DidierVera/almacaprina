@@ -1,10 +1,15 @@
 package com.didiprogrammer.almacaprina.ui.admin.hato
 
 import almacaprina.shared.generated.resources.Res
+import almacaprina.shared.generated.resources.admin_goat_form_external_father_breed_label
+import almacaprina.shared.generated.resources.admin_goat_form_father_external_label
+import almacaprina.shared.generated.resources.admin_goat_form_father_internal_label
 import almacaprina.shared.generated.resources.admin_goat_form_name_label
 import almacaprina.shared.generated.resources.admin_repro_event_add_kid_button
+import almacaprina.shared.generated.resources.admin_repro_event_buck_from_breeding_label
 import almacaprina.shared.generated.resources.admin_repro_event_buck_label
 import almacaprina.shared.generated.resources.admin_repro_event_dialog_title
+import almacaprina.shared.generated.resources.admin_repro_event_external_buck_name_label
 import almacaprina.shared.generated.resources.admin_repro_event_edit_dialog_title
 import almacaprina.shared.generated.resources.admin_repro_event_kid_number_label
 import almacaprina.shared.generated.resources.admin_repro_event_kid_records_label
@@ -56,6 +61,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.didiprogrammer.almacaprina.business.formatQuantity
+import com.didiprogrammer.almacaprina.domain.model.Breed
+import com.didiprogrammer.almacaprina.domain.model.BreedPercentage
 import com.didiprogrammer.almacaprina.domain.model.Goat
 import com.didiprogrammer.almacaprina.domain.model.GoatSex
 import com.didiprogrammer.almacaprina.domain.model.GoatStatus
@@ -77,6 +85,8 @@ data class ReproductiveEventFormResult(
     val date: LocalDate,
     val eventType: ReproductiveEventType,
     val buckId: String?,
+    val externalBuckName: String?,
+    val externalBuckBreedComposition: List<BreedPercentage>?,
     val result: ReproductiveEventResult,
     val kidsBornCount: Int?,
     val kidsAliveCount: Int?,
@@ -84,6 +94,16 @@ data class ReproductiveEventFormResult(
     val newKids: List<NewKidEntry> = emptyList(),
     val resultingDoeStatus: GoatStatus? = null
 )
+
+/** Resumen legible del semental (interno o externo) de la monta vinculada — solo informativo. */
+private fun linkedBuckSummary(event: ReproductiveEvent, bucks: List<Goat>): String {
+    val name = event.buckId?.let { id -> bucks.firstOrNull { it.id == id }?.name } ?: event.externalBuckName ?: ""
+    val composition = event.buckId?.let { id -> bucks.firstOrNull { it.id == id }?.breedComposition } ?: event.externalBuckBreedComposition
+    val compositionLabel = composition
+        ?.takeIf { it.isNotEmpty() }
+        ?.joinToString(" · ") { "${formatQuantity(it.percentage)}% ${it.breedName}" }
+    return if (compositionLabel != null) "$name ($compositionLabel)" else name
+}
 
 /**
  * Formulario rápido para registrar un evento reproductivo, invocado desde la pestaña
@@ -98,6 +118,10 @@ data class ReproductiveEventFormResult(
 @Composable
 fun RegisterReproductiveEventDialog(
     bucks: List<Goat>,
+    breeds: List<Breed>,
+    /** Monta más reciente de esta cabra — si se abre el diálogo para un parto nuevo y ya trae
+     * semental cargado, se reutiliza tal cual (ver CLAUDE.md); si no, se puede cargar aquí mismo. */
+    linkedBreedingEvent: ReproductiveEvent? = null,
     existingEvent: ReproductiveEvent? = null,
     onDismiss: () -> Unit,
     onSave: (ReproductiveEventFormResult) -> Unit
@@ -105,6 +129,25 @@ fun RegisterReproductiveEventDialog(
     var date by remember { mutableStateOf(existingEvent?.date ?: Clock.System.todayIn(TimeZone.currentSystemDefault())) }
     var eventType by remember { mutableStateOf(existingEvent?.eventType ?: ReproductiveEventType.BREEDING) }
     var buckId by remember { mutableStateOf(existingEvent?.buckId) }
+    var buckIsExternal by remember {
+        mutableStateOf(existingEvent != null && existingEvent.buckId == null && !existingEvent.externalBuckName.isNullOrBlank())
+    }
+    var externalBuckName by remember { mutableStateOf(existingEvent?.externalBuckName ?: "") }
+    val externalBuckBreedRows = remember {
+        mutableStateListOf<BreedCompositionRow>().apply { addAll(existingEvent?.externalBuckBreedComposition?.toRows() ?: emptyList()) }
+    }
+    var breedPickerRowId by remember { mutableStateOf<String?>(null) }
+
+    // Si se abre el diálogo para registrar un parto nuevo (no una edición) y la monta más
+    // reciente de esta cabra ya trae semental cargado, se usa tal cual — no se vuelve a pedir.
+    val loadedBuckEvent = linkedBreedingEvent?.takeIf {
+        eventType == ReproductiveEventType.BIRTH &&
+            existingEvent == null &&
+            (it.buckId != null || !it.externalBuckName.isNullOrBlank())
+    }
+    val showEditableBuckSection = eventType == ReproductiveEventType.BREEDING ||
+        (eventType == ReproductiveEventType.BIRTH && loadedBuckEvent == null)
+
     var result by remember { mutableStateOf(existingEvent?.result ?: ReproductiveEventResult.PENDING) }
     var kidsBorn by remember { mutableStateOf(existingEvent?.kidsBornCount?.toString() ?: "") }
     var kidsAlive by remember { mutableStateOf(existingEvent?.kidsAliveCount?.toString() ?: "") }
@@ -142,17 +185,56 @@ fun RegisterReproductiveEventDialog(
                     }
                 }
 
-                if (eventType == ReproductiveEventType.BREEDING) {
+                if (showEditableBuckSection) {
                     Text(stringResource(Res.string.admin_repro_event_buck_label))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        items(bucks) { buck ->
-                            FilterChip(
-                                selected = buckId == buck.id,
-                                onClick = { buckId = if (buckId == buck.id) null else buck.id },
-                                label = { Text(buck.name) }
-                            )
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        FilterChip(
+                            selected = !buckIsExternal,
+                            onClick = { buckIsExternal = false; externalBuckName = ""; externalBuckBreedRows.clear() },
+                            label = { Text(stringResource(Res.string.admin_goat_form_father_internal_label)) }
+                        )
+                        FilterChip(
+                            selected = buckIsExternal,
+                            onClick = { buckIsExternal = true; buckId = null },
+                            label = { Text(stringResource(Res.string.admin_goat_form_father_external_label)) }
+                        )
+                    }
+                    if (buckIsExternal) {
+                        OutlinedTextField(
+                            value = externalBuckName,
+                            onValueChange = { externalBuckName = it },
+                            label = { Text(stringResource(Res.string.admin_repro_event_external_buck_name_label)) },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        Text(
+                            stringResource(Res.string.admin_goat_form_external_father_breed_label),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        BreedCompositionRowsEditor(
+                            rows = externalBuckBreedRows,
+                            onAddRow = { externalBuckBreedRows.add(BreedCompositionRow()) },
+                            onRemoveRow = { rowId -> externalBuckBreedRows.removeAll { it.rowId == rowId } },
+                            onPercentageChanged = { rowId, value ->
+                                val index = externalBuckBreedRows.indexOfFirst { it.rowId == rowId }
+                                if (index >= 0) externalBuckBreedRows[index] = externalBuckBreedRows[index].copy(percentageText = value)
+                            },
+                            onPickBreed = { rowId -> breedPickerRowId = rowId }
+                        )
+                    } else {
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            items(bucks) { buck ->
+                                FilterChip(
+                                    selected = buckId == buck.id,
+                                    onClick = { buckId = if (buckId == buck.id) null else buck.id },
+                                    label = { Text(buck.name) }
+                                )
+                            }
                         }
                     }
+                } else if (loadedBuckEvent != null) {
+                    Text(stringResource(Res.string.admin_repro_event_buck_from_breeding_label))
+                    Text(linkedBuckSummary(loadedBuckEvent, bucks), style = MaterialTheme.typography.bodyMedium)
                 }
 
                 Text(stringResource(Res.string.admin_repro_event_result_label))
@@ -296,11 +378,25 @@ fun RegisterReproductiveEventDialog(
                 val newKids = newKidNames.indices
                     .map { i -> NewKidEntry(newKidNames[i].trim(), newKidTags[i].trim(), newKidSexes[i]) }
                     .filter { it.name.isNotBlank() && it.tagNumber.isNotBlank() }
+                val effectiveBuckId: String?
+                val effectiveExternalBuckName: String?
+                val effectiveExternalBuckBreedComposition: List<BreedPercentage>?
+                if (loadedBuckEvent != null) {
+                    effectiveBuckId = loadedBuckEvent.buckId
+                    effectiveExternalBuckName = loadedBuckEvent.externalBuckName
+                    effectiveExternalBuckBreedComposition = loadedBuckEvent.externalBuckBreedComposition
+                } else {
+                    effectiveBuckId = if (buckIsExternal) null else buckId
+                    effectiveExternalBuckName = if (buckIsExternal) externalBuckName.trim().ifBlank { null } else null
+                    effectiveExternalBuckBreedComposition = if (buckIsExternal) externalBuckBreedRows.toBreedComposition().ifEmpty { null } else null
+                }
                 onSave(
                     ReproductiveEventFormResult(
                         date = date,
                         eventType = eventType,
-                        buckId = buckId,
+                        buckId = effectiveBuckId,
+                        externalBuckName = effectiveExternalBuckName,
+                        externalBuckBreedComposition = effectiveExternalBuckBreedComposition,
                         result = result,
                         kidsBornCount = kidsBorn.toIntOrNull(),
                         kidsAliveCount = kidsAlive.toIntOrNull(),
@@ -313,4 +409,16 @@ fun RegisterReproductiveEventDialog(
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.common_cancel)) } }
     )
+
+    breedPickerRowId?.let { rowId ->
+        BreedPickerDialog(
+            breeds = breeds,
+            onDismiss = { breedPickerRowId = null },
+            onSelect = { breed ->
+                val index = externalBuckBreedRows.indexOfFirst { it.rowId == rowId }
+                if (index >= 0) externalBuckBreedRows[index] = externalBuckBreedRows[index].copy(breedName = breed.name)
+                breedPickerRowId = null
+            }
+        )
+    }
 }

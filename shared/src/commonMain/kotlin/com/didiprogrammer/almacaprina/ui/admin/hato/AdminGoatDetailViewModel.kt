@@ -11,6 +11,7 @@ import com.didiprogrammer.almacaprina.business.ageLabel
 import com.didiprogrammer.almacaprina.business.averageBreedComposition
 import com.didiprogrammer.almacaprina.business.expectedBirthDateOrNull
 import com.didiprogrammer.almacaprina.business.lactationNumber
+import com.didiprogrammer.almacaprina.business.resolveSireBreedComposition
 import com.didiprogrammer.almacaprina.domain.model.Breed
 import com.didiprogrammer.almacaprina.domain.model.Goat
 import com.didiprogrammer.almacaprina.domain.model.GoatOrigin
@@ -196,13 +197,11 @@ class AdminGoatDetailViewModel(
             try {
                 // Composición racial de los cabritos: promedio de la de la madre y el padre
                 // (herencia 50/50) — ver CLAUDE.md / business.averageBreedComposition. Si el
-                // padre es un semental externo (no está en el hato), su aporte queda como
-                // desconocido; el admin puede completarlo a mano desde la ficha del cabrito.
+                // padre es un semental externo, se usa la composición cargada en la monta (o
+                // en este mismo evento de parto); si no se cargó, su aporte queda desconocido.
                 val motherComposition = _uiState.value.goat?.breedComposition ?: emptyList()
-                val fatherComposition = form.buckId
-                    ?.let { id -> _uiState.value.availableBucks.firstOrNull { it.id == id } }
-                    ?.breedComposition
-                    ?: emptyList()
+                val buck = form.buckId?.let { id -> _uiState.value.availableBucks.firstOrNull { it.id == id } }
+                val fatherComposition = resolveSireBreedComposition(buck, form.externalBuckBreedComposition)
                 val kidBreedComposition = averageBreedComposition(motherComposition, fatherComposition)
 
                 // Si el evento es un parto exitoso, primero se crean las fichas de los
@@ -235,6 +234,8 @@ class AdminGoatDetailViewModel(
                         eventType = form.eventType,
                         date = form.date,
                         buckId = form.buckId,
+                        externalBuckName = form.externalBuckName,
+                        externalBuckBreedComposition = form.externalBuckBreedComposition,
                         result = form.result,
                         kidsBornCount = form.kidsBornCount,
                         kidsAliveCount = form.kidsAliveCount,
@@ -277,6 +278,8 @@ class AdminGoatDetailViewModel(
                         eventType = form.eventType,
                         date = form.date,
                         buckId = form.buckId,
+                        externalBuckName = form.externalBuckName,
+                        externalBuckBreedComposition = form.externalBuckBreedComposition,
                         result = form.result,
                         kidsBornCount = form.kidsBornCount,
                         kidsAliveCount = form.kidsAliveCount,

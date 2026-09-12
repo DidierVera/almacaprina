@@ -9,16 +9,14 @@ import almacaprina.shared.generated.resources.admin_goat_detail_origin_purchased
 import almacaprina.shared.generated.resources.admin_goat_detail_sex_female
 import almacaprina.shared.generated.resources.admin_goat_detail_sex_label
 import almacaprina.shared.generated.resources.admin_goat_detail_sex_male
-import almacaprina.shared.generated.resources.admin_goat_form_add_breed_button
 import almacaprina.shared.generated.resources.admin_goat_form_birth_date_label
 import almacaprina.shared.generated.resources.admin_goat_form_breed_composition_hint
 import almacaprina.shared.generated.resources.admin_goat_form_breed_composition_label
-import almacaprina.shared.generated.resources.admin_goat_form_breed_select_placeholder
-import almacaprina.shared.generated.resources.admin_goat_form_breed_total_label
 import almacaprina.shared.generated.resources.admin_goat_form_change_photo_button
 import almacaprina.shared.generated.resources.admin_goat_form_choose_photo_button
 import almacaprina.shared.generated.resources.admin_goat_form_current_status_label
 import almacaprina.shared.generated.resources.admin_goat_form_edit_title
+import almacaprina.shared.generated.resources.admin_goat_form_external_father_breed_label
 import almacaprina.shared.generated.resources.admin_goat_form_external_father_description_label
 import almacaprina.shared.generated.resources.admin_goat_form_father_external_label
 import almacaprina.shared.generated.resources.admin_goat_form_father_internal_label
@@ -29,7 +27,6 @@ import almacaprina.shared.generated.resources.admin_goat_form_new_title
 import almacaprina.shared.generated.resources.admin_goat_form_photo_label
 import almacaprina.shared.generated.resources.admin_goat_form_pick_father_title
 import almacaprina.shared.generated.resources.admin_goat_form_pick_mother_title
-import almacaprina.shared.generated.resources.admin_goat_form_remove_breed_content_description
 import almacaprina.shared.generated.resources.admin_goat_form_remove_photo_button
 import almacaprina.shared.generated.resources.admin_goat_form_select_unknown_female
 import almacaprina.shared.generated.resources.admin_goat_form_select_unknown_male
@@ -48,19 +45,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -84,7 +75,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import com.didiprogrammer.almacaprina.business.formatQuantity
 import com.didiprogrammer.almacaprina.domain.model.GoatOrigin
 import com.didiprogrammer.almacaprina.domain.model.GoatSex
 import com.didiprogrammer.almacaprina.domain.model.GoatStatus
@@ -109,7 +99,7 @@ fun AdminGoatFormScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showMotherPicker by remember { mutableStateOf(false) }
     var showFatherPicker by remember { mutableStateOf(false) }
-    var breedPickerRowId by remember { mutableStateOf<String?>(null) }
+    var breedPickerRowId by remember { mutableStateOf<BreedPickerTarget?>(null) }
     var fatherIsExternal by remember(uiState.isLoading) {
         mutableStateOf(uiState.externalFatherDescription.isNotBlank())
     }
@@ -184,39 +174,13 @@ fun AdminGoatFormScreen(
                         stringResource(Res.string.admin_goat_form_breed_composition_hint),
                         style = MaterialTheme.typography.bodySmall
                     )
-                    uiState.breedRows.forEach { row ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            OutlinedButton(
-                                onClick = { breedPickerRowId = row.rowId },
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Text(row.breedName.ifBlank { stringResource(Res.string.admin_goat_form_breed_select_placeholder) })
-                            }
-                            OutlinedTextField(
-                                value = row.percentageText,
-                                onValueChange = { viewModel.onBreedRowPercentageChanged(row.rowId, it) },
-                                label = { Text("%") },
-                                modifier = Modifier.width(90.dp),
-                                singleLine = true
-                            )
-                            IconButton(onClick = { viewModel.onRemoveBreedRow(row.rowId) }) {
-                                Icon(Icons.Outlined.Close, contentDescription = stringResource(Res.string.admin_goat_form_remove_breed_content_description))
-                            }
-                        }
-                    }
-                    TextButton(onClick = viewModel::onAddBreedRow) {
-                        Icon(Icons.Outlined.Add, contentDescription = null)
-                        Text(" " + stringResource(Res.string.admin_goat_form_add_breed_button))
-                    }
-                    if (uiState.breedRows.isNotEmpty()) {
-                        Text(
-                            stringResource(Res.string.admin_goat_form_breed_total_label, formatQuantity(uiState.breedCompositionTotal)),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
+                    BreedCompositionRowsEditor(
+                        rows = uiState.breedRows,
+                        onAddRow = viewModel::onAddBreedRow,
+                        onRemoveRow = viewModel::onRemoveBreedRow,
+                        onPercentageChanged = viewModel::onBreedRowPercentageChanged,
+                        onPickBreed = { rowId -> breedPickerRowId = BreedPickerTarget.Own(rowId) }
+                    )
                 }
             }
             item {
@@ -247,7 +211,7 @@ fun AdminGoatFormScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         FilterChip(
                             selected = !fatherIsExternal,
-                            onClick = { fatherIsExternal = false; viewModel.onExternalFatherDescriptionChanged("") },
+                            onClick = { fatherIsExternal = false; viewModel.onFatherIsInternalSelected() },
                             label = { Text(stringResource(Res.string.admin_goat_form_father_internal_label)) }
                         )
                         FilterChip(
@@ -262,6 +226,18 @@ fun AdminGoatFormScreen(
                             onValueChange = viewModel::onExternalFatherDescriptionChanged,
                             label = { Text(stringResource(Res.string.admin_goat_form_external_father_description_label)) },
                             modifier = Modifier.fillMaxWidth()
+                        )
+                        Text(
+                            stringResource(Res.string.admin_goat_form_external_father_breed_label),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                        BreedCompositionRowsEditor(
+                            rows = uiState.externalFatherBreedRows,
+                            onAddRow = viewModel::onAddExternalFatherBreedRow,
+                            onRemoveRow = viewModel::onRemoveExternalFatherBreedRow,
+                            onPercentageChanged = viewModel::onExternalFatherBreedRowPercentageChanged,
+                            onPickBreed = { rowId -> breedPickerRowId = BreedPickerTarget.ExternalFather(rowId) }
                         )
                     } else {
                         OutlinedButton(onClick = { showFatherPicker = true }, modifier = Modifier.fillMaxWidth()) {
@@ -402,12 +378,30 @@ fun AdminGoatFormScreen(
             onSelect = { goat -> viewModel.onFatherSelected(goat); showFatherPicker = false }
         )
     }
-    breedPickerRowId?.let { rowId ->
+    breedPickerRowId?.let { target ->
         BreedPickerDialog(
             breeds = uiState.breeds,
             onDismiss = { breedPickerRowId = null },
-            onSelect = { breed -> viewModel.onBreedRowNameChanged(rowId, breed.name); breedPickerRowId = null },
-            onCreateNew = { name -> viewModel.createAndSelectBreed(rowId, name); breedPickerRowId = null }
+            onSelect = { breed ->
+                when (target) {
+                    is BreedPickerTarget.Own -> viewModel.onBreedRowNameChanged(target.rowId, breed.name)
+                    is BreedPickerTarget.ExternalFather -> viewModel.onExternalFatherBreedRowNameChanged(target.rowId, breed.name)
+                }
+                breedPickerRowId = null
+            },
+            onCreateNew = { name ->
+                when (target) {
+                    is BreedPickerTarget.Own -> viewModel.createAndSelectBreed(target.rowId, name)
+                    is BreedPickerTarget.ExternalFather -> viewModel.createAndSelectExternalFatherBreed(target.rowId, name)
+                }
+                breedPickerRowId = null
+            }
         )
     }
+}
+
+/** A qué lista de filas pertenece el picker de raza abierto — la propia cabra o el semental externo. */
+private sealed class BreedPickerTarget {
+    data class Own(val rowId: String) : BreedPickerTarget()
+    data class ExternalFather(val rowId: String) : BreedPickerTarget()
 }

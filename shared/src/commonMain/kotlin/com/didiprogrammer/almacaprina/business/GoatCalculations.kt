@@ -114,6 +114,16 @@ fun averageBreedComposition(
 fun breedCompositionTotal(composition: List<BreedPercentage>): Double = composition.sumOf { it.percentage }
 
 /**
+ * Composición racial del padre/semental para [averageBreedComposition] — si está en el hato,
+ * su propia `breed_composition` manda; si es externo, se usa la que se haya cargado a mano
+ * (monta o alta manual), o vacía si no se cargó (aporte desconocido, ver CLAUDE.md).
+ */
+fun resolveSireBreedComposition(
+    sireInHerd: Goat?,
+    externalBreedComposition: List<BreedPercentage>?
+): List<BreedPercentage> = sireInHerd?.breedComposition ?: externalBreedComposition ?: emptyList()
+
+/**
  * Etiqueta legible para la ficha técnica (ej. "100% AL", "50% AL · 50% NU") — usa el
  * prefijo de cada raza del maestro (ver [Breed]) en vez del nombre completo, para que el
  * resumen quede corto. Si una raza no tiene prefijo configurado, cae de vuelta a su nombre.

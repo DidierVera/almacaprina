@@ -75,10 +75,12 @@ import com.didiprogrammer.almacaprina.domain.model.GoatSex
 import com.didiprogrammer.almacaprina.domain.model.HealthRecord
 import com.didiprogrammer.almacaprina.domain.model.ReproductiveEvent
 import com.didiprogrammer.almacaprina.domain.model.ReproductiveEventResult
+import com.didiprogrammer.almacaprina.domain.model.ReproductiveEventType
 import com.didiprogrammer.almacaprina.domain.model.WeightRecord
 import com.didiprogrammer.almacaprina.ui.components.AlmacaprinaCard
 import com.didiprogrammer.almacaprina.ui.components.GoatAvatar
 import com.didiprogrammer.almacaprina.ui.components.GoatStatusChip
+import com.didiprogrammer.almacaprina.ui.components.PhotoViewerDialog
 import com.didiprogrammer.almacaprina.ui.components.SectionHeader
 import com.didiprogrammer.almacaprina.ui.components.label
 import com.didiprogrammer.almacaprina.ui.components.SimpleLineChart
@@ -218,8 +220,13 @@ fun AdminGoatDetailScreen(
         )
     }
     if (showReproEventDialog || editingReproEvent != null) {
+        val linkedBreedingEvent = uiState.reproductiveEvents
+            .filter { it.doeId == goatId && it.eventType == ReproductiveEventType.BREEDING }
+            .maxByOrNull { it.date }
         RegisterReproductiveEventDialog(
             bucks = uiState.availableBucks,
+            breeds = uiState.breeds,
+            linkedBreedingEvent = linkedBreedingEvent,
             existingEvent = editingReproEvent,
             onDismiss = {
                 showReproEventDialog = false
@@ -257,17 +264,34 @@ private fun GoatDetailHeader(
     ageLabel: String,
     statusChip: @Composable () -> Unit
 ) {
+    var showPhotoViewer by remember { mutableStateOf(false) }
+    val hasPhoto = !photoUrl.isNullOrBlank()
+
     Row(
         modifier = Modifier.fillMaxWidth().padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        GoatAvatar(name = name, photoUrl = photoUrl, size = 64.dp)
+        GoatAvatar(
+            name = name,
+            photoUrl = photoUrl,
+            size = 64.dp,
+            // Solo abre el visor si hay una foto real — el monograma de respaldo no.
+            modifier = if (hasPhoto) Modifier.clickable { showPhotoViewer = true } else Modifier
+        )
         Column(modifier = Modifier.weight(1f)) {
             Text(name, style = MaterialTheme.typography.titleLarge)
             Text(stringResource(Res.string.admin_goat_detail_tag_age, tagNumber, ageLabel), style = MaterialTheme.typography.bodyMedium)
         }
         statusChip()
+    }
+
+    if (showPhotoViewer && photoUrl != null) {
+        PhotoViewerDialog(
+            photoUrl = photoUrl,
+            contentDescription = name,
+            onDismiss = { showPhotoViewer = false }
+        )
     }
 }
 

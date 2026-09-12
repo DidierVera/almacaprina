@@ -39,7 +39,9 @@ fun BreedPickerDialog(
     breeds: List<Breed>,
     onDismiss: () -> Unit,
     onSelect: (Breed) -> Unit,
-    onCreateNew: (name: String) -> Unit
+    /** Nulo = no permite crear una raza nueva desde aquí (ej. dentro del diálogo de evento
+     * reproductivo, que no tiene acceso al repositorio de razas) — solo se puede elegir una ya existente. */
+    onCreateNew: ((name: String) -> Unit)? = null
 ) {
     var query by remember { mutableStateOf("") }
     val filtered = remember(query, breeds) {
@@ -69,7 +71,7 @@ fun BreedPickerDialog(
                             Text(breed.name)
                         }
                     }
-                    if (trimmedQuery.isNotEmpty() && !exactMatchExists) {
+                    if (onCreateNew != null && trimmedQuery.isNotEmpty() && !exactMatchExists) {
                         item {
                             TextButton(onClick = { onCreateNew(trimmedQuery) }) {
                                 Icon(Icons.Outlined.Add, contentDescription = null)

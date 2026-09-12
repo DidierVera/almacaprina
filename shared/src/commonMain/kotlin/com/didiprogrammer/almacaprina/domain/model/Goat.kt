@@ -48,6 +48,9 @@ data class Goat(
     @SerialName("mother_id") val motherId: String? = null,
     @SerialName("father_id") val fatherId: String? = null,
     @SerialName("external_father_description") val externalFatherDescription: String? = null,
+    /** Solo tiene sentido junto con [externalFatherDescription] — permite calcular breed_composition
+     * de la cría aunque el padre no esté en el hato (ver business.averageBreedComposition). */
+    @SerialName("external_father_breed_composition") val externalFatherBreedComposition: List<BreedPercentage>? = null,
     @SerialName("current_status") val currentStatus: GoatStatus,
     @SerialName("current_weight_kg") val currentWeightKg: Double? = null,
     @SerialName("current_body_condition_score") val currentBodyConditionScore: Int? = null,

@@ -361,6 +361,10 @@
     <string name="admin_hato_tag_prefix">Arete %1$s</string>
     <string name="admin_hato_error_load">No se pudo cargar el hato</string>
     <string name="admin_hato_error_not_found">No se encontró la cabra</string>
+    <string name="admin_hato_sort_label">Ordenar por</string>
+    <string name="admin_hato_sort_name">Nombre</string>
+    <string name="admin_hato_sort_tag_number">Número de arete</string>
+    <string name="admin_hato_sort_age">Edad</string>
 
     <!-- ==================== Admin · Ficha técnica de cabra ==================== -->
     <string name="admin_goat_detail_edit_content_description">Editar ficha</string>
@@ -424,6 +428,7 @@
     <string name="admin_goat_form_father_internal_label">Del hato</string>
     <string name="admin_goat_form_father_external_label">Semental externo</string>
     <string name="admin_goat_form_external_father_description_label">Descripción del semental externo</string>
+    <string name="admin_goat_form_external_father_breed_label">Composición racial del semental (opcional) — si la cargas, se usa para calcular la raza de la cría</string>
     <string name="admin_goat_form_photo_label">Foto (opcional)</string>
     <string name="admin_goat_form_change_photo_button">Cambiar foto</string>
     <string name="admin_goat_form_choose_photo_button">Elegir foto</string>
@@ -445,6 +450,8 @@
     <string name="repro_event_type_birth">Parto</string>
     <string name="repro_event_type_abortion">Aborto</string>
     <string name="admin_repro_event_buck_label">Semental (opcional)</string>
+    <string name="admin_repro_event_external_buck_name_label">Nombre del semental externo</string>
+    <string name="admin_repro_event_buck_from_breeding_label">Semental (cargado en la monta)</string>
     <string name="admin_repro_event_result_label">Resultado</string>
     <string name="repro_event_result_pending">Pendiente</string>
     <string name="repro_event_result_successful">Exitoso</string>

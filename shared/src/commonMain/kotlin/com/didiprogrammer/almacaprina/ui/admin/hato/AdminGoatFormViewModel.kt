@@ -5,7 +5,7 @@ import almacaprina.shared.generated.resources.admin_goat_form_error_save
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.didiprogrammer.almacaprina.business.averageBreedComposition
-import com.didiprogrammer.almacaprina.business.formatQuantity
+import com.didiprogrammer.almacaprina.business.resolveSireBreedComposition
 import com.didiprogrammer.almacaprina.data.remote.PhotoUploadService
 import com.didiprogrammer.almacaprina.domain.model.Breed
 import com.didiprogrammer.almacaprina.domain.model.BreedPercentage
@@ -75,6 +75,7 @@ class AdminGoatFormViewModel(
                         mother = mother,
                         father = father,
                         externalFatherDescription = existing.externalFatherDescription ?: "",
+                        externalFatherBreedRows = existing.externalFatherBreedComposition?.toRows() ?: emptyList(),
                         origin = existing.origin,
                         existingPhotoUrl = existing.photoUrl,
                         currentStatus = existing.currentStatus
@@ -98,11 +99,37 @@ class AdminGoatFormViewModel(
     }
 
     fun onFatherSelected(value: Goat?) {
-        _uiState.update { it.copy(father = value, externalFatherDescription = "") }
+        _uiState.update { it.copy(father = value, externalFatherDescription = "", externalFatherBreedRows = emptyList()) }
         autoCalculateBreedComposition()
     }
 
     fun onExternalFatherDescriptionChanged(value: String) = _uiState.update { it.copy(externalFatherDescription = value, father = null) }
+
+    /** Al volver a "Del hato" tras haber cargado un semental externo, se descarta su descripción
+     * y composición racial — no tiene sentido conservarlas junto a un padre interno. */
+    fun onFatherIsInternalSelected() = _uiState.update { it.copy(externalFatherDescription = "", externalFatherBreedRows = emptyList()) }
+
+    fun onAddExternalFatherBreedRow() = _uiState.update { it.copy(externalFatherBreedRows = it.externalFatherBreedRows + BreedCompositionRow()) }
+
+    fun onRemoveExternalFatherBreedRow(rowId: String) {
+        _uiState.update { it.copy(externalFatherBreedRows = it.externalFatherBreedRows.filterNot { row -> row.rowId == rowId }) }
+        autoCalculateBreedComposition()
+    }
+
+    fun onExternalFatherBreedRowNameChanged(rowId: String, name: String) {
+        _uiState.update { state ->
+            state.copy(externalFatherBreedRows = state.externalFatherBreedRows.map { row -> if (row.rowId == rowId) row.copy(breedName = name) else row })
+        }
+        autoCalculateBreedComposition()
+    }
+
+    fun onExternalFatherBreedRowPercentageChanged(rowId: String, percentageText: String) {
+        _uiState.update { state ->
+            state.copy(externalFatherBreedRows = state.externalFatherBreedRows.map { row -> if (row.rowId == rowId) row.copy(percentageText = percentageText) else row })
+        }
+        autoCalculateBreedComposition()
+    }
+
     fun onOriginChanged(value: GoatOrigin) = _uiState.update { it.copy(origin = value, initialStatus = null) }
     fun onPhotoPicked(bytes: ByteArray) = _uiState.update { it.copy(photoBytes = bytes, photoRemoved = false) }
     fun onPhotoCleared() = _uiState.update { it.copy(photoBytes = null, photoRemoved = true) }
@@ -140,19 +167,39 @@ class AdminGoatFormViewModel(
         }
     }
 
+    /** Igual que [createAndSelectBreed] pero para una fila del semental externo. */
+    fun createAndSelectExternalFatherBreed(rowId: String, name: String) {
+        viewModelScope.launch {
+            try {
+                val breed = breedRepository.insert(Breed(id = newId(), name = name))
+                _uiState.update { state ->
+                    state.copy(
+                        breeds = state.breeds + breed,
+                        externalFatherBreedRows = state.externalFatherBreedRows.map { row -> if (row.rowId == rowId) row.copy(breedName = breed.name) else row }
+                    )
+                }
+                autoCalculateBreedComposition()
+            } catch (t: Throwable) {
+                t.printStackTrace()
+                _uiState.update { it.copy(errorMessage = t.message ?: getString(Res.string.admin_goat_form_error_save)) }
+            }
+        }
+    }
+
     /**
-     * Si la cría nace en la finca y ya se conocen ambos padres del hato, se calcula
-     * automáticamente la composición racial como el promedio de la de cada uno (ver
-     * CLAUDE.md / business.averageBreedComposition). Solo se aplica cuando el editor
-     * todavía está vacío, para no pisar una composición ya cargada o editada a mano.
+     * Si la cría nace en la finca y ya se conoce la composición racial de la madre y del padre
+     * (del hato, o de un semental externo con su composición cargada), se calcula
+     * automáticamente el promedio de ambas (ver CLAUDE.md / business.averageBreedComposition).
+     * Solo se aplica cuando el editor todavía está vacío, para no pisar una composición ya
+     * cargada o editada a mano.
      */
     private fun autoCalculateBreedComposition() {
         val state = _uiState.value
         if (state.origin != GoatOrigin.BORN_ON_FARM) return
         if (state.breedComposition.isNotEmpty()) return
         val mother = state.mother ?: return
-        val father = state.father
-        val calculated = averageBreedComposition(mother.breedComposition, father?.breedComposition ?: emptyList())
+        val fatherComposition = resolveSireBreedComposition(state.father, state.externalFatherBreedComposition)
+        val calculated = averageBreedComposition(mother.breedComposition, fatherComposition)
         if (calculated.isNotEmpty()) {
             _uiState.update { it.copy(breedRows = calculated.toRows()) }
         }
@@ -194,6 +241,7 @@ class AdminGoatFormViewModel(
                             motherId = state.mother?.id,
                             fatherId = state.father?.id,
                             externalFatherDescription = state.externalFatherDescription.ifBlank { null },
+                            externalFatherBreedComposition = state.externalFatherBreedComposition.ifEmpty { null },
                             currentStatus = state.currentStatus ?: base.currentStatus,
                             origin = state.origin
                         )
@@ -215,6 +263,7 @@ class AdminGoatFormViewModel(
                             motherId = state.mother?.id,
                             fatherId = state.father?.id,
                             externalFatherDescription = state.externalFatherDescription.ifBlank { null },
+                            externalFatherBreedComposition = state.externalFatherBreedComposition.ifEmpty { null },
                             currentStatus = state.initialStatus ?: GoatStatus.KID,
                             herdEntryDate = today,
                             origin = state.origin
@@ -229,6 +278,3 @@ class AdminGoatFormViewModel(
         }
     }
 }
-
-private fun List<BreedPercentage>.toRows(): List<BreedCompositionRow> =
-    map { BreedCompositionRow(breedName = it.breedName, percentageText = formatQuantity(it.percentage)) }
