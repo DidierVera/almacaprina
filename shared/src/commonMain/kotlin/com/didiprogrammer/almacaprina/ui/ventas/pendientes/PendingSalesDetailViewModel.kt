@@ -87,7 +87,7 @@ class PendingSalesDetailViewModel(
                 val items = pendingSales.map { sale ->
                     val product = productsById[sale.productId]
                     val packaging = sale.packagingId?.let { packagingsById[it] }
-                    val depositSuffix = if ((sale.newPackagingUnitsCount ?: 0) > 0) {
+                    val depositSuffix = if (packaging?.isReturnable == true && (sale.newPackagingUnitsCount ?: 0) > 0) {
                         " + " + getString(Res.string.pending_detail_item_deposit_word, sale.newPackagingUnitsCount ?: 0)
                     } else {
                         ""
