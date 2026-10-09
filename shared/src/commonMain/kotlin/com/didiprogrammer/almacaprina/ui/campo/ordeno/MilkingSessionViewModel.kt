@@ -5,7 +5,11 @@ import almacaprina.shared.generated.resources.milking_session_error_load
 import almacaprina.shared.generated.resources.milking_session_error_save
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.didiprogrammer.almacaprina.business.MilkEntryUnit
+import com.didiprogrammer.almacaprina.business.fromMilliliters
 import com.didiprogrammer.almacaprina.business.lactationNumber
+import com.didiprogrammer.almacaprina.business.roundTo1Decimal
+import com.didiprogrammer.almacaprina.business.toMilliliters
 import com.didiprogrammer.almacaprina.domain.model.Goat
 import com.didiprogrammer.almacaprina.domain.model.GoatStatus
 import com.didiprogrammer.almacaprina.domain.model.MilkProductionRecord
@@ -26,6 +30,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlinx.datetime.toLocalDateTime
+import kotlin.math.round
 import kotlin.time.Clock
 import org.jetbrains.compose.resources.getString
 
@@ -34,6 +39,14 @@ private data class MilkingRawData(
     val milkRecords: List<MilkProductionRecord>,
     val reproductiveEvents: List<ReproductiveEvent>
 )
+
+/** Valor precargado al editar un registro ya guardado: texto mostrado, unidad y los ml originales. */
+private data class Prefill(val text: String, val unit: MilkEntryUnit, val ml: Double)
+
+private fun formatEntryValue(value: Double, unit: MilkEntryUnit): String {
+    val rounded = if (unit == MilkEntryUnit.MILLILITER) round(value) else roundTo1Decimal(value)
+    return if (rounded == rounded.toLong().toDouble()) rounded.toLong().toString() else rounded.toString().replace('.', ',')
+}
 
 /**
  * ViewModel único para las 3 pantallas de la sesión de ordeño (`campo/ordeno`, `.../registro/{goatId}`,
@@ -51,6 +64,7 @@ class MilkingSessionViewModel(
 
     private var today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
     private var existingRecordsByGoat: Map<String, MilkProductionRecord> = emptyMap()
+    private var prefill: Prefill? = null
 
     init {
         load()
@@ -79,11 +93,11 @@ class MilkingSessionViewModel(
 
                 val entries = eligibleGoats.map { goat ->
                     val record = todayRecordsByGoat[goat.id]
-                    val sessionValue = record?.let { if (isEvening) it.eveningMilkingLiters else it.morningMilkingLiters }
+                    val sessionValue = record?.let { if (isEvening) it.eveningMilkingMl else it.morningMilkingMl }
                     MilkingGoatEntry(
                         goat = goat,
                         lactationNumber = lactationNumber(goat.id, raw.reproductiveEvents),
-                        sessionLiters = sessionValue,
+                        sessionMl = sessionValue,
                         noMilkingReason = record?.noMilkingReason
                     )
                 }
@@ -98,33 +112,66 @@ class MilkingSessionViewModel(
 
     fun onSelectGoat(goatId: String) {
         val entry = _uiState.value.entries.firstOrNull { it.goat.id == goatId }
-        _uiState.update {
-            it.copy(
-                selectedGoatId = goatId,
-                currentLitersText = entry?.sessionLiters?.toString() ?: "0"
-            )
-        }
+        val unit = _uiState.value.entryUnit
+        val savedMl = entry?.sessionMl
+        val text = if (savedMl != null) formatEntryValue(unit.fromMilliliters(savedMl), unit) else "0"
+        prefill = savedMl?.let { Prefill(text, unit, it) }
+        _uiState.update { it.copy(selectedGoatId = goatId, currentValueText = text) }
     }
 
-    fun onClearSelection() = _uiState.update { it.copy(selectedGoatId = null, currentLitersText = "0", showReasonPicker = false) }
+    fun onClearSelection() {
+        prefill = null
+        _uiState.update { it.copy(selectedGoatId = null, currentValueText = "0", showReasonPicker = false) }
+    }
 
-    fun onLitersChanged(text: String) = _uiState.update { it.copy(currentLitersText = text) }
+    fun onValueChanged(text: String) = _uiState.update { it.copy(currentValueText = text) }
+
+    /** Cambia ml ↔ oz conservando la cantidad ya digitada (se reexpresa en la nueva unidad). */
+    fun onUnitChanged(unit: MilkEntryUnit) {
+        val state = _uiState.value
+        if (unit == state.entryUnit) return
+        val untouched = prefill?.let { it.unit == state.entryUnit && it.text == state.currentValueText } == true
+        val ml = resolveMl(state)
+        val text = if (ml > 0) formatEntryValue(unit.fromMilliliters(ml), unit) else "0"
+        prefill = if (untouched) Prefill(text, unit, ml) else null
+        _uiState.update { it.copy(entryUnit = unit, currentValueText = text) }
+    }
+
+    /** direction = +1 / -1; el paso depende de la unidad (ver [MilkingSessionUiState.stepSize]). */
+    fun onStep(direction: Int) = _uiState.update {
+        val newValue = (it.currentValue + direction * it.stepSize).coerceAtLeast(0.0)
+        it.copy(currentValueText = formatEntryValue(newValue, it.entryUnit))
+    }
+
     fun onToggleKeypad(useKeypad: Boolean) = _uiState.update { it.copy(useNumericKeypad = useKeypad) }
     fun onShowReasonPicker(show: Boolean) = _uiState.update { it.copy(showReasonPicker = show) }
+
+    /**
+     * Lo guardado siempre son ml. Si el usuario no tocó un valor precargado se conservan los ml
+     * originales (convertir ml → oz → ml puede redondear y alterar un dato que nadie editó).
+     */
+    private fun resolveMl(state: MilkingSessionUiState): Double {
+        val p = prefill
+        if (p != null && p.unit == state.entryUnit && p.text == state.currentValueText) return p.ml
+        return round(state.entryUnit.toMilliliters(state.currentValue))
+    }
+
+    /** ml que se guardarían ahora mismo — para la vista previa cuando se captura en oz. */
+    fun currentMl(): Double = resolveMl(_uiState.value)
 
     fun saveCurrentEntry(onSaved: () -> Unit) {
         val state = _uiState.value
         val goatId = state.selectedGoatId ?: return
-        val liters = state.currentLitersValue
+        val ml = resolveMl(state)
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, errorMessage = null) }
             try {
-                upsertMilkRecord(goatId, sessionLiters = liters, reason = null)
+                upsertMilkRecord(goatId, sessionMl = ml, reason = null)
                 _uiState.update { state ->
                     state.copy(
                         isSaving = false,
                         entries = state.entries.map { entry ->
-                            if (entry.goat.id == goatId) entry.copy(sessionLiters = liters, noMilkingReason = null) else entry
+                            if (entry.goat.id == goatId) entry.copy(sessionMl = ml, noMilkingReason = null) else entry
                         }
                     )
                 }
@@ -141,12 +188,12 @@ class MilkingSessionViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, errorMessage = null, showReasonPicker = false) }
             try {
-                upsertMilkRecord(goatId, sessionLiters = null, reason = reason)
+                upsertMilkRecord(goatId, sessionMl = null, reason = reason)
                 _uiState.update { state ->
                     state.copy(
                         isSaving = false,
                         entries = state.entries.map { entry ->
-                            if (entry.goat.id == goatId) entry.copy(sessionLiters = null, noMilkingReason = reason) else entry
+                            if (entry.goat.id == goatId) entry.copy(sessionMl = null, noMilkingReason = reason) else entry
                         }
                     )
                 }
@@ -158,24 +205,24 @@ class MilkingSessionViewModel(
         }
     }
 
-    private suspend fun upsertMilkRecord(goatId: String, sessionLiters: Double?, reason: NoMilkingReason?) {
+    private suspend fun upsertMilkRecord(goatId: String, sessionMl: Double?, reason: NoMilkingReason?) {
         val isEvening = _uiState.value.isEveningSession
         val existing = existingRecordsByGoat[goatId]
         val updated = if (existing != null) {
             // no_milking_reason es un solo campo para todo el día (no por sesión) — si esta
-            // sesión sí registra litros, se conserva el motivo que ya hubiera de la otra sesión.
+            // sesión sí registra leche, se conserva el motivo que ya hubiera de la otra sesión.
             if (isEvening) {
-                existing.copy(eveningMilkingLiters = sessionLiters, noMilkingReason = reason ?: existing.noMilkingReason)
+                existing.copy(eveningMilkingMl = sessionMl, noMilkingReason = reason ?: existing.noMilkingReason)
             } else {
-                existing.copy(morningMilkingLiters = sessionLiters, noMilkingReason = reason ?: existing.noMilkingReason)
+                existing.copy(morningMilkingMl = sessionMl, noMilkingReason = reason ?: existing.noMilkingReason)
             }
         } else {
             MilkProductionRecord(
                 id = newId(),
                 goatId = goatId,
                 date = today,
-                morningMilkingLiters = if (!isEvening) sessionLiters else null,
-                eveningMilkingLiters = if (isEvening) sessionLiters else null,
+                morningMilkingMl = if (!isEvening) sessionMl else null,
+                eveningMilkingMl = if (isEvening) sessionMl else null,
                 noMilkingReason = reason
             )
         }

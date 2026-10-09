@@ -7,9 +7,12 @@ import com.didiprogrammer.almacaprina.domain.model.Sale
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 
-/** total_liters_day (calculado) de un único registro de ordeño. */
-fun MilkProductionRecord.totalLitersDay(): Double =
-    (morningMilkingLiters ?: 0.0) + (eveningMilkingLiters ?: 0.0)
+/** total_ml_day (calculado) de un único registro de ordeño — el ordeño se guarda siempre en ml. */
+fun MilkProductionRecord.totalMlDay(): Double =
+    (morningMilkingMl ?: 0.0) + (eveningMilkingMl ?: 0.0)
+
+/** Total del día en litros — es la unidad con la que trabajan ventas, lotes y el dashboard. */
+fun MilkProductionRecord.totalLitersDay(): Double = totalMlDay() / MILLILITERS_PER_LITER
 
 /** DailyHerdProduction — suma de total_liters_day de todas las cabras, para una fecha dada. */
 fun dailyHerdProduction(records: List<MilkProductionRecord>, date: LocalDate): Double =

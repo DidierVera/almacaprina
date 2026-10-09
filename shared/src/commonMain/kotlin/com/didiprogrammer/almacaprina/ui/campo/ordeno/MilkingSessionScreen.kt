@@ -9,6 +9,7 @@ import almacaprina.shared.generated.resources.milking_session_registered_count
 import almacaprina.shared.generated.resources.milking_session_registered_label
 import almacaprina.shared.generated.resources.milking_session_today_header
 import almacaprina.shared.generated.resources.milking_session_unmilked_label
+import almacaprina.shared.generated.resources.milking_unit_ml
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -128,8 +129,8 @@ fun MilkingSessionScreen(
                                     color = TintaSuave
                                 )
                             }
-                            if (entry.sessionLiters != null) {
-                                Text("${formatQuantity(entry.sessionLiters)} L", style = MaterialTheme.typography.titleMedium, color = Verde)
+                            if (entry.sessionMl != null) {
+                                Text("${formatQuantity(entry.sessionMl)} ${stringResource(Res.string.milking_unit_ml)}", style = MaterialTheme.typography.titleMedium, color = Verde)
                             } else if (entry.noMilkingReason != null) {
                                 Text(stringResource(Res.string.milking_session_unmilked_label), style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
                             }

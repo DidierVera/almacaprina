@@ -5,8 +5,9 @@ import almacaprina.shared.generated.resources.common_cancel
 import almacaprina.shared.generated.resources.milking_entry_back_button
 import almacaprina.shared.generated.resources.milking_entry_editing_badge
 import almacaprina.shared.generated.resources.milking_entry_lactation_suffix
-import almacaprina.shared.generated.resources.milking_entry_liters_label
+import almacaprina.shared.generated.resources.milking_entry_amount_label
 import almacaprina.shared.generated.resources.milking_entry_mark_unmilked_button
+import almacaprina.shared.generated.resources.milking_entry_ml_preview
 import almacaprina.shared.generated.resources.milking_entry_reason_dialog_goat_fallback
 import almacaprina.shared.generated.resources.milking_entry_reason_dialog_message
 import almacaprina.shared.generated.resources.milking_entry_reason_dialog_title
@@ -19,6 +20,8 @@ import almacaprina.shared.generated.resources.milking_entry_save_correction_butt
 import almacaprina.shared.generated.resources.milking_entry_step_label
 import almacaprina.shared.generated.resources.milking_entry_use_keypad_button
 import almacaprina.shared.generated.resources.milking_entry_use_stepper_button
+import almacaprina.shared.generated.resources.milking_unit_ml
+import almacaprina.shared.generated.resources.milking_unit_oz
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +33,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +53,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.didiprogrammer.almacaprina.business.MilkEntryUnit
+import com.didiprogrammer.almacaprina.business.formatQuantity
 import com.didiprogrammer.almacaprina.domain.model.NoMilkingReason
 import com.didiprogrammer.almacaprina.ui.components.PrimaryButton
 import com.didiprogrammer.almacaprina.ui.theme.Borde
@@ -59,8 +66,6 @@ import com.didiprogrammer.almacaprina.ui.theme.Tinta
 import com.didiprogrammer.almacaprina.ui.theme.TintaSuave
 import com.didiprogrammer.almacaprina.ui.theme.Verde
 import org.jetbrains.compose.resources.stringResource
-
-private const val LITER_STEP = 0.1
 
 /** Campo · Ordeño — registro individual. Ver mockups campo-Registrar ordeño-selection-registering-*.png. */
 @Composable
@@ -96,6 +101,9 @@ fun MilkingEntryScreen(
                 }
             }
 
+            // El contenido hace scroll; Guardar queda fijo abajo para que siempre sea alcanzable
+            // (en teléfonos pequeños el selector de unidad + teclado no caben en pantalla).
+            Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             Spacer(Modifier.height(Spacing.md))
             Text(entry?.goat?.name ?: "", style = MaterialTheme.typography.displaySmall, color = Tinta)
             Text(
@@ -104,30 +112,52 @@ fun MilkingEntryScreen(
                 color = TintaSuave
             )
 
-            Spacer(Modifier.height(Spacing.xxl))
+            val unitLabel = stringResource(unitLabelRes(uiState.entryUnit))
+
+            Spacer(Modifier.height(Spacing.md))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.sm, Alignment.CenterHorizontally)) {
+                MilkEntryUnit.entries.forEach { unit ->
+                    FilterChip(
+                        selected = uiState.entryUnit == unit,
+                        onClick = { viewModel.onUnitChanged(unit) },
+                        label = { Text(stringResource(unitLabelRes(unit))) }
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(Spacing.sm))
             Text(
-                stringResource(Res.string.milking_entry_liters_label),
+                stringResource(Res.string.milking_entry_amount_label),
                 style = MaterialTheme.typography.labelMedium,
                 color = TintaSuave,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.Bottom) {
-                Text(uiState.currentLitersText, style = MaterialTheme.typography.displayLarge, color = Tinta)
-                Text(" L", style = MaterialTheme.typography.titleLarge, color = TintaSuave)
+                Text(uiState.currentValueText, style = MaterialTheme.typography.displayLarge, color = Tinta)
+                Text(" $unitLabel", style = MaterialTheme.typography.titleLarge, color = TintaSuave)
+            }
+            if (uiState.entryUnit != MilkEntryUnit.MILLILITER) {
+                Text(
+                    stringResource(Res.string.milking_entry_ml_preview, formatQuantity(viewModel.currentMl())),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TintaSuave,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
             }
 
-            Spacer(Modifier.height(Spacing.xl))
+            Spacer(Modifier.height(Spacing.md))
 
             if (uiState.useNumericKeypad) {
                 NumericKeypad(
-                    onDigit = { digit -> viewModel.onLitersChanged((uiState.currentLitersText.takeIf { it != "0" } ?: "") + digit) },
+                    onDigit = { digit -> viewModel.onValueChanged((uiState.currentValueText.takeIf { it != "0" } ?: "") + digit) },
                     onComma = {
-                        if (!uiState.currentLitersText.contains(',')) viewModel.onLitersChanged(uiState.currentLitersText + ",")
+                        if (!uiState.currentValueText.contains(',')) viewModel.onValueChanged(uiState.currentValueText + ",")
                     },
                     onBackspace = {
-                        val newText = uiState.currentLitersText.dropLast(1)
-                        viewModel.onLitersChanged(newText.ifEmpty { "0" })
+                        val newText = uiState.currentValueText.dropLast(1)
+                        viewModel.onValueChanged(newText.ifEmpty { "0" })
                     }
                 )
                 TextButton(onClick = { viewModel.onToggleKeypad(false) }, modifier = Modifier.fillMaxWidth()) {
@@ -135,28 +165,27 @@ fun MilkingEntryScreen(
                 }
             } else {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    StepperButton(label = "–", color = Borde, contentColor = Tinta) {
-                        val newValue = (uiState.currentLitersValue - LITER_STEP).coerceAtLeast(0.0)
-                        viewModel.onLitersChanged(formatStepper(newValue))
-                    }
-                    Text(stringResource(Res.string.milking_entry_step_label, LITER_STEP.toString()), style = MaterialTheme.typography.bodyMedium, color = TintaSuave)
-                    StepperButton(label = "+", color = Terracota, contentColor = SobreVerde) {
-                        val newValue = uiState.currentLitersValue + LITER_STEP
-                        viewModel.onLitersChanged(formatStepper(newValue))
-                    }
+                    StepperButton(label = "–", color = Borde, contentColor = Tinta) { viewModel.onStep(-1) }
+                    Text(
+                        stringResource(Res.string.milking_entry_step_label, formatQuantity(uiState.stepSize), unitLabel),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TintaSuave
+                    )
+                    StepperButton(label = "+", color = Terracota, contentColor = SobreVerde) { viewModel.onStep(1) }
                 }
                 TextButton(onClick = { viewModel.onToggleKeypad(true) }, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(Res.string.milking_entry_use_keypad_button), color = Terracota)
                 }
             }
 
-            Spacer(Modifier.height(Spacing.xl))
+            Spacer(Modifier.height(Spacing.sm))
             TextButton(onClick = { viewModel.onShowReasonPicker(true) }, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(Res.string.milking_entry_mark_unmilked_button), color = TintaSuave)
             }
 
-            Spacer(Modifier.weight(1f))
+            }
 
+            Spacer(Modifier.height(Spacing.md))
             PrimaryButton(
                 text = if (entry?.registered == true) stringResource(Res.string.milking_entry_save_correction_button) else stringResource(Res.string.milking_entry_save_button),
                 enabled = !uiState.isSaving,
@@ -197,9 +226,9 @@ fun MilkingEntryScreen(
     }
 }
 
-private fun formatStepper(value: Double): String {
-    val rounded = kotlin.math.round(value * 10) / 10
-    return if (rounded == rounded.toLong().toDouble()) rounded.toLong().toString() else rounded.toString().replace('.', ',')
+private fun unitLabelRes(unit: MilkEntryUnit) = when (unit) {
+    MilkEntryUnit.MILLILITER -> Res.string.milking_unit_ml
+    MilkEntryUnit.OUNCE -> Res.string.milking_unit_oz
 }
 
 @Composable
@@ -231,7 +260,7 @@ private fun NumericKeypad(onDigit: (String) -> Unit, onComma: () -> Unit, onBack
                     Surface(
                         shape = ShapeLarge,
                         color = Borde,
-                        modifier = Modifier.weight(1f).height(64.dp).clickable {
+                        modifier = Modifier.weight(1f).height(52.dp).clickable {
                             when (key) {
                                 "," -> onComma()
                                 "⌫" -> onBackspace()

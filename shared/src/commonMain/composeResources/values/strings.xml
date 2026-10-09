@@ -174,9 +174,12 @@
     <string name="milking_entry_back_button">‹ Volver</string>
     <string name="milking_entry_editing_badge">Editando registro</string>
     <string name="milking_entry_lactation_suffix">%1$dª lactancia</string>
-    <string name="milking_entry_liters_label">LITROS DE ESTA SESIÓN</string>
+    <string name="milking_entry_amount_label">CANTIDAD DE ESTA SESIÓN</string>
+    <string name="milking_unit_ml">ml</string>
+    <string name="milking_unit_oz">oz</string>
+    <string name="milking_entry_ml_preview">Se guardarán ≈ %1$s ml</string>
     <string name="milking_entry_use_stepper_button">Usar stepper +/-</string>
-    <string name="milking_entry_step_label">paso %1$s L</string>
+    <string name="milking_entry_step_label">paso %1$s %2$s</string>
     <string name="milking_entry_use_keypad_button">Usar teclado numérico</string>
     <string name="milking_entry_mark_unmilked_button">Marcar sin ordeñar</string>
     <string name="milking_entry_save_correction_button">Guardar corrección</string>

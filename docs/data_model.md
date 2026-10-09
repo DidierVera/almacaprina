@@ -108,16 +108,18 @@ Producción de leche cruda en el establo — la fuente de todo lo demás (venta 
 | id | UUID (PK) | |
 | goat_id | UUID (FK → Goat) | |
 | date | date | |
-| morning_milking_liters | decimal | |
-| evening_milking_liters | decimal | |
-| total_liters_day | decimal (calculated) | |
+| morning_milking_ml | decimal | Siempre en ml, sin importar en qué unidad se capturó |
+| evening_milking_ml | decimal | Siempre en ml, sin importar en qué unidad se capturó |
+| total_ml_day | decimal (calculated) | Columna generada en ml; la app lo convierte a litros (`totalLitersDay()`) |
 | days_in_milk | integer (calculated) | Días desde el último birth |
 | fat_pct | decimal | Opcional |
 | protein_pct | decimal | Opcional |
 | no_milking_reason | enum (dry, sick, under_treatment, other) | Nulo si sí se ordeñó |
 | no_milking_reason_detail | text | Solo si no_milking_reason = other |
 
-**Vista/tabla calculada:** `DailyHerdProduction` = suma de `total_liters_day` de todas las cabras activas, por fecha.
+**Captura en ml u oz:** Campo elige la unidad al registrar. `oz` son onzas de **peso** (lo que mide la báscula) y se convierten a ml con la densidad de la leche de cabra (1,03 g/ml; `business/MilkUnitConversion.kt`) — la leche no pesa lo mismo que el agua, así que 1 g ≠ 1 ml. Lo guardado siempre son ml.
+
+**Vista/tabla calculada:** `DailyHerdProduction` = suma de `total_ml_day` (convertida a litros) de todas las cabras activas, por fecha.
 
 ---
 
@@ -436,7 +438,7 @@ CareTask (1) ──< (N) CareTaskLog
 
 | Vista | Cálculo | Uso | Estado |
 |---|---|---|---|
-| `DailyHerdProduction` | Σ total_liters_day por fecha | Producción total de leche cruda del día | ✅ Implementada |
+| `DailyHerdProduction` | Σ total_ml_day ÷ 1000 por fecha | Producción total de leche cruda del día | ✅ Implementada |
 | `RawMilkAvailableBalance` | Σ DailyHerdProduction − Σ Sale.quantity_sold (producto = leche) − Σ ProductionBatch.milk_liters_used | Litros de leche cruda realmente disponibles | ✅ Implementada |
 | `DerivedProductInventory` | Σ ProductionBatch.output_quantity − Σ Sale.quantity_sold, por producto derivado | Stock de queso/kéfir/mantequilla | ❌ Pendiente |
 | `ProductYieldRatio` | Promedio histórico de `yield_ratio` por producto derivado | Litros de leche reales necesarios por unidad de cada producto | ✅ Implementada (usada en Nuevo lote) |

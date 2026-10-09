@@ -68,6 +68,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.didiprogrammer.almacaprina.business.breedCompositionLabel
+import com.didiprogrammer.almacaprina.business.totalLitersDay
 import com.didiprogrammer.almacaprina.domain.model.Breed
 import com.didiprogrammer.almacaprina.domain.model.BreedPercentage
 import com.didiprogrammer.almacaprina.domain.model.GoatOrigin
@@ -468,9 +469,7 @@ private fun ProduccionLecheTab(records: List<com.didiprogrammer.almacaprina.doma
             AlmacaprinaCard {
                 Text(stringResource(Res.string.admin_goat_detail_liters_curve_title), style = MaterialTheme.typography.titleSmall)
                 SimpleLineChart(
-                    values = records.map {
-                        ((it.morningMilkingLiters ?: 0.0) + (it.eveningMilkingLiters ?: 0.0)).toFloat()
-                    }
+                    values = records.map { it.totalLitersDay().toFloat() }
                 )
             }
         }

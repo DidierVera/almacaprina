@@ -77,6 +77,7 @@ Puntos clave a respetar en el código:
 - Altas manuales de cabras compradas (`origin = purchased`) con 6 meses o más (`GOAT_ADULT_AGE_MONTHS = 6`, confirmado) exigen seleccionar `current_status` explícitamente en el formulario
 - Gestación de cabra ≈ 150 días — usar esta constante para `expected_birth_date`
 - `MilkProductionRecord` tiene `no_milking_reason` (enum: dry, sick, under_treatment, other) confirmado con el dueño — no inventar otras categorías sin confirmar
+- **El ordeño se guarda SIEMPRE en mililitros** (`morning_milking_ml` / `evening_milking_ml`), no en litros. Campo captura en ml u oz (onzas de peso de la báscula); la conversión oz → ml usa la densidad de la leche de cabra (`GOAT_MILK_DENSITY_G_PER_ML`, `business/MilkUnitConversion.kt`). El resto de la app (ventas, lotes, dashboard) sigue en litros vía `totalLitersDay()` — nunca leer los campos `*_ml` y asumir litros
 - `LactationNumber` ("2ª lactancia" en la UI) no es un campo guardado — se calcula contando partos exitosos previos de esa cabra
 
 **Insumos y costos:**
